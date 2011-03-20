@@ -1,0 +1,204 @@
+#!/usr/bin/env node
+//
+// Toss executables (scripts too) in /etc/node-agent.d
+// Each program should produce lines as follows:
+//    <name><whitespace><type>
+// or:
+//    <name><whitespace><type><whitespace><value>
+//
+// The first indicates the value is present an null
+// the second indicates the valus is present and specific
+//
+var fs = require('fs'),
+    sys = require('sys'),
+    http = require('http'),
+    url = require('url'),
+    spawn = require('child_process').spawn,
+    past_results = {},
+    scripts = {},
+    creds = {},
+    generation = 0;
+
+var configdir = '/etc/node-agent.d',
+    port = 0,
+    sslport = 0,
+    verify = false;
+
+function help(err) {
+  console.log(process.argv[1] + "\n" +
+              "\t-h\t\tthis help message\n" +
+              "\t-c <configdir>\tconfig dir\n" +
+              "\t-p <port>\tunsecured port\n" +
+              "\t-s <secureport>\tsecured port\n" +
+              "\t-v\t\tverify secured traffic\n");
+  if(err) {
+    console.log("\nError: " + err + "\n");
+    process.exit(-1);
+  }
+}
+
+for(var i=2; i<process.argv.length; i++) {
+  switch(process.argv[i]) {
+    case "-h": help(); process.exit(-1);
+    case "-c": configdir = process.argv[++i]; break;
+    case "-p": port = parseInt(process.argv[++i]); break;
+    case "-s": sslport = parseInt(process.argv[++i]); break;
+    case "-v": verify = true; break;
+    default: help("unknown argument: " + process.argv[i]);
+  }
+}
+
+if(!port && !sslport) help("must specify at least one of -p and -s");
+if(sslport) {
+  try {
+    // Setup creds
+    creds.key = fs.readFileSync(configdir+"/na.key").toString();
+    creds.crt = fs.readFileSync(configdir+"/na.crt").toString();
+    if(verify) creds.ca = fs.readFileSync(configdir+"/na.ca").toString();
+  } catch(e) {
+    console.log("Make sure:");
+    console.log("\tyour key is available: " + configdir+"/na.key");
+    console.log("\tyour cert is available: " + configdir+"/na.crt");
+    if(verify)
+      console.log("\tyour ca is available: " + configdir+"/na.ca");
+    console.log("\n" + e);
+    process.exit(-1);
+  }
+}
+
+function onchange(cb) { return function(c,p) { if(c.ino != p.ino || c.size != p.size || c.mtime.valueOf() != p.mtime.valueOf() || c.mode != p.mode) cb(); }}
+
+function rescan_modules() {
+  var progress = 0;
+  var sweep = function () {
+    if(progress != 0) return;
+    for(var t in scripts) {
+      if(scripts[t].generation < generation) {
+        fs.unwatchFile(scripts[t].command);
+        delete scripts[t];
+      }
+    }
+  }
+  generation++;
+  fs.readdir(configdir, function(err, files) {
+    for(var i = 0; i < files.length; i++) {
+      var m = /^(?!\.)([^\/]*?)(?:\..*)$/.exec(files[i]);
+      if(!m) continue;
+      var filename = configdir + "/" + files[i];
+      fs.unwatchFile(filename);
+      progress++;
+      fs.stat(filename, (function(filename, name) {
+        return function(serr, sb) {
+          if(sb && sb.isFile())
+            fs.watchFile(filename, onchange(rescan_modules));
+          if(sb && sb.isFile() && (sb.mode & 0111)) {
+            if(!(name in scripts)) scripts[name] = {};
+            var d = scripts[name];
+            d.name = name;
+            d.generation = generation;
+            d.command = filename;
+            d.running = false;
+            d.sb = sb;
+            sweep();
+          }
+          progress--;
+        }
+      })(filename,m[1]));
+    }
+  });
+  sweep();
+}
+
+fs.watchFile(configdir, onchange(rescan_modules));
+rescan_modules();
+
+function run_script(d, cb) {
+  if(d.running) {
+    cb(d, past_results[d.name]);
+    return;
+  }
+  d.running = true;
+  var data = '';
+  d.last_start = +(new Date());
+  var cmd = spawn(d.command);
+  cmd.stdout.on('data', function(buff) { data = data + buff; });
+  cmd.on('exit', function(code) {
+    d.running = false;
+    d.last_finish = +(new Date());
+    var results = {};
+    try { results = JSON.parse(data); }
+    catch(e) {
+      var lines = data.split(/\r?\n/);
+      for(var i = 0; i < lines.length; i++) {
+        var parts = /^\s*(\S+)\s+([iIlLns])(\s*)(.*)$/.exec(lines[i]);
+        if(parts) {
+          var isnull = (parts[3].length == 0 || parts[4] == "[[null]]");
+          results[parts[1]] = { '_type': parts[2],
+                                '_value': isnull ? null : parts[4]
+                              };
+        }
+      }
+    }
+    past_results[d.name] = results;
+    cb(d, results);
+  });
+}
+function run_scripts(res, which) {
+  if(which) {
+    if(!(which in scripts)) {
+      res.writeHead(404);
+      res.end();
+    }
+    else {
+      run_script(scripts[which], function(d, results) {
+        res.writeHead(200, { 'Content-Type': 'text/json' });
+        res.write(JSON.stringify(results));
+        res.end();
+      });
+    }
+  }
+  else {
+    var cnt = 0;
+    for(which in scripts) cnt++;
+    var set = {};
+    var send_complete = function() {
+      if(cnt != 0) return;
+      res.writeHead(200, { 'Content-Type': 'text/json' });
+      res.write(JSON.stringify(set));
+      res.end();
+    };
+    for(which in scripts) run_script(scripts[which], function(d, results) {
+      cnt--;
+      set[d.name] = results;
+      send_complete();
+    });
+    send_complete();
+  }
+}
+function handler(req, res) {
+  req.addListener('end', function() {
+    var m, path = url.parse(this.url).pathname;
+    if(/^\/inventory/.test(path)) {
+      res.writeHead(200, { 'Content-Type': 'text/json' });
+      res.write(JSON.stringify(scripts));
+    }
+    else if(/^\/(?:run)?$/.test(path)) return run_scripts(res);
+    else if(m = /^\/run\/(.+)$/.exec(path)) return run_scripts(res, m[1]);
+    else res.writeHead(404);
+    res.end();
+  });
+}
+
+try {
+  if(port) http.createServer(handler).listen(port);
+} catch(e) {
+  console.log("Failed to start server on port " + port + ": " + e);
+  process.exit(-1);
+}
+try {
+  if(sslport)
+    https.createServer(creds).addListener(handler).listen(sslport);
+} catch(e) {
+  console.log("Failed to start server on port " + sslport + ": " + e);
+  process.exit(-1);
+}

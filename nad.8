@@ -1,0 +1,100 @@
+.TH nad 8 "March 20, 2011" "version 1.0"
+.SH NAME
+nad \- node\-agent daemon
+.SH SYNOPSIS
+.B nad
+[\-h] [\-c configdir] [\-p port] [\-s sslport] [\-v]
+.SH DESCRIPTION
+The node\-agent daemon provides a simple mechanism to expose
+systems and application metrics to external onlookers. It
+inventories all executable programs in
+.I configdir
+and executes them upon external request (via http or https)
+and returns the results in JSON format.
+.PP
+No arguments are accepted from the onlooker and thus no special
+precautions must be taken handling/validating/sanitizing arguments.
+.PP
+The daemon provides several locations for information:
+.TP
+/ and /run
+cause execution and consolidation of all scripts and their output.
+.TP
+/run/scriptname
+causes the executation of a single script (minus the extension on
+script if it exists)
+.TP
+/inventory
+returns the current active inventory of scripts.
+.SH OPTIONS
+.TP
+\-h
+Display the help text.
+.TP
+\-c <configdir>
+Sets the configuration directory (home of scripts and SSL credentials).
+.TP
+\-p <port>
+Sets the port on which the HTTP server shall listen.
+.TP
+\-s <sslport>
+Sets the port on which the HTTPS server shall listen.  If this option is
+specified,
+.I na.key
+and
+.I na.crt
+must be present in the
+.I configdir.
+.TP
+\-v
+Causes the daemon to validate the connecting client's certificate against
+the provided certificate authorities. A list of CA certificates must exist
+in the
+.I na.ca
+file in the
+.I configdir.
+.SH SCRIPT OUTPUT
+The executable programs that you place in the
+.I configdir
+must produce metrics to standard output. They may produce JSON output.
+Alternatively, the may produce simple tab-separated metric output that
+adheres to the folling format.
+.TP
+.I metric_name metric_type
+Indicating the the metric specified has a null value.
+.TP
+.I metric_name metric_type value
+Indicating the the metric specified has
+.I value
+.SS The metric_type
+.PP
+.B i
+\- indicating a signed 32bit integer value,
+.PP
+.B I
+\- indicating an unsigned 32bit integer value,
+.PP
+.B l
+\- indicating a signed 64bit integer value,
+.PP
+.B L
+\- indicating an unsigned 64bit integer value,
+.PP
+.B n
+\- indicating a value to be represented as a double, or
+.PP
+.B s
+\- indicating the the value is a string.
+.SS JSON format
+If you elect to product JSON formatted output in your programs, you
+must provide a JSON object whose keys have values that look so:
+.pf
+
+   { "_type": <metric_type>, "_value": "yourvalue" }
+.nf
+.SH BUGS
+No known bugs, report bugs to Theo Schlossnagle <jesus@omniti.com>
+.SH AUTHOR
+Theo Schlossnagle (jesus@omniti.com).
+.PP
+Copyright (c) 2011, OmniTI Computer Consulting, Inc.
