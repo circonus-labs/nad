@@ -85,6 +85,31 @@ Indicating the the metric specified has
 .PP
 .B s
 \- indicating the the value is a string.
+.SS Control Information
+You may provide control information in a line starting with a #
+character and followed by a JSON block.  Currently,
+.I
+timeout
+is the only parameter accepted and the argument is interpretted as
+seconds.  For example, to indicate that the script should be aborted if
+a set of output metrics cannot be completed in 1.12 seconds:
+.pf
+
+   # { "timeout": 1.12 }
+.nf
+.SS Continuous Output
+Continuous output is supported by long-running scripts.  After a set
+of metrics is emitted to standard output, emit a single empty line.
+nad will accept the previous metrics into a result set and return them
+on the next request for data.  The program can then pause for some
+ad-hoc amount of time and produce another set of metrics followed by
+a blank line.  This mode can be useful for collectin information such
+as mpstat or vmstat information.
+.PP
+Note, that in most cases if you can get raw accumulated counters
+(instead of averages over some amount of time), that the output can
+be more useful to monitoring applications as a derivative can be
+applied after the fact without the risk of data loss.
 .SS JSON format
 If you elect to product JSON formatted output in your programs, you
 must provide a JSON object whose keys have values that look so:

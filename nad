@@ -16,6 +16,7 @@ var fs = require('fs'),
     spawn = require('child_process').spawn,
     past_results = {},
     scripts = {},
+    scripts_once = {},
     creds = {},
     generation = 0;
 
@@ -68,6 +69,14 @@ if(sslport) {
 
 function onchange(cb) { return function(c,p) { if(c.ino != p.ino || c.size != p.size || c.mtime.valueOf() != p.mtime.valueOf() || c.mode != p.mode) cb(); }}
 
+function initial_pass() {
+  for(which in scripts) {
+    if(!(which in scripts_once)) {
+      run_script(scripts[which], function() {});
+      scripts_once[which] = true;
+    }
+  }
+}
 function rescan_modules() {
   var progress = 0;
   var sweep = function () {
@@ -76,8 +85,10 @@ function rescan_modules() {
       if(scripts[t].generation < generation) {
         fs.unwatchFile(scripts[t].command);
         delete scripts[t];
+        delete scripts_once[t];
       }
     }
+    initial_pass();
   }
   generation++;
   fs.readdir(configdir, function(err, files) {
@@ -99,9 +110,9 @@ function rescan_modules() {
             d.command = filename;
             d.running = false;
             d.sb = sb;
-            sweep();
           }
           progress--;
+          sweep();
         }
       })(filename,m[1]));
     }
@@ -118,19 +129,23 @@ function run_script(d, cb) {
     return;
   }
   d.running = true;
-  var data = '';
+  var proc_data = { data: '', lines: [], options: {} };
   d.last_start = +(new Date());
-  var cmd = spawn(d.command);
-  cmd.stdout.on('data', function(buff) { data = data + buff; });
-  cmd.on('exit', function(code) {
-    d.running = false;
+  var cmd = spawn("/bin/sh", ["-c", d.command]);
+  var kill_func = function() {
+    cmd.stdin.destroy();
+    cmd.stdout.destroy();
+    cmd.stderr.destroy();
+    cmd.kill();
+  };
+  var handle_output = function(d, cb) {
+    if(proc_data.timeout) clearTimeout(proc_data.timeout);
     d.last_finish = +(new Date());
-    var results = {};
-    try { results = JSON.parse(data); }
+    var i, results = {}, parts;
+    try { results = JSON.parse(proc_data.lines.join(' ')); }
     catch(e) {
-      var lines = data.split(/\r?\n/);
-      for(var i = 0; i < lines.length; i++) {
-        var parts = /^\s*(\S+)\s+([iIlLns])(\s*)(.*)$/.exec(lines[i]);
+      for(i=0; i<proc_data.lines.length; i++) {
+        parts = /^\s*(\S+)\s+([iIlLns])(\s*)(.*)$/.exec(proc_data.lines[i]);
         if(parts) {
           var isnull = (parts[3].length == 0 || parts[4] == "[[null]]");
           results[parts[1]] = { '_type': parts[2],
@@ -141,6 +156,35 @@ function run_script(d, cb) {
     }
     past_results[d.name] = results;
     cb(d, results);
+  };
+  cmd.stdout.on('data', function(buff) {
+    var offset;
+    if(buff == null || buff.length == 0) {
+      handle_output(d, cb);
+    }
+    proc_data.data = proc_data.data + buff;
+    while((offset = proc_data.data.indexOf('\n')) >= 0) {
+      var line = proc_data.data.substring(0,
+                     (offset > 0 &&
+                      proc_data.data.charAt(offset-1) == '\r') ?
+                         offset - 1 : offset);
+      if(line.charAt(0) == '#') {
+        try { proc_data.options = JSON.parse(line.substring(1)); }
+        catch(e) { console.log("Error parsing proc otions: " + e); }
+        if(proc_data.options.timeout)
+          proc_data.timeout = setTimeout(kill_func,
+                                         proc_data.options.timeout * 1000);
+      }
+      else {
+        if(line.length) proc_data.lines.push(line);
+        else handle_output(d, cb);
+      }
+      proc_data.data = proc_data.data.substring(offset+1);
+    }
+  });
+  cmd.on('exit', function(code, signal) {
+    d.running = false;
+    handle_output(d, cb);
   });
 }
 function run_scripts(res, which) {
