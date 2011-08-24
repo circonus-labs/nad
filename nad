@@ -195,7 +195,7 @@ function run_scripts(res, which) {
     }
     else {
       run_script(scripts[which], function(d, results) {
-        res.writeHead(200, { 'Content-Type': 'text/json' });
+        res.writeHead(200, { 'Content-Type': 'application/json' });
         res.write(JSON.stringify(results));
         res.end();
       });
@@ -207,7 +207,7 @@ function run_scripts(res, which) {
     var set = {};
     var send_complete = function() {
       if(cnt != 0) return;
-      res.writeHead(200, { 'Content-Type': 'text/json' });
+      res.writeHead(200, { 'Content-Type': 'application/json' });
       res.write(JSON.stringify(set));
       res.end();
     };
@@ -223,7 +223,7 @@ function handler(req, res) {
   req.addListener('end', function() {
     var m, path = url.parse(this.url).pathname;
     if(/^\/inventory/.test(path)) {
-      res.writeHead(200, { 'Content-Type': 'text/json' });
+      res.writeHead(200, { 'Content-Type': 'application/json' });
       res.write(JSON.stringify(scripts));
     }
     else if(/^\/(?:run)?$/.test(path)) return run_scripts(res);
