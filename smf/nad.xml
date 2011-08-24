@@ -13,6 +13,12 @@
     <dependency name='localfs' grouping='require_all' restart_on='error' type='service'>
       <service_fmri value='svc:/system/filesystem/local:default'/>
     </dependency>
+    <method_context working_directory='/opt/omni/etc'>
+      <method_environment>
+        <envvar name='HOME' value='/opt/omni/etc'/>
+        <envvar name='PATH' value='/usr/xpg4/bin:/usr/bin:/usr/sbin:/sbin:/usr/sfw/bin:/usr/local/bin:/opt/omni/bin'/>
+      </method_environment>
+    </method_context>
     <exec_method name='start' type='method' exec='/opt/omni/sbin/nad -c /opt/omni/etc/node-agent.d -p 8081' timeout_seconds='60'>
       <method_context>
         <method_credential user='nobody' group='other'/>
