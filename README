@@ -1,0 +1,16 @@
+For running nad, man nad.
+
+These are the poor man's docs.
+
+nad will run scripts from the config directory; only from that
+and not subdirectories.  The best practice it to write your scripts
+in subdirectories of the config dir and soft link to them to enable
+their execution.
+
+Some scripts distributed with nad need to be compiled (yes, they aren't
+actually scripts, they are elf executables).  Since not all programs
+can be compiled on all platforms, you need to go build them as needed.
+There are makefiles, pick and choose.
+
+If you write a set of scripts/programs, you can describe them in a
+.index.json file and they will be reported on when you run nad -i.

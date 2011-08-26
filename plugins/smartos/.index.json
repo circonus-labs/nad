@@ -1,0 +1,7 @@
+{
+  "aggcpu.elf": "aggregated statistics across all CPUs",
+  "cpu.sh": "statistics for each CPU",
+  "sdinfo.sh": "statistics for all disk devices on 'sd'",
+  "vminfo.sh": "statistics related to the virtual memory subsystem",
+  "zfsinfo.sh": "statistics for ZFS"
+}

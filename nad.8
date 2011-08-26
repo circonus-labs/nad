@@ -3,7 +3,7 @@
 nad \- node\-agent daemon
 .SH SYNOPSIS
 .B nad
-[\-h] [\-c configdir] [\-p port] [\-s sslport] [\-v]
+[\-h] [\-i] [\-c configdir] [\-p port] [\-s sslport] [\-v]
 .SH DESCRIPTION
 The node\-agent daemon provides a simple mechanism to expose
 systems and application metrics to external onlookers. It
@@ -11,6 +11,15 @@ inventories all executable programs in
 .I configdir
 and executes them upon external request (via http or https)
 and returns the results in JSON format.
+.PP
+It is recommended that executable checks be stored in subdirectories
+of the
+.I configdir.
+Because those subdirectories are not scanned, those
+scripts will not be executed with an additional step.  Those scripts
+that the administrator wishes activated can be soft linked directly
+within
+.I configdir.
 .PP
 No arguments are accepted from the onlooker and thus no special
 precautions must be taken handling/validating/sanitizing arguments.
@@ -31,11 +40,14 @@ returns the current active inventory of scripts.
 \-h
 Display the help text.
 .TP
+\-i
+Display an inventory of plugins.
+.TP
 \-c <configdir>
 Sets the configuration directory (home of scripts and SSL credentials).
 .TP
 \-p <port>
-Sets the port on which the HTTP server shall listen.
+Sets the port on which the HTTP server shall listen. (default 2609).
 .TP
 \-s <sslport>
 Sets the port on which the HTTPS server shall listen.  If this option is

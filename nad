@@ -14,20 +14,22 @@ var fs = require('fs'),
     http = require('http'),
     url = require('url'),
     spawn = require('child_process').spawn,
+    procre = /^(?!\.)([^\/]*?)(?:\..*)$/,
     past_results = {},
     scripts = {},
     scripts_once = {},
     creds = {},
-    generation = 0;
+    generation = 0, do_index = false;
 
 var configdir = '/etc/node-agent.d',
-    port = 0,
+    port = 2609,
     sslport = 0,
     verify = false;
 
 function help(err) {
   console.log(process.argv[1] + "\n" +
               "\t-h\t\tthis help message\n" +
+              "\t-i\t\toffline inventory\n" +
               "\t-c <configdir>\tconfig dir\n" +
               "\t-p <port>\tunsecured port\n" +
               "\t-s <secureport>\tsecured port\n" +
@@ -38,17 +40,88 @@ function help(err) {
   }
 }
 
+function index(dir) {
+  try { process.chdir(dir); }
+  catch (e) {
+    console.log("Cannot use configdir: " + configdir);
+    console.log(e.message);
+    process.exit(-1);
+  }
+  var catalog = {}, active = {}, missing = {};
+
+  function build_catalog(dir) {
+    dir = dir || "";
+    try {
+      var c = fs.readFileSync("./" + dir + "/.index.json");
+      var j = JSON.parse(c);
+      catalog[dir] = j;
+      for(var script in j) {
+        try {
+          var info = fs.statSync("./" + dir + "/" + script);
+          if(!info.isFile() || !(info.mode & 0100)) throw Exception("");
+        } catch(e) { missing[dir + "/" + script] = true; }
+      }
+    } catch(e) { }
+    var files = fs.readdirSync("./" + dir);
+    for(var i=0; i<files.length; i++) {
+      var info = fs.statSync("./" + dir + "/" + files[i]);
+      if(info && info.isDirectory())
+        build_catalog(dir + (dir ? "/" : "") + files[i]);
+    }
+  }
+  build_catalog();
+  var files = fs.readdirSync(".");
+  var base = fs.realpathSync(".") + "/";
+  for(var i=0; i<files.length; i++) {
+    var m = procre.exec(files[i]);
+    if(!m) continue;
+    var info = fs.lstatSync(files[i]);
+    var realpath = files[i];
+    if(info.isSymbolicLink()) info = fs.statSync(files[i]);
+    if(info.isFile() && (info.mode & 0100)) {
+      var realpath = fs.realpathSync(files[i]);
+      if(realpath.indexOf(base) == 0)
+        realpath = realpath.substr(base.length);
+      active[realpath] = m[1];
+    }
+  }
+  for(var module in catalog) {
+    for(var script in catalog[module]) {
+      var m = procre.exec(script);
+      if(!m) console.log("! " + script + ": MALFORMED NAME");
+      else {
+        var file = module + "/" + script;
+        var desc = catalog[module][script];
+        var on = (file in active) ? "*" : " ";
+        if(file in missing) on = "!";
+        delete active[file];
+        console.log(on + " " +
+                    module + "/" + m[1] + ": " + desc);
+      }
+    }
+  }
+  var first = true;
+  for(var file in active) {
+    if(first) { console.log("\n  !!! Rogue scripts !!!"); first = false; }
+    console.log("* " + file + ": ???");
+  }
+}
+
 for(var i=2; i<process.argv.length; i++) {
   switch(process.argv[i]) {
     case "-h": help(); process.exit(-1);
     case "-c": configdir = process.argv[++i]; break;
+    case "-i": do_index = true; break;
     case "-p": port = parseInt(process.argv[++i]); break;
     case "-s": sslport = parseInt(process.argv[++i]); break;
     case "-v": verify = true; break;
     default: help("unknown argument: " + process.argv[i]);
   }
 }
-
+if(do_index) {
+  index(configdir);
+  process.exit(0);
+}
 if(!port && !sslport) help("must specify at least one of -p and -s");
 if(sslport) {
   try {
@@ -93,7 +166,7 @@ function rescan_modules() {
   generation++;
   fs.readdir(configdir, function(err, files) {
     for(var i = 0; i < files.length; i++) {
-      var m = /^(?!\.)([^\/]*?)(?:\..*)$/.exec(files[i]);
+      var m = procre.exec(files[i]);
       if(!m) continue;
       var filename = configdir + "/" + files[i];
       fs.unwatchFile(filename);
