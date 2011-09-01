@@ -218,13 +218,19 @@ function run_script(d, cb) {
     try { results = JSON.parse(proc_data.lines.join(' ')); }
     catch(e) {
       for(i=0; i<proc_data.lines.length; i++) {
-        parts = /^\s*(\S+)\s+([iIlLns])(\s*)(.*)$/.exec(proc_data.lines[i]);
-        if(parts) {
-          var isnull = (parts[3].length == 0 || parts[4] == "[[null]]");
-          results[parts[1]] = { '_type': parts[2],
-                                '_value': isnull ? null : parts[4]
-                              };
+        var name, type, space, val, isnull;
+        parts = /^\s*(metric\s+)?(\S+)\s+(string|int|float|[iIlLns])(\s*)(.*)$/.exec(proc_data.lines[i]);
+        if (parts) {
+          name = parts[2];
+          type = parts[3];
+          space = parts[4];
+          val = parts[5];
+          isnull = (space.length == 0 || val == "[[null]]");
         }
+        type = type.length > 1 ? type === "float" ? "n" : type.substr(0,1) : type;
+        results[name] = { '_type': type,
+                          '_value': isnull ? null : val
+                        };
       }
     }
     past_results[d.name] = results;
