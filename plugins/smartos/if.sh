@@ -16,5 +16,7 @@ do
                 if(index($2,".")) { print $1"\tn\t"$2; } \
                 else { print $1"\tL\t"$2; }
         }' | \
-        sed -e 's/^z[0-9]*_//g;' -e 's/_[hs]wlane[0-9]*//g;'
+        sed -e 's/^z[0-9]*_//g;' \
+				    -e 's/_[hs]wlane[0-9]*//g;' \
+				    -e 's/:[0-9][0-9]*:mac[^:]*//;'
 done
