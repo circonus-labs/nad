@@ -1,5 +1,6 @@
 #include <kstat.h>  
 #include <stdio.h>
+#include <strings.h>
 #include <inttypes.h>
 #include <sys/sysinfo.h>
 
