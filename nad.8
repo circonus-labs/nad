@@ -3,7 +3,7 @@
 nad \- node\-agent daemon
 .SH SYNOPSIS
 .B nad
-[\-h] [\-i] [\-c configdir] [\-p port] [\-s sslport] [\-v]
+[\-h] [\-i] [\-c configdir] [\-p [ip:]port] [\-s [ip:]sslport] [\-v]
 .SH DESCRIPTION
 The node\-agent daemon provides a simple mechanism to expose
 systems and application metrics to external onlookers. It
@@ -47,10 +47,10 @@ Display an inventory of plugins.
 Sets the configuration directory (home of scripts and SSL credentials).
 .TP
 \-p <port>
-Sets the port on which the HTTP server shall listen. (default 2609).
+Sets the port (and IP) on which the HTTP server shall listen. (default 2609).
 .TP
 \-s <sslport>
-Sets the port on which the HTTPS server shall listen.  If this option is
+Sets the port (and IP) on which the HTTPS server shall listen.  If this option is
 specified,
 .I na.key
 and

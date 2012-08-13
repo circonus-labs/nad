@@ -22,8 +22,9 @@ var fs = require('fs'),
     generation = 0, do_index = false;
 
 var configdir = '/etc/node-agent.d',
-    port = 2609,
-    sslport = 0,
+    port = [],
+    defaultport = [ [ 2609, null ] ],
+    sslport = [],
     verify = false;
 
 function help(err) {
@@ -31,8 +32,8 @@ function help(err) {
               "\t-h\t\tthis help message\n" +
               "\t-i\t\toffline inventory\n" +
               "\t-c <configdir>\tconfig dir\n" +
-              "\t-p <port>\tunsecured port\n" +
-              "\t-s <secureport>\tsecured port\n" +
+              "\t-p [ip:]<port>\tunsecured port\n" +
+              "\t-s [ip:]<secureport>\tsecured port\n" +
               "\t-v\t\tverify secured traffic\n");
   if(err) {
     console.log("\nError: " + err + "\n");
@@ -112,18 +113,32 @@ for(var i=2; i<process.argv.length; i++) {
     case "-h": help(); process.exit(-1);
     case "-c": configdir = process.argv[++i]; break;
     case "-i": do_index = true; break;
-    case "-p": port = parseInt(process.argv[++i]); break;
-    case "-s": sslport = parseInt(process.argv[++i]); break;
+    case "-p": {
+      var p = process.argv[++i].split(/:/);
+      if(p.length == 1) p.unshift(null);
+      if(p.length != 2) help("-p [ip:]port");
+      port.push( [ parseInt(p[1]), p[0] ] );
+      break;
+    }
+    case "-s": {
+      var p = process.argv[++i].split(/:/);
+      if(p.length == 1) p.unshift(null);
+      if(p.length != 2) help("-s [ip:]port");
+      sslport.push( [ parseInt(p[1]), p[0] ] );
+      break;
+    }
     case "-v": verify = true; break;
     default: help("unknown argument: " + process.argv[i]);
   }
 }
+if(port.length == 0) port = defaultport;
 if(do_index) {
   index(configdir);
   process.exit(0);
 }
-if(!port && !sslport) help("must specify at least one of -p and -s");
-if(sslport) {
+if(port.length == 0 && sslport.length == 0)
+  help("must specify at least one of -p and -s");
+if(sslport.length > 0) {
   try {
     // Setup creds
     creds.key = fs.readFileSync(configdir+"/na.key").toString();
@@ -313,14 +328,15 @@ function handler(req, res) {
 }
 
 try {
-  if(port) http.createServer(handler).listen(port);
+  for(var i=0; i<port.length; i++)
+    http.createServer(handler).listen(port[i][0] , port[i][1]);
 } catch(e) {
   console.log("Failed to start server on port " + port + ": " + e);
   process.exit(-1);
 }
 try {
-  if(sslport)
-    https.createServer(creds).addListener(handler).listen(sslport);
+  for(var i=0; i<sslport.length; i++)
+    https.createServer(creds).addListener(handler).listen(sslport[i][0], sslport[i][1]);
 } catch(e) {
   console.log("Failed to start server on port " + sslport + ": " + e);
   process.exit(-1);
