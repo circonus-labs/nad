@@ -18,6 +18,12 @@ There are makefiles, pick and choose.
 If you write a set of scripts/programs, you can describe them in a
 .index.json file and they will be reported on when you run nad -i.
 
+Installation
+===
+
+If your operating system vendor doesn't package it for you, just check
+it out and run make install.
+
 Operations
 ===
 
