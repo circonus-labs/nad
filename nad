@@ -251,11 +251,11 @@ function run_script(d, cb) {
     past_results[d.name] = results;
     cb(d, results);
   };
+  cmd.stdout.on('end', function() {
+    handle_output(d, cb);
+  });
   cmd.stdout.on('data', function(buff) {
     var offset;
-    if(buff == null || buff.length == 0) {
-      handle_output(d, cb);
-    }
     proc_data.data = proc_data.data + buff;
     while((offset = proc_data.data.indexOf('\n')) >= 0) {
       var line = proc_data.data.substring(0,
@@ -278,7 +278,6 @@ function run_script(d, cb) {
   });
   cmd.on('exit', function(code, signal) {
     d.running = false;
-    handle_output(d, cb);
   });
 }
 function run_scripts(res, which) {
