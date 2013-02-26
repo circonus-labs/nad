@@ -16,6 +16,7 @@
     <method_context working_directory='/opt/circonus/etc'>
       <method_environment>
         <envvar name='HOME' value='/opt/circonus/etc'/>
+        <envvar name='NODE_PATH' value='/opt/circonus/etc/node_modules'/>
         <envvar name='PATH' value='/usr/xpg4/bin:/usr/bin:/usr/sbin:/sbin:/usr/sfw/bin:/usr/local/bin:/opt/circonus/bin'/>
       </method_environment>
     </method_context>
