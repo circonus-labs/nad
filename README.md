@@ -33,7 +33,7 @@ When you install it, all available plugins will be installed in
 subdirectories under the "config dir".  To enable a script, simply link
 it from the top-level directory.
 
-By default, the config dir is /opt/omni/etc/node-agent.d/, you can change
+By default, the config dir is /opt/circonus/etc/node-agent.d/, you can change
 this using -c on the command line.  The default port is 2609, this can be
 changed using -p.
 
@@ -53,11 +53,11 @@ Setup
 So, if you are on a Joyent SmartOS box and you want to monitor vm, cpu,
 and zfs stuff, you would do the following as root:
 
-    # cd /opt/omni/etc/node-agent.dA
-    # (cd smartos && test -f Makefile && make)
-    # ln -s smartos/aggcpu.elf
-    # ln -s smartos/zfsinfo.sh
-    # ln -s smartos/vminfo.sh
+    # cd /opt/circonus/etc/node-agent.d
+    # (cd illumos && test -f Makefile && make)
+    # ln -s illumos/aggcpu.elf
+    # ln -s illumos/zfsinfo.sh
+    # ln -s illumos/vminfo.sh
 
 After which, you should be able to:
 
@@ -69,7 +69,7 @@ Why did we "make" in the config directory?
 ---
 
 You'll notice above we actually did a "make" before we linked thing up.
-Why? For smartos, aggcpu.elf is a compiled binary (as calculating
+Why? For illumos, aggcpu.elf is a compiled binary (as calculating
 aggregate CPU info is expensive using "the UNIX way"). The make will
 compile an d link any plugins that need compiling and linking.  We
 don't build this on install because we're lazy and think it is a tad

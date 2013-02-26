@@ -13,13 +13,13 @@
     <dependency name='localfs' grouping='require_all' restart_on='error' type='service'>
       <service_fmri value='svc:/system/filesystem/local:default'/>
     </dependency>
-    <method_context working_directory='/opt/omni/etc'>
+    <method_context working_directory='/opt/circonus/etc'>
       <method_environment>
-        <envvar name='HOME' value='/opt/omni/etc'/>
-        <envvar name='PATH' value='/usr/xpg4/bin:/usr/bin:/usr/sbin:/sbin:/usr/sfw/bin:/usr/local/bin:/opt/omni/bin'/>
+        <envvar name='HOME' value='/opt/circonus/etc'/>
+        <envvar name='PATH' value='/usr/xpg4/bin:/usr/bin:/usr/sbin:/sbin:/usr/sfw/bin:/usr/local/bin:/opt/circonus/bin'/>
       </method_environment>
     </method_context>
-    <exec_method name='start' type='method' exec='/opt/omni/sbin/nad -c /opt/omni/etc/node-agent.d' timeout_seconds='60'>
+    <exec_method name='start' type='method' exec='/opt/circonus/sbin/nad -c /opt/circonus/etc/node-agent.d' timeout_seconds='60'>
       <method_context>
         <method_credential user='nobody' group='other'/>
       </method_context>
