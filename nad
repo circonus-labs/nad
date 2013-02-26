@@ -13,13 +13,17 @@ var fs = require('fs'),
     sys = require('sys'),
     http = require('http'),
     url = require('url'),
+    nadapi = require('nad_circapi'),
     spawn = require('child_process').spawn,
     procre = /^(?!\.)([^\/]*?)(?:\..*)$/,
     past_results = {},
     scripts = {},
     scripts_once = {},
     creds = {},
-    generation = 0, do_index = false;
+    generation = 0, do_index = false,
+    api_setup = false, auth_token = null,
+    target = null, hostname = null,
+    brokerid = null, configfile = null;
 
 var configdir = '/etc/node-agent.d',
     port = [],
@@ -29,12 +33,18 @@ var configdir = '/etc/node-agent.d',
 
 function help(err) {
   console.log(process.argv[1] + "\n" +
-              "\t-h\t\tthis help message\n" +
-              "\t-i\t\toffline inventory\n" +
-              "\t-c <configdir>\tconfig dir\n" +
-              "\t-p [ip:]<port>\tunsecured port\n" +
+              "\t-h\t\t\tthis help message\n" +
+              "\t-i\t\t\toffline inventory\n" +
+              "\t-c <configdir>\t\tconfig dir\n" +
+              "\t-p [ip:]<port>\t\tunsecured port\n" +
               "\t-s [ip:]<secureport>\tsecured port\n" +
-              "\t-v\t\tverify secured traffic\n");
+              "\t-v\t\t\tverify secured traffic\n" + 
+              "\t--authtoken\t\tCirconus API auth token to use, if passed will attempt to configure via the Circonus API then exit.\n" +
+              "\t--target\t\tTarget Circonus will use to contact this host.\n" +
+              "\t--hostname\t\tHostname used in check and graph names, if not passed we will attempt to look it up.\n" +
+              "\t--brokerid\t\tID of the Circonus broker to configure the check on.\n" +
+              "\t--configfile\t\tName of the file in the config directory to use for Circonus configuration.\n"
+            );
   if(err) {
     console.log("\nError: " + err + "\n");
     process.exit(-1);
@@ -128,6 +138,15 @@ for(var i=2; i<process.argv.length; i++) {
       break;
     }
     case "-v": verify = true; break;
+    case "--authtoken": {
+        api_setup = true;
+        auth_token = process.argv[++i];
+        break;
+    }
+    case "--target": target = process.argv[++i]; break;
+    case "--hostname": hostname = process.argv[++i]; break;
+    case "--brokerid": brokerid = process.argv[++i]; break;
+    case "--configfile": configfile = process.argv[++i]; break;
     default: help("unknown argument: " + process.argv[i]);
   }
 }
@@ -135,6 +154,9 @@ if(port.length == 0) port = defaultport;
 if(do_index) {
   index(configdir);
   process.exit(0);
+}
+if(api_setup) {
+  configure_circonus();
 }
 if(port.length == 0 && sslport.length == 0)
   help("must specify at least one of -p and -s");
@@ -207,9 +229,6 @@ function rescan_modules() {
   });
   sweep();
 }
-
-fs.watchFile(configdir, onchange(rescan_modules));
-rescan_modules();
 
 function run_script(d, cb) {
   if(d.running) {
@@ -326,17 +345,47 @@ function handler(req, res) {
   });
 }
 
-try {
-  for(var i=0; i<port.length; i++)
-    http.createServer(handler).listen(port[i][0] , port[i][1]);
-} catch(e) {
-  console.log("Failed to start server on port " + port + ": " + e);
-  process.exit(-1);
+function configure_circonus() {
+  var error = false;
+  if ( ! /^[0-9a-fA-F]{4}(?:[0-9a-fA-F]{4}-){4}[0-9a-fA-F]{12}$/.test(auth_token)  ) {
+    console.log("--authtoken should be a UUID.");
+    error = true;
+  }
+  if ( target === null ) {
+    console.log("--target is required.");
+    error = true;
+  }
+  if ( brokerid === null || ! /^\d+$/.test(brokerid) ) {
+    console.log("--brokerid is required and should be an integer.");
+    error = true;
+  }
+  if ( configfile === null ) {
+    console.log("--configfile is required.");
+    error = true;
+  }
+  if ( error ) {
+    process.exit(1);
+  }
+
+  nadapi.configure(auth_token, target, hostname, brokerid, configfile);
 }
-try {
-  for(var i=0; i<sslport.length; i++)
-    https.createServer(creds).addListener(handler).listen(sslport[i][0], sslport[i][1]);
-} catch(e) {
-  console.log("Failed to start server on port " + sslport + ": " + e);
-  process.exit(-1);
+
+if ( ! api_setup ) {
+    fs.watchFile(configdir, onchange(rescan_modules));
+    rescan_modules();
+
+    try {
+      for(var i=0; i<port.length; i++)
+        http.createServer(handler).listen(port[i][0] , port[i][1]);
+    } catch(e) {
+      console.log("Failed to start server on port " + port + ": " + e);
+      process.exit(-1);
+    }
+    try {
+      for(var i=0; i<sslport.length; i++)
+        https.createServer(creds).addListener(handler).listen(sslport[i][0], sslport[i][1]);
+    } catch(e) {
+      console.log("Failed to start server on port " + sslport + ": " + e);
+      process.exit(-1);
+    }
 }
