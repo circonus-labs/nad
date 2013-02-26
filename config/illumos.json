@@ -1,0 +1,228 @@
+{
+    "graphs": {
+        "CPU / Memory": {
+            "style": "line",
+            "datapoints": [
+                {
+                    "name": "CPU Kernel",
+                    "metric_name": "aggcpu`cpu_stat:all:sys:cpu_kernel",
+                    "metric_type": "numeric",
+                    "axis": "l",
+                    "stack": 0,
+                    "derive": "counter",
+                    "hidden": false
+                },
+                {
+                    "name": "CPU User",
+                    "metric_name": "aggcpu`cpu_stat:all:sys:cpu_user",
+                    "metric_type": "numeric",
+                    "axis": "l",
+                    "stack": 0,
+                    "derive": "counter",
+                    "hidden": false
+                },
+                {
+                    "name": "CPU Idle",
+                    "metric_name": "aggcpu`cpu_stat:all:sys:cpu_idle",
+                    "metric_type": "numeric",
+                    "axis": "l",
+                    "stack": 0,
+                    "derive": "counter",
+                    "hidden": false
+                },
+                {
+                    "name": "Freemem",
+                    "metric_name": "vminfo`unix:0:vminfo:freemem",
+                    "metric_type": "numeric",
+                    "axis": "r",
+                    "derive": "counter",
+                    "data_formula": "4096,*",
+                    "hidden": false
+                }
+            ]
+        },
+        "VFS": {
+            "style": "line",
+            "min_left_y": 0,
+            "max_left_y": 100,
+            "datapoints": [
+                {
+                    "name": "read op pending %",
+                    "metric_name": "zone_vfs`zone_vfs:rtime",
+                    "metric_type": "numeric",
+                    "axis": "l",
+                    "derive": "counter",
+                    "data_formula": "10000000,/,2,round",
+                    "hidden": false
+                },
+                {
+                    "name": "write op pending %",
+                    "metric_name": "zone_vfs`zone_vfs:wtime",
+                    "metric_type": "numeric",
+                    "axis": "l",
+                    "derive": "counter",
+                    "data_formula": "10000000,/,2,round",
+                    "hidden": false
+                },
+                {
+                    "name": "Average read ops being serviced",
+                    "metric_name": "zone_vfs`zone_vfs:rlentime",
+                    "metric_type": "numeric",
+                    "axis": "r",
+                    "derive": "counter",
+                    "data_formula": "1000000000,/",
+                    "hidden": false
+                },
+                {
+                    "name": "Aveage write ops being serviced",
+                    "metric_name": "zone_vfs`zone_vfs:wlentime",
+                    "metric_type": "numeric",
+                    "axis": "r",
+                    "derive": "counter",
+                    "data_formula": "1000000000,/",
+                    "hidden": false
+                }
+                
+            ]
+        },
+        "Network": {
+            "style": "area",
+            "datapoints": [
+                {
+                    "metric_name": "tcp`tcp:inDataInorderBytes",
+                    "metric_type": "numeric",
+                    "axis": "l",
+                    "derive": "counter",
+                    "hidden": true
+                },
+                {
+                    "metric_name": "tcp`tcp:inDataUnorderBytes",
+                    "metric_type": "numeric",
+                    "axis": "l",
+                    "derive": "counter",
+                    "hidden": true
+                },
+                {
+                    "name": "Out Bytes",
+                    "metric_name": "tcp`tcp:outDataBytes",
+                    "metric_type": "numeric",
+                    "axis": "l",
+                    "derive": "counter",
+                    "hidden": false
+                }
+            ],
+            "composites": [
+                {
+                    "name": "In Bytes",
+                    "data_formula": "=-1*(A+B)",
+                    "legend_formula": "=-1*VAL"
+                }
+            ]
+        },
+        "IO": {
+            "style": "line",
+            "min_left_y": 0,
+            "max_left_y": 100,
+            "datapoints": [
+                {
+                    "name": "sd0 % busy",
+                    "metric_name": "sdinfo`sd:0:sd0:rtime",
+                    "metric_type": "numeric",
+                    "axis": "l",
+                    "derive": "counter",
+                    "data_formula": "100,*,2,round",
+                    "hidden": false
+                },
+                {
+                    "name": "sd1 % busy",
+                    "metric_name": "sdinfo`sd:1:sd1:rtime",
+                    "metric_type": "numeric",
+                    "axis": "l",
+                    "derive": "counter",
+                    "data_formula": "100,*,2,round",
+                    "hidden": false
+                },
+                {
+                    "name": "sd0 % time waiting for service",
+                    "metric_name": "sdinfo`sd:0:sd0:wtime",
+                    "metric_type": "numeric",
+                    "axis": "l",
+                    "derive": "counter",
+                    "data_formula": "100,*,2,round",
+                    "hidden": false
+                },
+                {
+                    "name": "sd1 % time waiting for service",
+                    "metric_name": "sdinfo`sd:1:sd1:wtime",
+                    "metric_type": "numeric",
+                    "axis": "l",
+                    "derive": "counter",
+                    "data_formula": "100,*,2,round",
+                    "hidden": false
+                },
+                {
+                    "name": "sd0 average service time",
+                    "metric_name": "sdinfo`sd:0:sd0:rlentime",
+                    "metric_type": "numeric",
+                    "axis": "r",
+                    "derive": "counter",
+                    "data_formula": "1000,*",
+                    "hidden": false
+                },
+                {
+                    "name": "sd1 average service time",
+                    "metric_name": "sdinfo`sd:1:sd1:rlentime",
+                    "metric_type": "numeric",
+                    "axis": "r",
+                    "derive": "counter",
+                    "data_formula": "1000,*",
+                    "hidden": false
+                },
+                {
+                    "name": "sd0 average wait queue time",
+                    "metric_name": "sdinfo`sd:0:sd0:wlentime",
+                    "metric_type": "numeric",
+                    "axis": "r",
+                    "derive": "counter",
+                    "data_formula": "1000,*",
+                    "hidden": false
+                },
+                {
+                    "name": "sd1 average wait queue time",
+                    "metric_name": "sdinfo`sd:1:sd1:wlentime",
+                    "metric_type": "numeric",
+                    "axis": "r",
+                    "derive": "counter",
+                    "data_formula": "1000,*",
+                    "hidden": false
+                }
+            ]
+        }
+    },
+    "metrics": {
+        "numeric": [
+            "aggcpu`cpu_stat:all:sys:cpu_idle",
+            "aggcpu`cpu_stat:all:sys:cpu_user",
+            "aggcpu`cpu_stat:all:sys:cpu_kernel",
+            "aggcpu`cpu_stat:all:sys:sysfork",
+            "aggcpu`cpu_stat:all:sys:syscall",
+            "vminfo`unix:0:vminfo:freemem",
+            "zone_vfs`zone_vfs:rlentime",
+            "zone_vfs`zone_vfs:wlentime",
+            "zone_vfs`zone_vfs:rtime",
+            "zone_vfs`zone_vfs:wtime",
+            "tcp`tcp:inDataInorderBytes",
+            "tcp`tcp:inDataUnorderBytes",
+            "tcp`tcp:outDataBytes",
+            "sdinfo`sd:0:sd0:rtime",
+            "sdinfo`sd:0:sd0:wtime",
+            "sdinfo`sd:0:sd0:rlentime",
+            "sdinfo`sd:0:sd0:wlentime",
+            "sdinfo`sd:1:sd1:rtime",
+            "sdinfo`sd:1:sd1:wtime",
+            "sdinfo`sd:1:sd1:rlentime",
+            "sdinfo`sd:1:sd1:wlentime"
+        ],
+        "text": []
+    }
+}
