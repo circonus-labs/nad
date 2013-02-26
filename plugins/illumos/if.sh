@@ -1,14 +1,16 @@
 #!/bin/sh
 DIR=`dirname $0`
-if [ -d $DIR/smartos ]; then . $DIR/smartos/lib/kstat.lib
+if [ -d $DIR/illumos ]; then . $DIR/illumos/lib/kstat.lib
 else . $DIR/lib/kstat.lib
 fi
 
 if [ "`/usr/bin/zonename`" = "global" ]; then
-	IFACES=`ifconfig -a | awk -F: '/^[^\t]/ {if($1 != "lo0") {print $1}}'`
+  IFACES=`ifconfig -a | awk -F: '/^[^\t]/ {if($1 != "lo0") {print $1}}' | uniq`
+elif [ "`grep OmniOS /etc/release | awk '{print $1}'`" = "OmniOS" ]; then
+  IFACES=`ifconfig -a | awk -F: '/^[^\t]/ {if($1 != "lo0") {print $1}}' | uniq`
 else
   ZN=`kstat -p -m tcp -n tcp -s crtime | awk -F: '{print $2;}'`
-  IFACES=`ifconfig -a | awk -F: '/^[^\t]/ {if($1 != "lo0") {print "z'$ZN'_"$1;}}'`
+  IFACES=`ifconfig -a | awk -F: '/^[^\t]/ {if($1 != "lo0") {print "z'$ZN'_"$1;}}' | uniq`
 fi
 
 for iface in $IFACES

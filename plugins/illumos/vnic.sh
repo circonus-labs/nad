@@ -1,6 +1,6 @@
 #!/bin/sh
 DIR=`dirname $0`
-if [ -d $DIR/smartos ]; then . $DIR/smartos/lib/kstat.lib
+if [ -d $DIR/illumos ]; then . $DIR/illumos/lib/kstat.lib
 else . $DIR/lib/kstat.lib
 fi
 

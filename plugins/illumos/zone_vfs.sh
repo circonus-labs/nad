@@ -1,7 +1,11 @@
 #!/bin/sh
 DIR=`dirname $0`
-if [ -d $DIR/smartos ]; then . $DIR/smartos/lib/kstat.lib
+if [ -d $DIR/illumos ]; then . $DIR/illumos/lib/kstat.lib
 else . $DIR/lib/kstat.lib
 fi
 
-_kstat -m zone_vfs
+if [ "`/usr/bin/zonename`" = global ]; then
+    _kstat -m zone_vfs
+else
+    _kstat -m zone_vfs -- cut -f1,4- -d:
+fi
