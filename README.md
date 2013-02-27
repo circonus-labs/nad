@@ -81,3 +81,30 @@ What about SSL?
 ---
 
 nad supports SSL, look at the man page.
+
+Automatic Configuration with Circonus
+===
+
+nad can automatically configure itself with Circonus via a few command
+line options.  When running in configuration mode, nad will create a check
+and graphs with Circonus and then exit, it will not attempt to bind to any port
+so is safe to use while running normally.
+
+ * --authtoken <UUID>  The Circonus API auth token to use when talking with the API. This "activates" the configuration mode
+
+ * --target <string> This should be either the IP or hostname that the Circonus broker can talk to                   this host at.  Required
+
+ * --hostname <string> The hostname to use in the check and graph names.  If not passed nad will attempt to look it up via commands like /usr/bin/zonename
+
+ * --brokerid <integer> The ID from Circonus for the broker you wish to configure the check on.  Required
+
+ * --configfile <string> The path to the config file to use that defines the metrics and graphs to create in Circonus.  Look at config/illumos.json for an example.  Required
+
+Config file
+---
+
+The --configfile parameter defines which config file to use when setting up checks and graphs in Circonus.  There are 2 keys the nad looks for.
+
+The metrics key defines which metrics we will collect and has 2 subkeys, numeric and text which are simply lists of metric names.  When nad attempts to create the check, if it gets back a pre-existing check, nad will update the check, adding the new metric names.
+
+The graphs key defined a collection of graphs to create.  Each subkey is the name of the graph that will be created in Circonus, with the hostname prepended to it.  Under the names, the structure is identical to the documentation for the Circonus graph API, any values added will be passed to the API as is.
