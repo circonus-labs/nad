@@ -105,6 +105,6 @@ Config file
 
 The --configfile parameter defines which config file to use when setting up checks and graphs in Circonus.  There are 2 keys the nad looks for.
 
-The metrics key defines which metrics we will collect and has 2 subkeys, numeric and text which are simply lists of metric names.  When nad attempts to create the check, if it gets back a pre-existing check, nad will update the check, adding the new metric names.
+The check key contains the definition that will be passed to the check bundle endpoint in the Cirocnus API.  You can set values like the period and timeout here, as well as config options (in the config key).  The metrics key defines which metrics we will collect and has 2 subkeys, numeric and text which are simply lists of metric names.  When nad attempts to create the check, if it gets back a pre-existing check, nad will update the check, adding the new metric names.
 
-The graphs key defined a collection of graphs to create.  Each subkey is the name of the graph that will be created in Circonus, with the hostname prepended to it.  Under the names, the structure is identical to the documentation for the Circonus graph API, any values added will be passed to the API as is.
+The graphs key defines a collection of graphs to create.  Each subkey is the name of the graph that will be created in Circonus, with the hostname prepended to it.  Under the names, the structure is identical to the documentation for the Circonus graph API, any values added will be passed to the API as is.
