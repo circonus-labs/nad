@@ -108,6 +108,7 @@
                     "metric_type": "numeric",
                     "axis": "l",
                     "derive": "counter",
+                    "legend_formula": "=bytes(VAL)",
                     "hidden": false
                 }
             ],
@@ -115,7 +116,7 @@
                 {
                     "name": "In Bytes",
                     "data_formula": "=-1*(A+B)",
-                    "legend_formula": "=-1*VAL"
+                    "legend_formula": "=bytes(-1*VAL)"
                 }
             ]
         },
@@ -199,30 +200,38 @@
             ]
         }
     },
-    "metrics": {
-        "numeric": [
-            "aggcpu`cpu_stat:all:sys:cpu_idle",
-            "aggcpu`cpu_stat:all:sys:cpu_user",
-            "aggcpu`cpu_stat:all:sys:cpu_kernel",
-            "aggcpu`cpu_stat:all:sys:sysfork",
-            "aggcpu`cpu_stat:all:sys:syscall",
-            "vminfo`unix:0:vminfo:freemem",
-            "zone_vfs`zone_vfs:rlentime",
-            "zone_vfs`zone_vfs:wlentime",
-            "zone_vfs`zone_vfs:rtime",
-            "zone_vfs`zone_vfs:wtime",
-            "tcp`tcp:inDataInorderBytes",
-            "tcp`tcp:inDataUnorderBytes",
-            "tcp`tcp:outDataBytes",
-            "sdinfo`sd:0:sd0:rtime",
-            "sdinfo`sd:0:sd0:wtime",
-            "sdinfo`sd:0:sd0:rlentime",
-            "sdinfo`sd:0:sd0:wlentime",
-            "sdinfo`sd:1:sd1:rtime",
-            "sdinfo`sd:1:sd1:wtime",
-            "sdinfo`sd:1:sd1:rlentime",
-            "sdinfo`sd:1:sd1:wlentime"
-        ],
-        "text": []
+    "check": {
+        "type": "json",
+        "period": 60,
+        "timeout": 10,
+        "metrics": {
+            "numeric": [
+                "aggcpu`cpu_stat:all:sys:cpu_idle",
+                "aggcpu`cpu_stat:all:sys:cpu_user",
+                "aggcpu`cpu_stat:all:sys:cpu_kernel",
+                "aggcpu`cpu_stat:all:sys:sysfork",
+                "aggcpu`cpu_stat:all:sys:syscall",
+                "vminfo`unix:0:vminfo:freemem",
+                "zone_vfs`zone_vfs:rlentime",
+                "zone_vfs`zone_vfs:wlentime",
+                "zone_vfs`zone_vfs:rtime",
+                "zone_vfs`zone_vfs:wtime",
+                "tcp`tcp:inDataInorderBytes",
+                "tcp`tcp:inDataUnorderBytes",
+                "tcp`tcp:outDataBytes",
+                "sdinfo`sd:0:sd0:rtime",
+                "sdinfo`sd:0:sd0:wtime",
+                "sdinfo`sd:0:sd0:rlentime",
+                "sdinfo`sd:0:sd0:wlentime",
+                "sdinfo`sd:1:sd1:rtime",
+                "sdinfo`sd:1:sd1:wtime",
+                "sdinfo`sd:1:sd1:rlentime",
+                "sdinfo`sd:1:sd1:wlentime"
+            ],
+            "text": []
+        },
+        "config": {
+            "port": 2609
+        }
     }
 }
