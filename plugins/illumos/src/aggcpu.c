@@ -6,20 +6,33 @@
 
 #define CSSUM(name) sum.cpu_sysinfo.name += cpu.cpu_sysinfo.name
 #define CVSUM(name) sum.cpu_vminfo.name += cpu.cpu_vminfo.name
-#define PRINT_CSSUM(name) \
-  printf("cpu_stat:all:sys:%s\tL\t%llu\n", #name, sum.cpu_sysinfo.name)
-#define PRINTN_CSSUM(pname, name) \
-  printf("cpu_stat:all:sys:%s\tL\t%llu\n", #pname, sum.cpu_sysinfo.name)
-#define PRINT_CVSUM(name) \
-  printf("cpu_stat:all:vm:%s\tL\t%llu\n", #name, sum.cpu_vminfo.name)
-#define PRINTN_CVSUM(pname, name) \
-  printf("cpu_stat:all:vm:%s\tL\t%llu\n", #pname, sum.cpu_vminfo.name)
+#define PRINT_CSSUM(name) do { \
+  printf("cpu_stat:all:sys:%s\tL\t%llu\n", #name, sum.cpu_sysinfo.name); \
+} while(0)
+#define PRINT_NORM_CSSUM(name) do { \
+  printf("cpu_stat:all:sys:%s\tL\t%llu\n", #name, sum.cpu_sysinfo.name); \
+  printf("cpu_stat:sys:%s\tn\t%llu\n", #name, sum.cpu_sysinfo.name/ncpus); \
+} while(0)
+#define PRINTN_CSSUM(pname, name) do { \
+  printf("cpu_stat:all:sys:%s\tL\t%llu\n", #pname, sum.cpu_sysinfo.name); \
+} while(0)
+#define PRINTN_NORM_CSSUM(pname, name) do { \
+  printf("cpu_stat:all:sys:%s\tL\t%llu\n", #pname, sum.cpu_sysinfo.name); \
+  printf("cpu_stat:sys:%s\tL\t%llu\n", #pname, sum.cpu_sysinfo.name/ncpus); \
+} while(0)
+#define PRINT_CVSUM(name) do { \
+  printf("cpu_stat:all:vm:%s\tL\t%llu\n", #name, sum.cpu_vminfo.name); \
+} while(0)
+#define PRINTN_CVSUM(pname, name) do { \
+  printf("cpu_stat:all:vm:%s\tL\t%llu\n", #pname, sum.cpu_vminfo.name); \
+} while(0)
 
 int main(int argc, char **argv) {
   kstat_ctl_t   *kc;  
   kstat_t       *ksp;  
   kstat_io_t     kio;  
-  kstat_named_t *knp;  
+  kstat_named_t *knp;
+  int ncpus = 0;
   cpu_stat_t sum;
   cpu_stat_t cpu;
  
@@ -28,6 +41,7 @@ int main(int argc, char **argv) {
   ksp = kstat_lookup(kc, "cpu_stat", -1, NULL);
   for (; ksp != NULL; ksp = ksp->ks_next) { 
     if(!strcmp(ksp->ks_module, "cpu_stat")) {
+      ncpus++;
       kstat_read(kc,ksp,&cpu);
       CSSUM(cpu[CPU_IDLE]);
       CSSUM(cpu[CPU_USER]);
@@ -116,13 +130,13 @@ int main(int argc, char **argv) {
     }
   }
 
-  PRINTN_CSSUM(cpu_idle, cpu[CPU_IDLE]);
-  PRINTN_CSSUM(cpu_user, cpu[CPU_USER]);
-  PRINTN_CSSUM(cpu_kernel, cpu[CPU_KERNEL]);
-  PRINTN_CSSUM(cpu_wait, cpu[CPU_WAIT]);
-  PRINTN_CSSUM(wait_io, wait[W_IO]);
-  PRINTN_CSSUM(wait_swap, wait[W_SWAP]);
-  PRINTN_CSSUM(wait_pio, wait[W_PIO]);
+  PRINTN_NORM_CSSUM(cpu_idle, cpu[CPU_IDLE]);
+  PRINTN_NORM_CSSUM(cpu_user, cpu[CPU_USER]);
+  PRINTN_NORM_CSSUM(cpu_kernel, cpu[CPU_KERNEL]);
+  PRINTN_NORM_CSSUM(cpu_wait, cpu[CPU_WAIT]);
+  PRINTN_NORM_CSSUM(wait_io, wait[W_IO]);
+  PRINTN_NORM_CSSUM(wait_swap, wait[W_SWAP]);
+  PRINTN_NORM_CSSUM(wait_pio, wait[W_PIO]);
   PRINT_CSSUM(bread);
   PRINT_CSSUM(bwrite);
   PRINT_CSSUM(lread);
