@@ -17,7 +17,7 @@
       <method_environment>
         <envvar name='HOME' value='/opt/circonus/etc'/>
         <envvar name='NODE_PATH' value='/opt/circonus/etc/node_modules'/>
-        <envvar name='PATH' value='/usr/xpg4/bin:/usr/bin:/usr/sbin:/sbin:/usr/sfw/bin:/usr/local/bin:/opt/circonus/bin'/>
+        <envvar name='PATH' value='/usr/xpg4/bin:/usr/bin:/usr/sbin:/sbin:/usr/sfw/bin:/usr/local/bin:/opt/circonus/bin:/opt/omni/bin'/>
       </method_environment>
     </method_context>
     <exec_method name='start' type='method' exec='/opt/circonus/sbin/nad -c /opt/circonus/etc/node-agent.d' timeout_seconds='60'>
