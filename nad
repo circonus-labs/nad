@@ -343,6 +343,9 @@ function handler(req, res) {
     else res.writeHead(404);
     res.end();
   });
+
+  // if we don't have a data listener the stream starts paused in node 10+
+  req.addListener('data', function(){});
 }
 
 function configure_circonus() {
