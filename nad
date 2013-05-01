@@ -260,11 +260,11 @@ function run_script(d, cb) {
           space = parts[4];
           val = parts[5];
           isnull = (space.length == 0 || val == "[[null]]");
+          type = type.length > 1 ? type === "float" ? "n" : type.substr(0,1) : type;
+          results[name] = { '_type': type,
+                            '_value': isnull ? null : val
+                          };
         }
-        type = type.length > 1 ? type === "float" ? "n" : type.substr(0,1) : type;
-        results[name] = { '_type': type,
-                          '_value': isnull ? null : val
-                        };
       }
     }
     past_results[d.name] = results;
