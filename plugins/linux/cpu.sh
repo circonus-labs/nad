@@ -12,7 +12,11 @@ print_norm_cssum() {
     printf "%s\tn\t%s\n" $1 `expr $2 / $NCPUS`
 }
 
-NCPUS=`/usr/bin/nproc`
+if [[ -x /usr/bin/nproc ]]; then
+    NCPUS=$(/usr/bin/nproc)
+else
+    NCPUS=$(/bin/grep -c ^processor /proc/cpuinfo)
+fi
 
 # Kernel version madness.  Number of columns in cpu line changed several times.
 OSREV=`/bin/uname -r`
