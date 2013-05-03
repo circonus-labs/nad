@@ -9,7 +9,7 @@ print_cssum() {
 
 # Print metrics normalized to a single CPU
 print_norm_cssum() {
-    printf "%s\tn\t%s\n" $1 `expr $2 / $NCPUS`
+    printf "%s\tL\t%s\n" $1 `expr $2 / $NCPUS`
 }
 
 NCPUS=`/usr/bin/nproc`
