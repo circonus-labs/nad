@@ -8,7 +8,8 @@
 
 static const char *suppress_fstype[] = {
   "rootfs", "proc", "sysfs", "selinuxfs", "usbfs", "devpts", "devtmpfs", 
-  "binfmt_misc", "rpc_pipefs", "autofs", "debugfs", "securityfs", NULL
+  "binfmt_misc", "rpc_pipefs", "autofs", "debugfs", "securityfs", "fusectl",
+  NULL
 };
 
 int main(int argc, char **argv) {
