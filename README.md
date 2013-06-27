@@ -11,7 +11,7 @@ in subdirectories of the config dir and soft link to them to enable
 their execution.
 
 Some scripts distributed with nad need to be compiled (yes, they aren't
-actually scripts, they are elf executables).  Since not all programs
+actually scripts, they are ELF executables).  Since not all programs
 can be compiled on all platforms, you need to go build them as needed.
 There are makefiles, pick and choose.
 
@@ -31,7 +31,7 @@ First, there are no config files for nad. You just run it and it works.
 It has a default directory out of which it executes scripts/executables.
 When you install it, all available plugins will be installed in
 subdirectories under the "config dir".  To enable a script, simply link
-it from the top-level directory.
+it from the "config dir".
 
 By default, the config dir is /opt/circonus/etc/node-agent.d/, you can change
 this using -c on the command line.  The default port is 2609, this can be
@@ -71,7 +71,7 @@ Why did we "make" in the config directory?
 You'll notice above we actually did a "make" before we linked thing up.
 Why? For illumos, aggcpu.elf is a compiled binary (as calculating
 aggregate CPU info is expensive using "the UNIX way"). The make will
-compile an d link any plugins that need compiling and linking.  We
+compile and link any plugins that need compiling and linking.  We
 don't build this on install because we're lazy and think it is a tad
 easier to only build what you need as you need it; it is very rare that
 you can't write your metrics check in shell or some other scripting
@@ -103,8 +103,19 @@ so is safe to use while running normally.
 Config file
 ---
 
-The --configfile parameter defines which config file to use when setting up checks and graphs in Circonus.  There are 2 keys the nad looks for.
+The --configfile parameter defines which config file to use when setting up
+checks and graphs in Circonus.  There are two keys the nad looks for.
 
-The check key contains the definition that will be passed to the check bundle endpoint in the Cirocnus API.  You can set values like the period and timeout here, as well as config options (in the config key).  The metrics key defines which metrics we will collect and has 2 subkeys, numeric and text which are simply lists of metric names.  When nad attempts to create the check, if it gets back a pre-existing check, nad will update the check, adding the new metric names.
+The check key contains the definition that will be passed to the check bundle
+endpoint in the Cirocnus API.  You can set values like the period and timeout
+here, as well as config options (in the config key).  The metrics key defines
+which metrics we will collect and has 2 subkeys, numeric and text which are 
+simply lists of metric names.  When nad attempts to create the check, if it 
+gets back a pre-existing check, nad will update the check, adding the new 
+metric names.
 
-The graphs key defines a collection of graphs to create.  Each subkey is the name of the graph that will be created in Circonus, with the hostname prepended to it.  Under the names, the structure is identical to the documentation for the Circonus graph API, any values added will be passed to the API as is.
+The graphs key defines a collection of graphs to create.  Each subkey is the 
+name of the graph that will be created in Circonus, with the hostname 
+prepended to it.  Under the names, the structure is identical to the 
+documentation for the Circonus graph API, any values added will be passed to 
+the API as is.
