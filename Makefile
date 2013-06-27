@@ -25,3 +25,8 @@ install-plugins:	install-dirs
 
 install-modules:
 	rsync -a node_modules/ $(DESTDIR)$(MODULES)/
+
+install-ubuntu:	install
+	./install-sh -c -m 0644 linux-init/ubuntu-etc_default $(DESTDIR)/etc/default/nad
+	./install-sh -c -m 0755 linux-init/ubuntu-init $(DESTDIR)/etc/init.d/nad
+	/usr/sbin/update-rc.d nad defaults 98 02

@@ -1,0 +1,103 @@
+#! /bin/sh
+
+### BEGIN INIT INFO
+# Provides:          nad
+# Required-Start:    $local_fs
+# Required-Stop:     $local_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: A very thin, simply managed host agent written in Node.js
+# Description:       The node-agent daemon provides a simple mechanism to expose
+#                    systems and application metrics to external onlookers.
+#                    It inventories all executable programs in its config directory
+#                    and executes them upon external request, returning results
+#                    in JSON format.
+### END INIT INFO
+
+set -e
+
+# /etc/init.d/nad: start and stop nad
+
+DAEMON=/opt/circonus/sbin/nad
+NAD_OPTS=''
+NAD_DEFAULTS_FILE=/etc/default/nad
+NAD_PID_FILE=/var/run/nad.pid
+
+test -x $DAEMON || exit 0
+
+. /lib/lsb/init-functions
+
+if [ -s $NAD_DEFAULTS_FILE ]; then
+    . $NAD_DEFAULTS_FILE
+fi
+
+export PATH="${PATH:+$PATH:}/usr/sbin:/sbin"
+export NODE_PATH=/opt/circonus/etc/node_modules
+
+nad_start() {
+    if start-stop-daemon --start --quiet --background \
+        --pidfile $NAD_PID_FILE --make-pidfile \
+        --exec $DAEMON -- $NAD_OPTS
+    then
+        rc=0
+        sleep 1
+        if ! kill -0 $(cat $NAD_PID_FILE) >/dev/null 2>&1; then
+            log_failure_msg "Circonus node agent daemon failed to start"
+            rc=1
+        fi
+    else
+        rc=1
+    fi
+    if [ $rc -eq 0 ]; then
+        log_end_msg 0
+    else
+        log_end_msg 1
+        rm -f $NAD_PID_FILE
+    fi
+} # nad_start
+
+
+case "$1" in
+  start)
+	log_daemon_msg "Starting Circonus node agent daemon" "nad"
+	if [ -s $NAD_PID_FILE ] && kill -0 $(cat $NAD_PID_FILE) >/dev/null 2>&1; then
+	    log_progress_msg "apparently already running"
+	    log_end_msg 0
+	    exit 0
+	fi
+        nad_start
+	;;
+  stop)
+	log_daemon_msg "Stopping Circonus node agent daemon" "nad"
+	start-stop-daemon --stop --quiet --oknodo --pidfile $NAD_PID_FILE
+	log_end_msg $?
+	rm -f $NAD_PID_FILE
+	;;
+
+  reload|force-reload)
+	log_warning_msg "Reloading Circonus node agent daemon: not needed, as there is no config file."
+	;;
+
+  restart)
+	set +e
+	log_daemon_msg "Restarting Circonus node agent daemon" "nad"
+	if [ -s $NAD_PID_FILE ] && kill -0 $(cat $NAD_PID_FILE) >/dev/null 2>&1; then
+	    start-stop-daemon --stop --quiet --oknodo --pidfile $NAD_PID_FILE || true
+	    sleep 1
+	else
+	    log_warning_msg "Circonus node agent daemon not running, attempting to start."
+		rm -f $NAD_PID_FILE
+	fi
+        nad_start
+	;;
+
+  status)
+	status_of_proc -p $NAD_PID_FILE "$DAEMON" nad
+	exit $?	# notreached due to set -e
+	;;
+  *)
+	echo "Usage: /etc/init.d/nad {start|stop|reload|force-reload|restart|status}"
+	exit 1
+esac
+
+exit 0
