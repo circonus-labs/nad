@@ -26,7 +26,14 @@ install-plugins:	install-dirs
 install-modules:
 	rsync -a node_modules/ $(DESTDIR)$(MODULES)/
 
-install-ubuntu:	install
-	./install-sh -c -m 0644 linux-init/ubuntu-etc_default $(DESTDIR)/etc/default/nad
+install-linux:	install
+	cd $(DESTDIR)$(CONF)/linux ; make
+	cd $(DESTDIR)$(CONF) ; for f in `/usr/bin/find linux -maxdepth 1 -type f -executable` ; do /bin/ln -sf $$f ; done
+
+install-ubuntu:	install-linux
+	./install-sh -c -m 0644 linux-init/defaults $(DESTDIR)/etc/default/nad
 	./install-sh -c -m 0755 linux-init/ubuntu-init $(DESTDIR)/etc/init.d/nad
-	/usr/sbin/update-rc.d nad defaults 98 02
+
+install-rhel:	install-linux
+	./install-sh -c -m 0644 linux-init/defaults $(DESTDIR)/etc/sysconfig/nad
+	./install-sh -c -m 0755 linux-init/rhel-init $(DESTDIR)/etc/init.d/nad
