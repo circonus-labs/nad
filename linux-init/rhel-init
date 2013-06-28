@@ -39,7 +39,7 @@ export PATH=/opt/circonus/sbin:/opt/omni/bin:$PATH
 export NODE_PATH=/opt/circonus/etc/node_modules
 
 run_app() {
-        nohup $NAD $NAD_OPTS >/dev/null 2>&1 &
+        runuser -p -c "nohup $NAD $NAD_OPTS >/dev/null 2>&1 &" nobody
 	RETVAL=$?
 	if [[ "$RETVAL" == "0" ]]; then
 		pid=$(pgrep -f $NAD)
@@ -90,7 +90,8 @@ case "$1" in
 	stop
 	;;
   status)
-	status -p $NAD_PIDFILE
+	status -p $NAD_PIDFILE $NAD
+	RETVAL=$?
 	;;
   reload|force-reload)
 	echo "Reloading Circonus node agent daemon: not needed, as there is no config file."

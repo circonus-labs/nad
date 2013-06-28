@@ -37,7 +37,7 @@ export NODE_PATH=/opt/circonus/etc/node_modules
 nad_start() {
     if start-stop-daemon --start --quiet --background \
         --pidfile $NAD_PID_FILE --make-pidfile \
-        --exec $DAEMON -- $NAD_OPTS
+        --chuid nobody --exec $DAEMON -- $NAD_OPTS
     then
         rc=0
         sleep 1
