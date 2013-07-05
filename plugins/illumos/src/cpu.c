@@ -1,5 +1,6 @@
 #include <kstat.h>  
 #include <stdio.h>
+#include <unistd.h>
 #include <strings.h>
 #include <inttypes.h>
 #include <sys/sysinfo.h>
@@ -12,9 +13,12 @@ int main(int argc, char **argv) {
   kstat_io_t     kio;  
   kstat_named_t *knp;
   int ncpus = 0;
+  long scale;
   cpu_stat_t sum;
   cpu_stat_t cpu;
  
+  /* scale for clock frequency */
+  scale = sysconf(_SC_CLK_TCK)/100;
   memset(&sum, 0, sizeof(sum)); 
   kc = kstat_open();  
   ksp = kstat_lookup(kc, "cpu_stat", -1, NULL);
@@ -37,15 +41,15 @@ int main(int argc, char **argv) {
   /*
    * Some stats are not implemented (yet), so make them zero.
    */
-  printf("%s\tL\t%llu\n", "user", sum.cpu_sysinfo.cpu[CPU_USER]/ncpus);
-  printf("%s\tL\t%llu\n", "user`normal", sum.cpu_sysinfo.cpu[CPU_USER]/ncpus);
+  printf("%s\tL\t%llu\n", "user", sum.cpu_sysinfo.cpu[CPU_USER]/ncpus/scale);
+  printf("%s\tL\t%llu\n", "user`normal", sum.cpu_sysinfo.cpu[CPU_USER]/ncpus/scale);
   printf("%s\tL\t%llu\n", "user`nice", 0);
-  printf("%s\tL\t%llu\n", "kernel", sum.cpu_sysinfo.cpu[CPU_KERNEL]/ncpus);
-  printf("%s\tL\t%llu\n", "kernel`sys", sum.cpu_sysinfo.cpu[CPU_KERNEL]/ncpus);
+  printf("%s\tL\t%llu\n", "kernel", sum.cpu_sysinfo.cpu[CPU_KERNEL]/ncpus/scale);
+  printf("%s\tL\t%llu\n", "kernel`sys", sum.cpu_sysinfo.cpu[CPU_KERNEL]/ncpus/scale);
   printf("%s\tL\t%llu\n", "kernel`guest", 0);
   printf("%s\tL\t%llu\n", "kernel`guest_nice", 0);
-  printf("%s\tL\t%llu\n", "idle", sum.cpu_sysinfo.cpu[CPU_IDLE]/ncpus);
-  printf("%s\tL\t%llu\n", "idle`normal", sum.cpu_sysinfo.cpu[CPU_IDLE]/ncpus);
+  printf("%s\tL\t%llu\n", "idle", sum.cpu_sysinfo.cpu[CPU_IDLE]/ncpus/scale);
+  printf("%s\tL\t%llu\n", "idle`normal", sum.cpu_sysinfo.cpu[CPU_IDLE]/ncpus/scale);
   printf("%s\tL\t%llu\n", "idle`steal", 0);
   printf("%s\tL\t%llu\n", "wait_io", sum.cpu_sysinfo.wait[W_IO]);
   printf("%s\tL\t%llu\n", "intr", sum.cpu_sysinfo.intr);
