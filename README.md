@@ -6,7 +6,7 @@ Description
 ===
 
 nad will run scripts from the config directory; only from that
-and not subdirectories.  The best practice it to write your scripts
+and not subdirectories.  The best practice is to write your scripts
 in subdirectories of the config dir and soft link to them to enable
 their execution.
 
