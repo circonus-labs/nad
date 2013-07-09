@@ -29,7 +29,7 @@ install-modules:
 
 install-illumos:	install
 	cd $(DESTDIR)$(CONF)/illumos ; $(MAKE)
-	cd $(DESTDIR)$(CONF) ; for f in aggcpu.elf cpu.elf fs.elf if.sh sdinfo.sh tcp.sh vminfo.sh vnic.sh zfsinfo.sh zone_vfs.sh; do /bin/ln -sf illumos/$$f ; done
+	cd $(DESTDIR)$(CONF) ; for f in aggcpu.elf cpu.elf fs.elf if.sh sdinfo.sh smf.sh tcp.sh vminfo.sh vnic.sh zfsinfo.sh zone_vfs.sh; do /bin/ln -sf illumos/$$f ; done
 	mkdir -p $(DESTDIR)/lib/svc/manifest/network/circonus
 	./install-sh -c -m 0644 smf/nad.xml $(DESTDIR)/lib/svc/manifest/network/circonus/nad.xml
 
