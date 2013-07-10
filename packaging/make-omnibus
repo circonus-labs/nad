@@ -80,11 +80,12 @@ fi
 
 echo "Building nad"
 pushd $BUILDDIR/nad > /dev/null
+NAD_VERSION=$(git log -1  --format=format:%ad --date=iso | sed -e 's/ +0000/Z/' -e 's/ /T/' -e 's/[-:]//g')
 make DESTDIR=$INSTALLDIR PREFIX=/opt/nad $INSTALL_TARGET
 popd > /dev/null
 
 echo "Creating omnibus tarball"
-ARCHIVE="$BUILDDIR/nad-omnibus-latest-${OS}-${PLATFORM}.tar"
+ARCHIVE="$BUILDDIR/nad-omnibus-${NAD_VERSION}-${OS}-${PLATFORM}.tar"
 pushd $INSTALLDIR > /dev/null
 tar cf $ARCHIVE .
 gzip $ARCHIVE
