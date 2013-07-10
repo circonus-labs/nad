@@ -1,0 +1,96 @@
+#!/bin/bash
+#
+# make-omnibus - create self-contained tarballs for distribution
+
+set -e
+
+PATH=$PATH:/opt/omni/bin
+NAD_REPO="https://github.com/circonus-labs/nad.git"
+BUILDDIR="/tmp/nad-omnibus-build"
+INSTALLDIR="/tmp/nad-omnibus-install"
+
+if [[ ! -d $BUILDDIR ]]; then
+    mkdir $BUILDDIR
+fi
+if [[ ! -d $INSTALLDIR ]]; then
+    mkdir $INSTALLDIR
+fi
+
+OS=
+NODE_VERSION=
+if [[ -f /etc/redhat-release ]]; then
+    INSTALL_TARGET="install-rhel"
+    case `sed -e 's/.*release \(.\).*/\1/' /etc/redhat-release` in
+        5)
+            OS="rhel5"
+            NODE_VERSION="v0.6.21"
+            ;;
+        6)
+            OS="rhel6"
+            NODE_VERSION="v0.8.25"
+            ;;
+    esac
+fi
+
+PLATFORM=$(uname -m)
+if [[ "$PLATFORM" == "i686" ]]; then
+    PLATFORM="i386"  # Normalize 
+fi
+NPROC=$(nproc)
+let MAKE_JOBS="$NPROC + ($NPROC / 2)" # 1.5x the number of CPUs
+echo "Building for $OS $PLATFORM"
+echo
+
+NODE_SOURCE="http://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}.tar.gz"
+echo "Checking for node-$NODE_VERSION source"
+if [[ -d $BUILDDIR/node-$NODE_VERSION ]]; then
+    echo "--- node source dir exists"
+else
+    pushd $BUILDDIR > /dev/null
+    if [[ -f node-${NODE_VERSION}.tar.gz ]]; then
+        echo "--- node source archive exists, extracting."
+        tar zxf node-${NODE_VERSION}.tar.gz
+    else
+        echo "--- node source archive not found, downloading."
+        wget $NODE_SOURCE
+        echo "--- extracting source archive"
+        tar zxf node-${NODE_VERSION}.tar.gz
+    fi
+fi
+        
+echo "Building node"
+pushd $BUILDDIR/node-$NODE_VERSION > /dev/null
+make clean
+./configure --prefix=/opt/nad/embedded
+make -j $MAKE_JOBS
+make DESTDIR=$INSTALLDIR install
+
+echo "Checking for nad source"
+if [[ -d $BUILDDIR/nad ]]; then
+    pushd $BUILDDIR/nad > /dev/null
+    echo "--- checkout exists, pulling latest revision"
+    git pull
+    popd > /dev/null
+else
+    pushd $BUILDDIR > /dev/null
+    echo "--- no checkout, cloning from $NAD_REPO"
+    git clone $NAD_REPO
+    popd > /dev/null
+fi
+
+echo "Building nad"
+pushd $BUILDDIR/nad > /dev/null
+make DESTDIR=$INSTALLDIR PREFIX=/opt/nad $INSTALL_TARGET
+popd > /dev/null
+
+echo "Creating omnibus tarball"
+ARCHIVE="$BUILDDIR/nad-omnibus-latest-${OS}-${PLATFORM}.tar"
+pushd $INSTALLDIR > /dev/null
+tar cf $ARCHIVE .
+gzip $ARCHIVE
+echo "--- created ${ARCHIVE}.gz"
+echo "Done."
+exit 0
+
+# Vim hints
+# vim:ts=4:sw=4:et:
