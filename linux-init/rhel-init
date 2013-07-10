@@ -24,7 +24,7 @@
 . /etc/rc.d/init.d/functions
 
 prog="Circonus node agent daemon"
-NAD=/opt/circonus/sbin/nad
+NAD="@@PREFIX@@/sbin/nad"
 NAD_OPTS=''
 NAD_DEFAULTS_FILE=/etc/sysconfig/nad
 NAD_PIDFILE=/var/run/nad
@@ -35,8 +35,8 @@ if [ -s $NAD_DEFAULTS_FILE ]; then
 	. $NAD_DEFAULTS_FILE
 fi
 
-export PATH=/opt/circonus/sbin:/opt/omni/bin:$PATH
-export NODE_PATH=/opt/circonus/etc/node_modules
+export PATH="@@PREFIX@@/embedded/bin:@@PREFIX@@/sbin:/opt/omni/bin:$PATH"
+export NODE_PATH="@@PREFIX@@/etc/node_modules"
 
 run_app() {
         runuser -p -c "nohup $NAD $NAD_OPTS >/dev/null 2>&1 &" nobody

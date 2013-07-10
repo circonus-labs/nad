@@ -34,13 +34,19 @@ install-illumos:	install
 	./install-sh -c -m 0644 smf/nad.xml $(DESTDIR)/lib/svc/manifest/network/circonus/nad.xml
 
 install-linux:	install
+	/bin/sed -e "s#@@PREFIX@@#$(PREFIX)#g" linux-init/defaults > linux-init/defaults.out
 	cd $(DESTDIR)$(CONF)/linux ; $(MAKE)
-	cd $(DESTDIR)$(CONF) ; for f in `/usr/bin/find linux -maxdepth 1 -type f -executable` ; do /bin/ln -sf $$f ; done
+	cd $(DESTDIR)$(CONF) ; for f in cpu.sh disk.sh fs.elf if.sh vm.sh ; do /bin/ln -sf linux/$$f ; done
 
 install-ubuntu:	install-linux
-	./install-sh -c -m 0644 linux-init/defaults $(DESTDIR)/etc/default/nad
-	./install-sh -c -m 0755 linux-init/ubuntu-init $(DESTDIR)/etc/init.d/nad
+	/bin/sed -e "s#@@PREFIX@@#$(PREFIX)#g" linux-init/ubuntu-init > linux-init/ubuntu-init.out
+	./install-sh -c -m 0644 linux-init/defaults.out $(DESTDIR)/etc/default/nad
+	./install-sh -c -m 0755 linux-init/ubuntu-init.out $(DESTDIR)/etc/init.d/nad
 
 install-rhel:	install-linux
-	./install-sh -c -m 0644 linux-init/defaults $(DESTDIR)/etc/sysconfig/nad
-	./install-sh -c -m 0755 linux-init/rhel-init $(DESTDIR)/etc/init.d/nad
+	/bin/sed -e "s#@@PREFIX@@#$(PREFIX)#g" linux-init/rhel-init > linux-init/rhel-init.out
+	./install-sh -c -m 0644 linux-init/defaults.out $(DESTDIR)/etc/sysconfig/nad
+	./install-sh -c -m 0755 linux-init/rhel-init.out $(DESTDIR)/etc/init.d/nad
+
+clean:
+	rm -f linux-init/*.out

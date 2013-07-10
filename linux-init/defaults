@@ -1,1 +1,1 @@
-NAD_OPTS="-c /opt/circonus/etc/node-agent.d"
+NAD_OPTS="-c @@PREFIX@@/etc/node-agent.d"

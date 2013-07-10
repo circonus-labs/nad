@@ -18,7 +18,7 @@ set -e
 
 # /etc/init.d/nad: start and stop nad
 
-DAEMON=/opt/circonus/sbin/nad
+DAEMON="@@PREFIX@@/sbin/nad"
 NAD_OPTS=''
 NAD_DEFAULTS_FILE=/etc/default/nad
 NAD_PID_FILE=/var/run/nad.pid
@@ -31,8 +31,8 @@ if [ -s $NAD_DEFAULTS_FILE ]; then
     . $NAD_DEFAULTS_FILE
 fi
 
-export PATH="${PATH:+$PATH:}/usr/sbin:/sbin"
-export NODE_PATH=/opt/circonus/etc/node_modules
+export PATH="@@PREFIX@@/embedded/bin:@@PREFIX@@/sbin:/opt/omni/bin:$PATH"
+export NODE_PATH="@@PREFIX@@/etc/node_modules"
 
 nad_start() {
     if start-stop-daemon --start --quiet --background \
