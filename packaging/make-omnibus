@@ -5,6 +5,7 @@
 set -e
 
 PATH=$PATH:/opt/omni/bin
+PREFIX=/opt/circonus
 NAD_REPO="https://github.com/circonus-labs/nad.git"
 BUILDDIR="/tmp/nad-omnibus-build"
 INSTALLDIR="/tmp/nad-omnibus-install"
@@ -20,7 +21,8 @@ OS=
 NODE_VERSION=
 if [[ -f /etc/redhat-release ]]; then
     INSTALL_TARGET="install-rhel"
-    case `sed -e 's/.*release \(.\).*/\1/' /etc/redhat-release` in
+    relver=$(sed -e 's/.*release \(.\).*/\1/' /etc/redhat-release)
+    case "$relver" in
         5)
             OS="rhel5"
             NODE_VERSION="v0.6.21"
@@ -29,6 +31,26 @@ if [[ -f /etc/redhat-release ]]; then
             OS="rhel6"
             NODE_VERSION="v0.8.25"
             ;;
+        *)
+            echo "Unsupported release: $relver"
+            exit 1
+            ;;
+    esac
+elif [[ -f /etc/lsb-release ]]; then
+    INSTALL_TARGET="install-ubuntu"
+    NODE_VERSION="v0.8.25"
+    relver=$(awk -F'=' '$1 == "DISTRIB_RELEASE" { print $2 }' /etc/lsb-release)
+    case "$relver" in
+        10.04)
+            OS="ubuntu-10.04"
+            ;;
+        12.04)
+            OS="ubuntu-12.04"
+            ;;
+        *)
+            echo "Unsupported release: $relver"
+            exit 1
+            ;;
     esac
 fi
 
@@ -36,6 +58,7 @@ PLATFORM=$(uname -m)
 if [[ "$PLATFORM" == "i686" ]]; then
     PLATFORM="i386"  # Normalize 
 fi
+
 NPROC=$(nproc)
 let MAKE_JOBS="$NPROC + ($NPROC / 2)" # 1.5x the number of CPUs
 echo "Building for $OS $PLATFORM"
@@ -61,7 +84,7 @@ fi
 echo "Building node"
 pushd $BUILDDIR/node-$NODE_VERSION > /dev/null
 make clean
-./configure --prefix=/opt/nad/embedded
+./configure --prefix=$PREFIX/embedded
 make -j $MAKE_JOBS
 make DESTDIR=$INSTALLDIR install
 
@@ -81,7 +104,7 @@ fi
 echo "Building nad"
 pushd $BUILDDIR/nad > /dev/null
 NAD_VERSION=$(git log -1  --format=format:%ad --date=iso | sed -e 's/ +0000/Z/' -e 's/ /T/' -e 's/[-:]//g')
-make DESTDIR=$INSTALLDIR PREFIX=/opt/nad $INSTALL_TARGET
+make DESTDIR=$INSTALLDIR PREFIX=$PREFIX $INSTALL_TARGET
 popd > /dev/null
 
 echo "Creating omnibus tarball"
