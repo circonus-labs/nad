@@ -31,14 +31,14 @@ int main(int argc, char **argv) {
       if(!strcmp(mnt.mnt_type, suppress_fstype[i])) break;
 
     if (suppress_fstype[i] == NULL && statvfs(mnt.mnt_dir, &buf) == 0) {
-      printf("%s`f_bsize\tL\t%llu\n", mnt.mnt_dir, buf.f_bsize);
-      printf("%s`f_frsize\tL\t%llu\n", mnt.mnt_dir, buf.f_frsize);
-      printf("%s`f_blocks\tL\t%llu\n", mnt.mnt_dir, buf.f_blocks);
-      printf("%s`f_bfree\tL\t%llu\n", mnt.mnt_dir, buf.f_bfree);
-      printf("%s`f_bavail\tL\t%llu\n", mnt.mnt_dir, buf.f_bavail);
-      printf("%s`f_files\tL\t%llu\n", mnt.mnt_dir, buf.f_files);
-      printf("%s`f_ffree\tL\t%llu\n", mnt.mnt_dir, buf.f_ffree);
-      printf("%s`f_favail\tL\t%llu\n", mnt.mnt_dir, buf.f_favail);
+      printf("%s`f_bsize\tL\t%llu\n", mnt.mnt_dir, (long long unsigned int) buf.f_bsize);
+      printf("%s`f_frsize\tL\t%llu\n", mnt.mnt_dir, (long long unsigned int) buf.f_frsize);
+      printf("%s`f_blocks\tL\t%llu\n", mnt.mnt_dir, (long long unsigned int) buf.f_blocks);
+      printf("%s`f_bfree\tL\t%llu\n", mnt.mnt_dir, (long long unsigned int) buf.f_bfree);
+      printf("%s`f_bavail\tL\t%llu\n", mnt.mnt_dir, (long long unsigned int) buf.f_bavail);
+      printf("%s`f_files\tL\t%llu\n", mnt.mnt_dir, (long long unsigned int) buf.f_files);
+      printf("%s`f_ffree\tL\t%llu\n", mnt.mnt_dir, (long long unsigned int) buf.f_ffree);
+      printf("%s`f_favail\tL\t%llu\n", mnt.mnt_dir, (long long unsigned int) buf.f_favail);
     }
   }
   exit(0);
