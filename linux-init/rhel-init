@@ -39,7 +39,7 @@ export PATH="@@PREFIX@@/embedded/bin:@@PREFIX@@/sbin:/opt/omni/bin:$PATH"
 export NODE_PATH="@@PREFIX@@/etc/node_modules"
 
 run_app() {
-        runuser -p -c "nohup $NAD $NAD_OPTS >/dev/null 2>&1 &" nobody
+        runuser -p -s /bin/bash -c "nohup $NAD $NAD_OPTS >/dev/null 2>&1 &" nobody
 	RETVAL=$?
 	if [[ "$RETVAL" == "0" ]]; then
 		pid=$(pgrep -f $NAD)
