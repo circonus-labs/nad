@@ -26,6 +26,7 @@ if [[ -f /etc/redhat-release ]]; then
         5)
             OS="rhel5"
             NODE_VERSION="v0.6.21"
+            export GIT_SSL_NO_VERIFY=true
             ;;
         6)
             OS="rhel6"
@@ -59,7 +60,11 @@ if [[ "$PLATFORM" == "i686" ]]; then
     PLATFORM="i386"  # Normalize 
 fi
 
-NPROC=$(nproc)
+if [[ -x /usr/bin/nproc ]]; then
+    NPROC=$(nproc)
+else
+    NPROC=$(grep -c ^processor /proc/cpuinfo)
+fi
 let MAKE_JOBS="$NPROC + ($NPROC / 2)" # 1.5x the number of CPUs
 echo "Building for $OS $PLATFORM"
 echo
@@ -83,7 +88,7 @@ fi
         
 echo "Building node"
 pushd $BUILDDIR/node-$NODE_VERSION > /dev/null
-make clean
+make clean || make distclean
 ./configure --prefix=$PREFIX/embedded
 make -j $MAKE_JOBS
 make DESTDIR=$INSTALLDIR install
