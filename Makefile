@@ -28,10 +28,11 @@ install-modules:
 	rsync -a node_modules/ $(DESTDIR)$(MODULES)/
 
 install-illumos:	install
-	cd $(DESTDIR)$(CONF)/illumos ; $(MAKE)
-	cd $(DESTDIR)$(CONF) ; for f in aggcpu.elf cpu.elf fs.elf if.sh sdinfo.sh smf.sh tcp.sh vminfo.sh vnic.sh zfsinfo.sh zone_vfs.sh; do /bin/ln -sf illumos/$$f ; done
+	/bin/sed -e "s#@@PREFIX@@#$(PREFIX)#g" smf/nad.xml.in > smf/nad.xml
 	mkdir -p $(DESTDIR)/lib/svc/manifest/network/circonus
 	./install-sh -c -m 0644 smf/nad.xml $(DESTDIR)/lib/svc/manifest/network/circonus/nad.xml
+	cd $(DESTDIR)$(CONF)/illumos ; $(MAKE)
+	cd $(DESTDIR)$(CONF) ; for f in aggcpu.elf cpu.elf fs.elf if.sh sdinfo.sh smf.sh tcp.sh vminfo.sh vnic.sh zfsinfo.sh zone_vfs.sh; do /bin/ln -sf illumos/$$f ; done
 
 install-linux:	install
 	/bin/sed -e "s#@@PREFIX@@#$(PREFIX)#g" linux-init/defaults > linux-init/defaults.out
@@ -49,4 +50,4 @@ install-rhel:	install-linux
 	./install-sh -c -m 0755 linux-init/rhel-init.out $(DESTDIR)/etc/init.d/nad
 
 clean:
-	rm -f linux-init/*.out
+	rm -f linux-init/*.out smf/nad.xml
