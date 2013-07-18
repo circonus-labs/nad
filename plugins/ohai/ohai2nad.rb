@@ -1,7 +1,6 @@
 # No shebang; We assume something has found ruby for us
 
 require 'json'
-require 'pp'
 
 # A more clever thing to do would be to run ohai as a gem, and interact intelligently
 # require 'ohai'
@@ -68,6 +67,7 @@ def handle_top_level(p, r)
 end
 
 def h_inspect(p,r)
+  require 'pp'
   puts "----"
   puts p
   puts "----"
