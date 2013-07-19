@@ -30,13 +30,13 @@ def handle_top_level(p, r)
          "platform_family",
          "ipaddress", 
          "macaddress",
+         "ohai_time",
         ]
     h_scalar(p,r)
   when *[
          # We ignore these explicitly
          "uptime", 
          "command",
-         "ohai_time",
          "languages",
          "chef_packages",
          "keys",
@@ -77,7 +77,7 @@ end
 def nad_type_scalar(v)
   if v.kind_of?(Fixnum) then
     return 'L'
-  elsif v.kind_of?(Rational) then
+  elsif v.kind_of?(Float) then
     return 'n'
   else
     return 's'
