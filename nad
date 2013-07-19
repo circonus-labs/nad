@@ -2,9 +2,9 @@
 //
 // Toss executables (scripts too) in /etc/node-agent.d
 // Each program should produce lines as follows:
-//    <name><whitespace><type>
+//    metric <name> <type>
 // or:
-//    <name><whitespace><type><whitespace><value>
+//    metric <name> <type> <value>
 //
 // The first indicates the value is present an null
 // the second indicates the valus is present and specific
