@@ -13,12 +13,14 @@ my %YAY_PORTABILITY =
    'linux' => {
                netstat => "netstat -nlp --inet 2>/dev/null | grep LISTEN",
                all_iface => '0.0.0.0',
+               separator => ':',  # Can't we agree on anything?
                match_col => 3,
                proc_col => 6,
               },
    'solaris' => {
                  netstat => "netstat -n -a -f inet | grep LISTEN",
                  all_iface => '*',
+                 separator => '.',  # Can't we agree on anything?
                  match_col => 0,
                  proc_col => undef, # Not without pfiles or lsof anyway :effort:
                 },
@@ -35,7 +37,7 @@ if (@ARGV) {
 if ($portspec !~ /:/) {
     $portspec = $YAY_PORTABILITY{$^O}{all_iface} . ':'. $portspec;
 }
-
+$portspec = join($YAY_PORTABILITY{$^O}{separator}, split(':', $portspec));
 
 my $cmd = $YAY_PORTABILITY{$^O}{netstat};
 my $matched = 0;
