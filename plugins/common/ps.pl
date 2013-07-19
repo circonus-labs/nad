@@ -15,7 +15,6 @@ my $username_opt = @ARGV ? "-u " . join(',', @ARGV)  : '-e ';
 #   -o pid= -o user= -o s=
 #  above works on solaris and gnu ps
 my $cmd = "ps -o pid= -o user= -o s= $username_opt";
-print "Have command: '$cmd'\n";
 
 my %count_by_state = map { $_ => 0 } qw(D R S Z O total); # Others?
 for my $proc (`$cmd`) {
