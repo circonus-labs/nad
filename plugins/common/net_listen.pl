@@ -62,13 +62,13 @@ if ($^O eq 'solaris') {
     unless ($>) {
         # I'm root, it's worth a try
         my $matcher = $sought_ip eq $YAY_PORTABILITY{$^O}{all_iface} ? 
-          /sockname: AF_INET.+port: $sought_port/ :
-            /sockname: AF_INET.+$sought_ip\s+port: $sought_port/;
+          "sockname: AF_INET.+port:\\s+$sought_port" :
+            "sockname: AF_INET.+$sought_ip\\s+port:\\s+$sought_port";
 
       PROC:
         foreach my $cpid (`ps -e -o pid=`) {
           LINE:
-            foreach my $line (`pfiles $cpid`) {
+            foreach my $line (`pfiles $cpid 2>/dev/null`) {
                 # sockname: AF_INET6 ::ffff:10.0.2.15  port: 22
                 if ($line =~ $matcher) {
                     $pid = $cpid;
