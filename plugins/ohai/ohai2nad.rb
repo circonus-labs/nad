@@ -113,7 +113,7 @@ end
 def h_cpu(p,r)
   # List cpu count, and model info for each
   puts_nad('cpu`total', 'L', r['total'])
-  puts_nad('cpu`total', 'L', r['real'])
+  puts_nad('cpu`real', 'L', r['real'])
   r.select{|k,v| k.match(/^\d+$/)}.each do |cpu_id, details|
     puts_nad("cpu`#{cpu_id}`model_name", 's', r[cpu_id]['model_name'])
   end
