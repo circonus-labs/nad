@@ -19,7 +19,6 @@ def handle_top_level(p, r)
   case p
   when *[
          # These are all simple scalars
-         "uptime", 
          "uptime_seconds", 
          "hostname", 
          "fqdn", 
@@ -34,23 +33,24 @@ def handle_top_level(p, r)
         ]
     h_scalar(p,r)
   when *[
-        # We ignore these explicitly
-        "command",
-        "ohai_time",
+         # We ignore these explicitly
+         "uptime", 
+         "command",
+         "ohai_time",
          "languages",
-        "chef_packages",
-        "keys",
-        "current_user",
-        "idletime",
-        "idletime_seconds",
-        "memory",   # Nad provides vm.sh for this
-        "block_device",
-        "dmi",
-        "lsb",
-        "virtualization",
-        "network", # Nad provides if.sh for this 
-        "counters", # Nad provides if.sh for this 
-       ]
+         "chef_packages",
+         "keys",
+         "current_user",
+         "idletime",
+         "idletime_seconds",
+         "memory",   # Nad provides vm.sh for this
+         "block_device",
+         "dmi",
+         "lsb",
+         "virtualization",
+         "network", # Nad provides if.sh for this 
+         "counters", # Nad provides if.sh for this 
+        ]
 
   when "filesystem"
     h_filesystem(p,r) # custom
