@@ -13,12 +13,14 @@ my %YAY_PORTABILITY =
    'linux' => {
                netstat => "netstat -nlp --inet 2>/dev/null | grep LISTEN",
                all_iface => '0.0.0.0',
+               separator => ':',  # Can't we agree on anything?
                match_col => 3,
                proc_col => 6,
               },
    'solaris' => {
                  netstat => "netstat -n -a -f inet | grep LISTEN",
                  all_iface => '*',
+                 separator => '.',  # Can't we agree on anything?
                  match_col => 0,
                  proc_col => undef, # Not without pfiles or lsof anyway :effort:
                 },
@@ -35,7 +37,8 @@ if (@ARGV) {
 if ($portspec !~ /:/) {
     $portspec = $YAY_PORTABILITY{$^O}{all_iface} . ':'. $portspec;
 }
-
+my ($sought_ip, $sought_port) = split(':', $portspec);
+$portspec = join($YAY_PORTABILITY{$^O}{separator}, split(':', $portspec));
 
 my $cmd = $YAY_PORTABILITY{$^O}{netstat};
 my $matched = 0;
@@ -54,7 +57,27 @@ foreach my $listener (`$cmd`) {
     last;
 }
 
-# TODO solaris pfiles hunt?
+# Solaris pfiles hunt?
+if ($^O eq 'solaris') {
+    unless ($>) {
+        # I'm root, it's worth a try
+        my $matcher = $sought_ip eq $YAY_PORTABILITY{$^O}{all_iface} ? 
+          "sockname: AF_INET.+port:\\s+$sought_port" :
+            "sockname: AF_INET.+$sought_ip\\s+port:\\s+$sought_port";
+
+      PROC:
+        foreach my $cpid (`ps -e -o pid=`) {
+          LINE:
+            foreach my $line (`pfiles $cpid 2>/dev/null`) {
+                # sockname: AF_INET6 ::ffff:10.0.2.15  port: 22
+                if ($line =~ $matcher) {
+                    $pid = $cpid;
+                    last PROC;
+                }
+            }
+        }
+    }
+}
 
 print "listening\tI\t$matched\n";
 if ($pid) {
