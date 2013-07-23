@@ -23,11 +23,6 @@ if [[ -f /etc/redhat-release ]]; then
     INSTALL_TARGET="install-rhel"
     relver=$(sed -e 's/.*release \(.\).*/\1/' /etc/redhat-release)
     case "$relver" in
-        5)
-            OS="rhel5"
-            NODE_VERSION="v0.6.21"
-            export GIT_SSL_NO_VERIFY=true
-            ;;
         6)
             OS="rhel6"
             NODE_VERSION="v0.8.25"
