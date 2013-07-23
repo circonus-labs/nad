@@ -20,6 +20,7 @@ var fs = require('fs'),
     scripts = {},
     scripts_once = {},
     creds = {},
+    run_count = 0,
     generation = 0, do_index = false,
     api_setup = false, auth_token = null,
     target = null, hostname = null,
@@ -182,7 +183,7 @@ function onchange(cb) { return function(c,p) { if(c.ino != p.ino || c.size != p.
 function initial_pass() {
   for(which in scripts) {
     if(!(which in scripts_once)) {
-      run_script(scripts[which], function() {});
+      init_script(scripts[which], function() {});
       scripts_once[which] = true;
     }
   }
@@ -230,22 +231,51 @@ function rescan_modules() {
   sweep();
 }
 
-function run_script(d, cb) {
+function init_script(d, cb) {
   if(d.running) {
     cb(d, past_results[d.name]);
     return;
   }
+
+  get_config(d, cb);
+}
+
+function get_config(d, cb) {
+  fs.exists(configdir + "/" + d.name + ".json", function(exists) {
+    if ( exists ) {
+      fs.readFile(configdir + "/" + d.name + ".json", function(err, data) {
+        if (err) throw err;
+        var json_config = JSON.parse(data);
+
+        var instance_count = 0;
+        for ( var instance in json_config ) instance_count++;
+
+        // Add the number of time we will run this script to our
+        // total run_count so we don't finish early.
+        if ( instance_count > 1 ) run_count += instance_count - 1;
+        for ( var instance in json_config ) {
+          run_script(d, cb, json_config[instance], d.name + "`" + instance);
+        }
+      }); 
+    }
+    else {
+      run_script(d, cb, [], d.name);
+    }
+  });
+}
+
+function run_script(d, cb, args, instance) {
   d.running = true;
   var proc_data = { data: '', lines: [], options: {} };
   d.last_start = +(new Date());
-  var cmd = spawn("/bin/sh", ["-c", d.command]);
+  var cmd = spawn(d.command, args);
   var kill_func = function() {
     cmd.stdin.destroy();
     cmd.stdout.destroy();
     cmd.stderr.destroy();
     cmd.kill();
   };
-  var handle_output = function(d, cb) {
+  var handle_output = function(d, cb, instance) {
     if(proc_data.timeout) clearTimeout(proc_data.timeout);
     d.last_finish = +(new Date());
     var i, results = {}, parts;
@@ -267,11 +297,11 @@ function run_script(d, cb) {
         }
       }
     }
-    past_results[d.name] = results;
-    cb(d, results);
+    past_results[instance] = results;
+    cb(d, results, instance);
   };
   cmd.stdout.on('end', function() {
-    handle_output(d, cb);
+    handle_output(d, cb, instance);
   });
   cmd.stdout.on('data', function(buff) {
     var offset;
@@ -290,7 +320,7 @@ function run_script(d, cb) {
       }
       else {
         if(line.length) proc_data.lines.push(line);
-        else handle_output(d, cb);
+        else handle_output(d, cb, instance);
       }
       proc_data.data = proc_data.data.substring(offset+1);
     }
@@ -300,34 +330,32 @@ function run_script(d, cb) {
   });
 }
 function run_scripts(res, which) {
-  if(which) {
-    if(!(which in scripts)) {
-      res.writeHead(404);
-      res.end();
-    }
-    else {
-      run_script(scripts[which], function(d, results) {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.write(JSON.stringify(results));
-        res.end();
-      });
-    }
+  run_count = 0;
+  var set = {};
+  var send_complete = function() {
+    if(run_count != 0) return;
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.write(JSON.stringify(set));
+    res.end();
+  };
+
+  if(which && !(which in scripts)) {
+    res.writeHead(404);
+    res.end();
   }
   else {
-    var cnt = 0;
-    for(which in scripts) cnt++;
-    var set = {};
-    var send_complete = function() {
-      if(cnt != 0) return;
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.write(JSON.stringify(set));
-      res.end();
-    };
-    for(which in scripts) run_script(scripts[which], function(d, results) {
-      cnt--;
-      set[d.name] = results;
-      send_complete();
-    });
+    for(file in scripts) {
+      if ( which && file != which ) continue;
+      run_count++;
+    }
+    for(file in scripts) {
+      if ( which && file != which ) continue;
+      init_script(scripts[file], function(d, results, name) {
+        run_count--;
+        set[name] = results;
+        send_complete();
+      });
+    }
     send_complete();
   }
 }
