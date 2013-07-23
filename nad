@@ -2,9 +2,9 @@
 //
 // Toss executables (scripts too) in /etc/node-agent.d
 // Each program should produce lines as follows:
-//    <name><whitespace><type>
+//    metric <name> <type>
 // or:
-//    <name><whitespace><type><whitespace><value>
+//    metric <name> <type> <value>
 //
 // The first indicates the value is present an null
 // the second indicates the valus is present and specific
@@ -13,9 +13,10 @@ var fs = require('fs'),
     sys = require('sys'),
     http = require('http'),
     url = require('url'),
+    path = require('path'),
     nadapi = require('nad_circapi'),
     spawn = require('child_process').spawn,
-    procre = /^(?!\.)([^\/]*?)(?:\..*)$/,
+    procre = /^(?!\.)([^\/]*?)(?:\.(?!conf$).*)$/,
     past_results = {},
     scripts = {},
     scripts_once = {},
@@ -213,16 +214,48 @@ function rescan_modules() {
           if(sb && sb.isFile())
             fs.watchFile(filename, onchange(rescan_modules));
           if(sb && sb.isFile() && (sb.mode & 0111)) {
-            if(!(name in scripts)) scripts[name] = {};
-            var d = scripts[name];
-            d.name = name;
-            d.generation = generation;
-            d.command = filename;
-            d.running = false;
-            d.sb = sb;
+            // attempt to read in the config file for this 
+            var configfile = path.join(path.dirname(filename),name + ".conf");
+            fs.readFile(configfile, function (rferr, rfdata) {
+              var config;
+              if (rferr) {
+                // no config file: just use a default config
+                config = { "args": [] };
+              } else {
+                try {
+                  config = JSON.parse(rfdata);
+                } catch (e) {
+                  console.log("Malformed JSON in config file "+configfile);
+                }
+                if (config && !config.hasOwnProperty("args"))
+                  config.args = [];
+                if(config && !Array.isArray(config.args)) {
+                  console.log("args does not contain an array in "+configfile);
+                  config = null;
+                }
+              }
+
+              // if we have a working config, setup this script.  If we do
+              // not then someone fed us garbage, and we'll not include the
+              // script
+              if (config) {
+                if(!(name in scripts)) scripts[name] = {};
+                var d = scripts[name];
+                d.name = name;
+                d.generation = generation;
+                d.command = filename;
+                d.running = false;
+                d.sb = sb;
+                d.config = config;
+              }
+
+              progress--;
+              sweep();
+            });
+          } else {
+            progress--;
+            sweep();
           }
-          progress--;
-          sweep();
         }
       })(filename,m[1]));
     }
@@ -238,7 +271,7 @@ function run_script(d, cb) {
   d.running = true;
   var proc_data = { data: '', lines: [], options: {} };
   d.last_start = +(new Date());
-  var cmd = spawn("/bin/sh", ["-c", d.command]);
+  var cmd = spawn(d.command, d.config.args);
   var kill_func = function() {
     cmd.stdin.destroy();
     cmd.stdout.destroy();
