@@ -18,14 +18,17 @@ if [[ ! -d $INSTALLDIR ]]; then
 fi
 
 OS=
-NODE_VERSION=
+NODE_VERSION="v0.8.25"
 if [[ -f /etc/redhat-release ]]; then
     INSTALL_TARGET="install-rhel"
     relver=$(sed -e 's/.*release \(.\).*/\1/' /etc/redhat-release)
     case "$relver" in
+        5)
+            OS="rhel5"
+            export GIT_SSL_NO_VERIFY=true
+            ;;
         6)
             OS="rhel6"
-            NODE_VERSION="v0.8.25"
             ;;
         *)
             echo "Unsupported release: $relver"
@@ -34,7 +37,6 @@ if [[ -f /etc/redhat-release ]]; then
     esac
 elif [[ -f /etc/lsb-release ]]; then
     INSTALL_TARGET="install-ubuntu"
-    NODE_VERSION="v0.8.25"
     relver=$(awk -F'=' '$1 == "DISTRIB_RELEASE" { print $2 }' /etc/lsb-release)
     case "$relver" in
         10.04)
