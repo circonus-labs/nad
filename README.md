@@ -24,6 +24,23 @@ Installation
 If your operating system vendor doesn't package it for you, just check
 it out and run make install.
 
+There are install targets for some operating systems, which enable
+all the default checks and install init scripts and default configuration 
+helper files.
+
+RHEL/CentOS
+---
+    # make install-rhel
+
+Ubuntu
+---
+    # make install-ubuntu
+
+illumos (SmartOS, OmniOS, OpenIndiana, etc.)
+---
+    # make install-illumos
+
+
 Operations
 ===
 
@@ -40,12 +57,25 @@ changed using -p.
 Running
 ---
 
-On Solaris/Illumos you can use smf.  First, node needs to be in your path,
+On Solaris or illumos you can use smf.  First, node needs to be in your path,
 so you might need to edit the SMF manifest to alter the PATH. After install:
 
     # svccfg import smf/nad.xml
 
-On other platforms, just run nad in the background.
+If you used the `install-illumos` target above, this step is not necessary.
+
+On RHEL/CentOS, assuming you did `make install-rhel`:
+
+   # /sbin/chkconfig nad on && /etc/init.d/nad start
+
+On Ubuntu, assuming you did `make install-ubuntu`:
+
+   # /usr/sbin/update-rc.d nad defaults 98 02 && /etc/init.d/nad start
+
+On other platforms, just run nad in the background. There is one required
+environment variable:
+
+   `# export NODE_PATH="/opt/circonus/etc/node-agent.d/"`
 
 Setup
 ---
