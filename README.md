@@ -66,11 +66,11 @@ If you used the `install-illumos` target above, this step is not necessary.
 
 On RHEL/CentOS, assuming you did `make install-rhel`:
 
-   # /sbin/chkconfig nad on && /etc/init.d/nad start
+    # /sbin/chkconfig nad on && /etc/init.d/nad start
 
 On Ubuntu, assuming you did `make install-ubuntu`:
 
-   # /usr/sbin/update-rc.d nad defaults 98 02 && /etc/init.d/nad start
+    # /usr/sbin/update-rc.d nad defaults 98 02 && /etc/init.d/nad start
 
 On other platforms, just run nad in the background. There is one required
 environment variable:
