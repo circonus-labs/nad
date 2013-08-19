@@ -17,7 +17,7 @@
       <method_environment>
         <envvar name='HOME' value='@@PREFIX@@/etc'/>
         <envvar name='NODE_PATH' value='@@PREFIX@@/etc/node_modules'/>
-        <envvar name='PATH' value='/usr/xpg4/bin:/usr/bin:/usr/sbin:/sbin:/usr/sfw/bin:/usr/local/bin:@@PREFIX@@/bin:/opt/omni/bin'/>
+        <envvar name='PATH' value='/usr/xpg4/bin:/opt/local/bin:/usr/bin:/usr/sbin:/sbin:/usr/sfw/bin:/usr/local/bin:@@PREFIX@@/bin:/opt/omni/bin'/>
       </method_environment>
     </method_context>
     <exec_method name='start' type='method' exec='@@PREFIX@@/sbin/nad -c @@PREFIX@@/etc/node-agent.d -p %{config/listen_address}' timeout_seconds='60'>
