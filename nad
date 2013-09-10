@@ -13,6 +13,7 @@ var fs = require('fs'),
     sys = require('sys'),
     http = require('http'),
     url = require('url'),
+    path = require('path'),
     nadapi = require('nad_circapi'),
     spawn = require('child_process').spawn,
     procre = /^(?!\.)([^\/]*?)(?:\..*)$/,
@@ -64,26 +65,27 @@ function index(dir) {
   function build_catalog(dir) {
     dir = dir || "";
     try {
-      var c = fs.readFileSync("./" + dir + "/.index.json");
+      var c = fs.readFileSync(path.join(".", dir, ".index.json"));
       var j = JSON.parse(c);
       catalog[dir] = j;
       for(var script in j) {
         try {
-          var info = fs.statSync("./" + dir + "/" + script);
+          var info = fs.statSync(path.join(".", dir, script));
           if(!info.isFile() || !(info.mode & 0100)) throw Exception("");
-        } catch(e) { missing[dir + "/" + script] = true; }
+        } catch(e) { missing[path.join(dir, script)] = true; }
       }
     } catch(e) { }
-    var files = fs.readdirSync("./" + dir);
+    var files = fs.readdirSync(path.join(".", dir));
     for(var i=0; i<files.length; i++) {
-      var info = fs.statSync("./" + dir + "/" + files[i]);
-      if(info && info.isDirectory())
-        build_catalog(dir + (dir ? "/" : "") + files[i]);
+      var info = fs.statSync(path.join(".", dir, files[i]));
+      if(info && info.isDirectory()) {
+        build_catalog(path.join(dir, files[i]));
+      }
     }
   }
   build_catalog();
   var files = fs.readdirSync(".");
-  var base = fs.realpathSync(".") + "/";
+  var base = fs.realpathSync(".") + path.sep;
   for(var i=0; i<files.length; i++) {
     var m = procre.exec(files[i]);
     if(!m) continue;
@@ -102,13 +104,13 @@ function index(dir) {
       var m = procre.exec(script);
       if(!m) console.log("! " + script + ": MALFORMED NAME");
       else {
-        var file = module + "/" + script;
+        var file = path.join(module, script);
         var desc = catalog[module][script];
         var on = (file in active) ? "*" : " ";
         if(file in missing) on = "!";
         delete active[file];
         console.log(on + " " +
-                    module + "/" + m[1] + ": " + desc);
+                    path.join(module, m[1]) + ": " + desc);
       }
     }
   }
@@ -122,7 +124,7 @@ function index(dir) {
 for(var i=2; i<process.argv.length; i++) {
   switch(process.argv[i]) {
     case "-h": help(); process.exit(-1);
-    case "-c": configdir = process.argv[++i]; break;
+    case "-c": configdir = fs.realpathSync(process.argv[++i]); break;
     case "-i": do_index = true; break;
     case "-p": {
       var p = process.argv[++i].split(/:/);
@@ -147,7 +149,7 @@ for(var i=2; i<process.argv.length; i++) {
     case "--target": target = process.argv[++i]; break;
     case "--hostname": hostname = process.argv[++i]; break;
     case "--brokerid": brokerid = process.argv[++i]; break;
-    case "--configfile": configfile = process.argv[++i]; break;
+    case "--configfile": configfile = fs.realpathSync(process.argv[++i]); break;
     default: help("unknown argument: " + process.argv[i]);
   }
 }
@@ -164,15 +166,15 @@ if(port.length == 0 && sslport.length == 0)
 if(sslport.length > 0) {
   try {
     // Setup creds
-    creds.key = fs.readFileSync(configdir+"/na.key").toString();
-    creds.crt = fs.readFileSync(configdir+"/na.crt").toString();
-    if(verify) creds.ca = fs.readFileSync(configdir+"/na.ca").toString();
+    creds.key = fs.readFileSync(path.join(configdir, "na.key")).toString();
+    creds.crt = fs.readFileSync(path.join(configdir, "na.crt")).toString();
+    if(verify) creds.ca = fs.readFileSync(path.join(configdir, "na.ca")).toString();
   } catch(e) {
     console.log("Make sure:");
-    console.log("\tyour key is available: " + configdir+"/na.key");
-    console.log("\tyour cert is available: " + configdir+"/na.crt");
+    console.log("\tyour key is available: " + path.join(configdir, "na.key"));
+    console.log("\tyour cert is available: " + path.join(configdir, "na.crt"));
     if(verify)
-      console.log("\tyour ca is available: " + configdir+"/na.ca");
+      console.log("\tyour ca is available: " + path.join(configdir, "na.ca"));
     console.log("\n" + e);
     process.exit(-1);
   }
@@ -206,7 +208,7 @@ function rescan_modules() {
     for(var i = 0; i < files.length; i++) {
       var m = procre.exec(files[i]);
       if(!m) continue;
-      var filename = configdir + "/" + files[i];
+      var filename = path.join(configdir, files[i]);
       fs.unwatchFile(filename);
       progress++;
       fs.stat(filename, (function(filename, name) {
@@ -241,9 +243,9 @@ function init_script(d, cb) {
 }
 
 function get_config(d, cb) {
-  fs.exists(configdir + "/" + d.name + ".json", function(exists) {
+  fs.exists(path.join(configdir, d.name + ".json"), function(exists) {
     if ( exists ) {
-      fs.readFile(configdir + "/" + d.name + ".json", function(err, data) {
+      fs.readFile(path.join(configdir, d.name + ".json"), function(err, data) {
         if (err) throw err;
         var json_config = JSON.parse(data);
 
