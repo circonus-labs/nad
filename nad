@@ -16,7 +16,8 @@ var fs = require('fs'),
     path = require('path'),
     nadapi = require('nad_circapi'),
     spawn = require('child_process').spawn,
-    procre = /^(?!\.)([^\/]*?)(?:\..*)$/,
+    procre = /^(?!\.)([^\/\\]*?)(?:\..*)$/,
+    ext = /(?:\.([^.]+))?$/,
     past_results = {},
     scripts = {},
     scripts_once = {},
@@ -25,7 +26,9 @@ var fs = require('fs'),
     generation = 0, do_index = false,
     api_setup = false, auth_token = null,
     target = null, hostname = null,
-    brokerid = null, configfile = null;
+    brokerid = null, configfile = null,
+    platform = process.platform,
+    is_windows = (platform === "win32");
 
 var configdir = '/etc/node-agent.d',
     port = [],
@@ -71,7 +74,7 @@ function index(dir) {
       for(var script in j) {
         try {
           var info = fs.statSync(path.join(".", dir, script));
-          if(!info.isFile() || !(info.mode & 0100)) throw Exception("");
+          if(!info.isFile() || (!(is_windows) && (!(info.mode & 0100)))) throw Exception("");
         } catch(e) { missing[path.join(dir, script)] = true; }
       }
     } catch(e) { }
@@ -89,10 +92,12 @@ function index(dir) {
   for(var i=0; i<files.length; i++) {
     var m = procre.exec(files[i]);
     if(!m) continue;
+    var extension = ext.exec(files[i])[1];
+    if (extension === "conf") continue;
     var info = fs.lstatSync(files[i]);
     var realpath = files[i];
     if(info.isSymbolicLink()) info = fs.statSync(files[i]);
-    if(info.isFile() && (info.mode & 0100)) {
+    if(info.isFile() && (is_windows || info.mode & 0100)) {
       var realpath = fs.realpathSync(files[i]);
       if(realpath.indexOf(base) == 0)
         realpath = realpath.substr(base.length);
@@ -104,6 +109,11 @@ function index(dir) {
       var m = procre.exec(script);
       if(!m) console.log("! " + script + ": MALFORMED NAME");
       else {
+        var extension = ext.exec(script)[1];
+        if (extension === "conf") {
+          console.log("! " + script + ": CANNOT EXECUTE CONF FILES");
+          continue;
+        }
         var file = path.join(module, script);
         var desc = catalog[module][script];
         var on = (file in active) ? "*" : " ";
@@ -208,6 +218,8 @@ function rescan_modules() {
     for(var i = 0; i < files.length; i++) {
       var m = procre.exec(files[i]);
       if(!m) continue;
+      var extension = ext.exec(files[i])[1];
+      if (extension === "conf") continue;
       var filename = path.join(configdir, files[i]);
       fs.unwatchFile(filename);
       progress++;
@@ -215,7 +227,7 @@ function rescan_modules() {
         return function(serr, sb) {
           if(sb && sb.isFile())
             fs.watchFile(filename, onchange(rescan_modules));
-          if(sb && sb.isFile() && (sb.mode & 0111)) {
+          if(sb && sb.isFile() && (is_windows || sb.mode & 0111)) {
             if(!(name in scripts)) scripts[name] = {};
             var d = scripts[name];
             d.name = name;
@@ -329,6 +341,12 @@ function run_script(d, cb, args, instance) {
   });
   cmd.on('exit', function(code, signal) {
     d.running = false;
+  });
+  cmd.on('error', function(err) {
+    console.log("Error on " + d.command + " (" + err + "), removing from scripts");
+    proc_data.data = "";
+    d.running = false;
+    delete scripts[d.name];
   });
 }
 function run_scripts(res, which) {
