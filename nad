@@ -16,7 +16,6 @@ var fs = require('fs'),
     path = require('path'),
     nadapi = require('nad_circapi'),
     spawn = require('child_process').spawn,
-    procre = /^(?!\.)([^\/\\]*?)(?:\..*)$/,
     ext = /(?:\.([^.]+))?$/,
     past_results = {},
     scripts = {},
@@ -28,7 +27,14 @@ var fs = require('fs'),
     target = null, hostname = null,
     brokerid = null, configfile = null,
     platform = process.platform,
-    is_windows = (platform === "win32");
+    is_windows = (platform === "win32"),
+    procre = null;
+
+if (is_windows) {
+  procre = /^(?!\.)([^\\]*?)(?:\..*)$/;
+} else {
+  procre = /^(?!\.)([^\/]*?)(?:\..*)$/;
+}
 
 var configdir = '/etc/node-agent.d',
     port = [],
