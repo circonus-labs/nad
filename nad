@@ -99,7 +99,7 @@ function index(dir) {
     var m = procre.exec(files[i]);
     if(!m) continue;
     var extension = ext.exec(files[i])[1];
-    if (extension === "conf") continue;
+    if ((extension === "conf") || (extension === "json")) continue;
     var info = fs.lstatSync(files[i]);
     var realpath = files[i];
     if(info.isSymbolicLink()) info = fs.statSync(files[i]);
@@ -116,8 +116,8 @@ function index(dir) {
       if(!m) console.log("! " + script + ": MALFORMED NAME");
       else {
         var extension = ext.exec(script)[1];
-        if (extension === "conf") {
-          console.log("! " + script + ": CANNOT EXECUTE CONF FILES");
+        if ((extension === "conf") || (extension === "json")){
+          console.log("! " + script + ": CANNOT EXECUTE " + extension + " FILES");
           continue;
         }
         var file = path.join(module, script);
