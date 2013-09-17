@@ -225,7 +225,7 @@ function rescan_modules() {
       var m = procre.exec(files[i]);
       if(!m) continue;
       var extension = ext.exec(files[i])[1];
-      if (extension === "conf") continue;
+      if ((extension === "conf")||(extension === "json")) continue;
       var filename = path.join(configdir, files[i]);
       fs.unwatchFile(filename);
       progress++;
