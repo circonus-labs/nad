@@ -1,13 +1,13 @@
 #!/bin/bash
 
-## note that PATH should include psql
-: ${PGUSER:="postgres"}
+which psql >/dev/null 2>&1 || exit 1
+PGUSER="${PGUSER:="postgres"}"
 
 OLDIFS=$IFS
 LINEBREAKS=$'\n\b'
 
-MASTER_LIST=$(psql -U PGUSER -F, -Atc "select client_addr, pg_xlog_location_diff(sent_location, write_location) from pg_stat_replication")
-REPLICA=$(psql -U PGUSER -F " " -Atc "select pg_xlog_location_diff(pg_last_xlog_receive_location(), pg_last_xlog_replay_location()), extract(epoch from now()) - extract(epoch from pg_last_xact_replay_timestamp())")
+MASTER_LIST=$(psql -U "$PGUSER" -F, -Atc "select client_addr, pg_xlog_location_diff(sent_location, write_location) from pg_stat_replication")
+REPLICA=$(psql -U "$PGUSER" -F " " -Atc "select pg_xlog_location_diff(pg_last_xlog_receive_location(), pg_last_xlog_replay_location()), extract(epoch from now()) - extract(epoch from pg_last_xact_replay_timestamp())")
 
 # This check runs on a master. Large numbers can indicate problems sending
 # xlogs to replicas, ie network problems
