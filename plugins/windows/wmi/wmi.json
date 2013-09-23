@@ -1,0 +1,3 @@
+{
+  "wmi": [".\\plugins\\windows\\wmi\\exec\\wmi.js", ".\\plugins\\windows\\wmi\\default.conf"]
+}
