@@ -3,6 +3,8 @@ MAN=$(PREFIX)/man/man8
 SBIN=$(PREFIX)/sbin
 CONF=$(PREFIX)/etc/node-agent.d
 MODULES=$(PREFIX)/etc/node_modules
+SMF_PREFIX?=
+SMF=$(SMF_PREFIX)/lib/svc/manifest/network/circonus
 MAKE?=make
 
 all:
@@ -27,10 +29,13 @@ install-plugins:	install-dirs
 install-modules:
 	rsync -a node_modules/ $(DESTDIR)$(MODULES)/
 
+install-smartos:
+	$(MAKE) install-illumos SMF_PREFIX=/var
+
 install-illumos:	install
 	/bin/sed -e "s#@@PREFIX@@#$(PREFIX)#g" smf/nad.xml.in > smf/nad.xml
-	mkdir -p $(DESTDIR)/lib/svc/manifest/network/circonus
-	./install-sh -c -m 0644 smf/nad.xml $(DESTDIR)/lib/svc/manifest/network/circonus/nad.xml
+	mkdir -p $(DESTDIR)$(SMF)
+	./install-sh -c -m 0644 smf/nad.xml $(DESTDIR)$(SMF)/nad.xml
 	cd $(DESTDIR)$(CONF)/illumos ; $(MAKE)
 	cd $(DESTDIR)$(CONF) ; for f in aggcpu.elf cpu.elf fs.elf if.sh sdinfo.sh smf.sh tcp.sh vminfo.sh vnic.sh zfsinfo.sh zone_vfs.sh; do /bin/ln -sf illumos/$$f ; done
 
