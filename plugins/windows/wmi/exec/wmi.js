@@ -83,13 +83,13 @@ function guess_data_type(value) {
 }
 
 function finalize_nad_output() {
+  var results = {};
   for(var prop in data_points) {
-    //Nad doesn't accept whitespace, so replace them all with
-    //underscores.
-    var prop_no_ws = prop.replace(/\s/g, "_");
-    var value_no_ws = data_points[prop].replace(/\s/g, "_");
-    console.log(prop_no_ws + " " + guess_data_type(value_no_ws) + " " + value_no_ws);
+    results[prop] = { '_type': guess_data_type(data_points[prop]),
+                      '_value': data_points[prop]
+    };
   }
+  console.log(JSON.stringify(results));
 }
 
 function process_output(output, args, tries) {
