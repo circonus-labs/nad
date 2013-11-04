@@ -15,6 +15,7 @@ var fs = require('fs'),
     url = require('url'),
     path = require('path'),
     nadapi = require('nad_circapi'),
+    circwmi = require('circwmi'),
     spawn = require('child_process').spawn,
     ext = /(?:\.([^.]+))?$/,
     past_results = {},
@@ -394,6 +395,8 @@ function handler(req, res) {
     }
     else if(/^\/(?:run)?$/.test(path)) return run_scripts(res);
     else if(m = /^\/run\/(.+)$/.exec(path)) return run_scripts(res, m[1]);
+    else if(m = /^\/wmi\/get-categories$/.test(path)) return circwmi.get_categories(res);
+    else if(m = /^\/wmi\/(.+)$/.exec(path)) return circwmi.get_counters_for_category(res, m[1]);
     else res.writeHead(404);
     res.end();
   });
