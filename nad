@@ -202,7 +202,7 @@ function onchange(cb) { return function(c,p) { if(c.ino != p.ino || c.size != p.
 function initial_pass() {
   for(which in scripts) {
     if(!(which in scripts_once)) {
-      init_script(scripts[which], function() {});
+      init_script(scripts[which], null, function() {});
       scripts_once[which] = true;
     }
   }
@@ -234,14 +234,19 @@ function rescan_modules() {
         return function(serr, sb) {
           if(sb && sb.isFile())
             fs.watchFile(filename, onchange(rescan_modules));
-          if(sb && sb.isFile() && (is_windows || sb.mode & 0111)) {
+          if(sb && sb.isFile() && (is_windows || /\.js$/.test(filename) || sb.mode & 0111)) {
             if(!(name in scripts)) scripts[name] = {};
             var d = scripts[name];
             d.name = name;
             d.generation = generation;
             d.command = filename;
+            d.native_plugin = /\.js$/.test(filename);
             d.running = false;
             d.sb = sb;
+            if(d.native_plugin) {
+              var module = require(d.command);
+              d.obj = new module();
+            }
           }
           progress--;
           sweep();
@@ -252,16 +257,16 @@ function rescan_modules() {
   sweep();
 }
 
-function init_script(d, cb) {
+function init_script(d, req, cb) {
   if(d.running) {
     cb(d, past_results[d.name]);
     return;
   }
 
-  get_config(d, cb);
+  get_config(req, d, cb);
 }
 
-function get_config(d, cb) {
+function get_config(req, d, cb) {
   fs.exists(path.join(configdir, d.name + ".json"), function(exists) {
     if ( exists ) {
       fs.readFile(path.join(configdir, d.name + ".json"), function(err, data) {
@@ -275,20 +280,31 @@ function get_config(d, cb) {
         // total run_count so we don't finish early.
         if ( instance_count > 1 ) run_count += instance_count - 1;
         for ( var instance in json_config ) {
-          run_script(d, cb, json_config[instance], d.name + "`" + instance);
+          run_script(d, cb, req, json_config[instance], d.name + "`" + instance);
         }
       }); 
     }
     else {
-      run_script(d, cb, [], d.name);
+      run_script(d, cb, req, [], d.name);
     }
   });
 }
 
-function run_script(d, cb, args, instance) {
+function past_set_cb(cb) {
+  return function(_d, _r, _i) {
+    past_results[_i] = _r;
+    cb(_d,_r,_i);
+  }
+};
+
+function run_script(d, cb, req, args, instance) {
   d.running = true;
   var proc_data = { data: '', lines: [], options: {} };
   d.last_start = +(new Date());
+  if(d.native_plugin) {
+    d.obj.run(d, past_set_cb(cb), req, args, instance);
+    return;
+  }
   var cmd = spawn(d.command, args);
   var kill_func = function() {
     cmd.stdin.destroy();
@@ -356,7 +372,7 @@ function run_script(d, cb, args, instance) {
     delete scripts[d.name];
   });
 }
-function run_scripts(res, which) {
+function run_scripts(req, res, which) {
   run_count = 0;
   var set = {};
   var send_complete = function() {
@@ -377,7 +393,7 @@ function run_scripts(res, which) {
     }
     for(file in scripts) {
       if ( which && file != which ) continue;
-      init_script(scripts[file], function(d, results, name) {
+      init_script(scripts[file], req, function(d, results, name) {
         run_count--;
         set[name] = results;
         send_complete();
@@ -393,8 +409,8 @@ function handler(req, res) {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.write(JSON.stringify(scripts));
     }
-    else if(/^\/(?:run)?$/.test(path)) return run_scripts(res);
-    else if(m = /^\/run\/(.+)$/.exec(path)) return run_scripts(res, m[1]);
+    else if(/^\/(?:run)?$/.test(path)) return run_scripts(req, res);
+    else if(m = /^\/run\/(.+)$/.exec(path)) return run_scripts(req, res, m[1]);
     else if(m = /^\/wmi\/get-categories$/.test(path)) return circwmi.get_categories(res);
     else if(m = /^\/wmi\/(.+)$/.exec(path)) return circwmi.get_counters_for_category(res, m[1]);
     else res.writeHead(404);
