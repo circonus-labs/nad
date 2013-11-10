@@ -3,7 +3,7 @@
 nad \- node\-agent daemon
 .SH SYNOPSIS
 .B nad
-[\-h] [\-i] [\-c configdir] [\-p [ip:]port] [\-s [ip:]sslport] [\-v]
+[\-h] [\-i] [\-u uid] [\-c configdir] [\-p [ip:]port] [\-s [ip:]sslport] [\-v]
 .SH DESCRIPTION
 The node\-agent daemon provides a simple mechanism to expose
 systems and application metrics to external onlookers. It
@@ -42,6 +42,9 @@ Display the help text.
 .TP
 \-i
 Display an inventory of plugins.
+.TP
+\-u <uid>
+Will setuid to this specified uid after starting.
 .TP
 \-c <configdir>
 Sets the configuration directory (home of scripts and SSL credentials).

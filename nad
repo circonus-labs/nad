@@ -22,6 +22,7 @@ var fs = require('fs'),
     scripts = {},
     scripts_once = {},
     creds = {},
+    drop_uid = 0,
     run_count = 0,
     generation = 0, do_index = false,
     api_setup = false, auth_token = null,
@@ -143,6 +144,7 @@ for(var i=2; i<process.argv.length; i++) {
     case "-h": help(); process.exit(-1);
     case "-c": configdir = fs.realpathSync(process.argv[++i]); break;
     case "-i": do_index = true; break;
+    case "-u": drop_uid = parseInt(process.argv[++i]); break;
     case "-p": {
       var p = process.argv[++i].split(/:/);
       if(p.length == 1) p.unshift(null);
@@ -465,3 +467,6 @@ if ( ! api_setup ) {
       process.exit(-1);
     }
 }
+
+if(process.setuid && drop_uid)
+  process.setuid(drop_uid);

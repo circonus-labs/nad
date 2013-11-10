@@ -20,7 +20,7 @@
         <envvar name='PATH' value='/usr/xpg4/bin:/opt/local/bin:/usr/bin:/usr/sbin:/sbin:/usr/sfw/bin:/usr/local/bin:@@PREFIX@@/bin:/opt/omni/bin'/>
       </method_environment>
     </method_context>
-    <exec_method name='start' type='method' exec='@@PREFIX@@/sbin/nad -c @@PREFIX@@/etc/node-agent.d -p %{config/listen_address}' timeout_seconds='60'>
+    <exec_method name='start' type='method' exec='/bin/ppriv -e -s 'EI+dtrace_kernel' @@PREFIX@@/sbin/nad -c @@PREFIX@@/etc/node-agent.d -p %{config/listen_address} -u 60001' timeout_seconds='60'>
     </exec_method>
     <exec_method name='stop' type='method' exec=':kill' timeout_seconds='60'/>
       <property_group name='config' type='application'>
