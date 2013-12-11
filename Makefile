@@ -29,8 +29,11 @@ install-modules:
 
 install-illumos:	install
 	/bin/sed -e "s#@@PREFIX@@#$(PREFIX)#g" smf/nad.xml.in > smf/nad.xml
+	/bin/sed -e "s#@@PREFIX@@#$(PREFIX)#g" smf/circonus-nad.in > smf/circonus-nad
 	mkdir -p $(DESTDIR)/var/svc/manifest/network/circonus
+	mkdir -p $(DESTDIR)/var/svc/method
 	./install-sh -c -m 0644 smf/nad.xml $(DESTDIR)/var/svc/manifest/network/circonus/nad.xml
+	./install-sh -c -m 0755 smf/circonus-nad $(DESTDIR)/var/svc/method/circonus-nad
 	cd $(DESTDIR)$(CONF)/illumos ; $(MAKE)
 	cd $(DESTDIR)$(CONF) ; for f in aggcpu.elf cpu.elf fs.elf if.sh sdinfo.sh smf.sh tcp.sh vminfo.sh vnic.sh zfsinfo.sh zone_vfs.sh; do /bin/ln -sf illumos/$$f ; done
 
