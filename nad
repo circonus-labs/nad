@@ -23,7 +23,6 @@ var fs = require('fs'),
     scripts_once = {},
     creds = {},
     drop_uid = 0,
-    run_count = 0,
     generation = 0, do_index = false,
     api_setup = false, auth_token = null,
     target = null, hostname = null,
@@ -280,7 +279,7 @@ function get_config(req, d, cb) {
 
         // Add the number of time we will run this script to our
         // total run_count so we don't finish early.
-        if ( instance_count > 1 ) run_count += instance_count - 1;
+        if ( instance_count > 1 ) req.nad_run_count += instance_count - 1;
         for ( var instance in json_config ) {
           run_script(d, cb, req, json_config[instance], d.name + "`" + instance);
         }
@@ -375,10 +374,10 @@ function run_script(d, cb, req, args, instance) {
   });
 }
 function run_scripts(req, res, which) {
-  run_count = 0;
+  req.nad_run_count = 0;
   var set = {};
   var send_complete = function() {
-    if(run_count != 0) return;
+    if(req.nad_run_count != 0) return;
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.write(JSON.stringify(set));
     res.end();
@@ -391,12 +390,12 @@ function run_scripts(req, res, which) {
   else {
     for(file in scripts) {
       if ( which && file != which ) continue;
-      run_count++;
+      req.nad_run_count++;
     }
     for(file in scripts) {
       if ( which && file != which ) continue;
       init_script(scripts[file], req, function(d, results, name) {
-        run_count--;
+        req.nad_run_count--;
         set[name] = results;
         send_complete();
       });
