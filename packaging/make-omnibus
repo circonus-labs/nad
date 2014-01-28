@@ -18,7 +18,7 @@ if [[ ! -d $INSTALLDIR ]]; then
 fi
 
 OS=
-NODE_VERSION="v0.8.25"
+NODE_VERSION="v0.10.25"
 if [[ -f /etc/redhat-release ]]; then
     INSTALL_TARGET="install-rhel"
     relver=$(sed -e 's/.*release \(.\).*/\1/' /etc/redhat-release)
