@@ -41,10 +41,12 @@ int main(int argc, char **argv) {
       printf("%s`f_bavail\tL\t%llu\n", mnt.mnt_dir, (long long unsigned int) buf.f_bavail);
       printf("%s`df_used_percent\tL\t%0.2f\n", mnt.mnt_dir, pct);
       printf("%s`used_percent\tL\t%0.2f\n", mnt.mnt_dir, 100.0*(double)used/(double)adj);
-      used = buf.f_files - buf.f_ffree;
-      pct = (used * 100) / buf.f_files + ((used * 100) % buf.f_files != 0);
-      printf("%s`df_used_inode_percent\tL\t%0.2f\n", mnt.mnt_dir, pct);
-      printf("%s`used_inode_percent\tL\t%0.2f\n", mnt.mnt_dir, 100.0*(double)(buf.f_files - buf.f_ffree)/(double)buf.f_files);
+      if(buf.f_files > 0) {
+        used = buf.f_files - buf.f_ffree;
+        pct = (used * 100) / buf.f_files + ((used * 100) % buf.f_files != 0);
+        printf("%s`df_used_inode_percent\tL\t%0.2f\n", mnt.mnt_dir, pct);
+        printf("%s`used_inode_percent\tL\t%0.2f\n", mnt.mnt_dir, 100.0*(double)(buf.f_files - buf.f_ffree)/(double)buf.f_files);
+      }
       printf("%s`f_files\tL\t%llu\n", mnt.mnt_dir, (long long unsigned int) buf.f_files);
       printf("%s`f_ffree\tL\t%llu\n", mnt.mnt_dir, (long long unsigned int) buf.f_ffree);
       printf("%s`f_favail\tL\t%llu\n", mnt.mnt_dir, (long long unsigned int) buf.f_favail);
