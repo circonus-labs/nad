@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 PATH="/opt/local/bin:/opt/local/sbin:/usr/bin:/usr/sbin";
 
