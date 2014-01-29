@@ -116,7 +116,7 @@ popd > /dev/null
 
 if [[ "$OS" =~ "^rhel" ]]; then
     echo "Creating nad-omnibus RPM for $OS $PLATFORM"
-    pushd packaging >/dev/null
+    pushd $BUILDDIR/nad/packaging >/dev/null
     sed -e "s#@@RPMVER@@#$NAD_VERSION#" omnibus-rpm.spec.in > omnibus-rpm.spec
     rpmbuild -bb omnibus-rpm.spec
     rm -f omnibus-rpm.spec
