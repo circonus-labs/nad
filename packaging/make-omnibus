@@ -114,14 +114,23 @@ TSTAMP=$(date -d "$NAD_VERSION" -u +%Y%m%dT%H%M%SZ)
 make DESTDIR=$INSTALLDIR PREFIX=$PREFIX $INSTALL_TARGET
 popd > /dev/null
 
-echo "Creating omnibus tarball"
-ARCHIVE="$BUILDDIR/nad-omnibus-${TSTAMP}-${OS}-${PLATFORM}.tar"
-pushd $INSTALLDIR > /dev/null
-tar cf $ARCHIVE .
-gzip $ARCHIVE
-echo "--- created ${ARCHIVE}.gz"
-echo "Done."
-exit 0
+if [[ "$OS" =~ "^rhel" ]]; then
+    echo "Creating nad-omnibus RPM for $OS $PLATFORM"
+    pushd packaging >/dev/null
+    sed -e "s#@@RPMVER@@#$NAD_VERSION#" omnibus-rpm.spec.in > omnibus-rpm.spec
+    rpmbuild -bb omnibus-rpm.spec
+    rm -f omnibus-rpm.spec
+    popd >/dev/null
+else
+    echo "Creating omnibus tarball"
+    ARCHIVE="$BUILDDIR/nad-omnibus-${TSTAMP}-${OS}-${PLATFORM}.tar"
+    pushd $INSTALLDIR > /dev/null
+    tar cf $ARCHIVE .
+    gzip $ARCHIVE
+    echo "--- created ${ARCHIVE}.gz"
+fi
+    echo "Done."
+    exit 0
 
 # Vim hints
 # vim:ts=4:sw=4:et:
