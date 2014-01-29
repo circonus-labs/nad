@@ -9,6 +9,7 @@
 static const char *suppress_fstype[] = {
   "rootfs", "proc", "sysfs", "selinuxfs", "usbfs", "devpts", "devtmpfs", 
   "binfmt_misc", "rpc_pipefs", "autofs", "debugfs", "securityfs", "fusectl",
+  "cgroup", "configfs", "mqueue", "hugetlbfs", "fuse.gvfs-fuse-daemon",
   NULL
 };
 
