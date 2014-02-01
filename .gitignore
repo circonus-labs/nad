@@ -1,6 +1,7 @@
 aggcpu.elf
 cpu.elf
 fs.elf
+zpoolio.elf
 *~
 smf/circonus-nad
 smf/nad.xml
