@@ -35,7 +35,7 @@ install-illumos:	install
 	./install-sh -c -m 0644 smf/nad.xml $(DESTDIR)/var/svc/manifest/network/circonus/nad.xml
 	./install-sh -c -m 0755 smf/circonus-nad $(DESTDIR)/var/svc/method/circonus-nad
 	cd $(DESTDIR)$(CONF)/illumos ; $(MAKE)
-	cd $(DESTDIR)$(CONF) ; for f in aggcpu.elf cpu.elf fs.elf if.sh sdinfo.sh smf.sh tcp.sh udp.sh vminfo.sh vnic.sh zfsinfo.sh zone_vfs.sh; do /bin/ln -sf illumos/$$f ; done
+	cd $(DESTDIR)$(CONF) ; for f in aggcpu.elf cpu.elf fs.elf zpoolio.elf if.sh sdinfo.sh smf.sh tcp.sh udp.sh vminfo.sh vnic.sh zfsinfo.sh zone_vfs.sh; do /bin/ln -sf illumos/$$f ; done
 
 install-linux:	install
 	/bin/sed -e "s#@@PREFIX@@#$(PREFIX)#g" linux-init/defaults > linux-init/defaults.out
