@@ -17,8 +17,7 @@ if [[ ! -d $INSTALLDIR ]]; then
     mkdir $INSTALLDIR
 fi
 
-OS=
-NODE_VERSION="v0.10.25"
+OS=""
 if [[ -f /etc/redhat-release ]]; then
     INSTALL_TARGET="install-rhel"
     relver=$(sed -e 's/.*release \(.\).*/\1/' /etc/redhat-release)
@@ -38,12 +37,14 @@ if [[ -f /etc/redhat-release ]]; then
 elif [[ -f /etc/lsb-release ]]; then
     INSTALL_TARGET="install-ubuntu"
     relver=$(awk -F'=' '$1 == "DISTRIB_RELEASE" { print $2 }' /etc/lsb-release)
+    [[ "$PLATFORM" == "x86_64" ]] && PLATFORM="amd64"
     case "$relver" in
         10.04)
-            OS="ubuntu-10.04"
+            OS="ubuntu.10.04"
+            fpm="/var/lib/gems/1.8/bin/fpm"
             ;;
         12.04)
-            OS="ubuntu-12.04"
+            OS="ubuntu.12.04"
             ;;
         *)
             echo "Unsupported release: $relver"
@@ -54,7 +55,7 @@ fi
 
 PLATFORM=$(uname -m)
 if [[ "$PLATFORM" == "i686" ]]; then
-    PLATFORM="i386"  # Normalize 
+    PLATFORM="i386"  # Normalize
 fi
 
 if [[ -x /usr/bin/nproc ]]; then
@@ -63,74 +64,108 @@ else
     NPROC=$(grep -c ^processor /proc/cpuinfo)
 fi
 let MAKE_JOBS="$NPROC + ($NPROC / 2)" # 1.5x the number of CPUs
+
 echo "Building for $OS $PLATFORM"
 echo
 
+NODE_VERSION="v0.10.25"
 NODE_SOURCE="http://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}.tar.gz"
-echo "Checking for node-$NODE_VERSION source"
-if [[ -d $BUILDDIR/node-$NODE_VERSION ]]; then
-    echo "--- node source dir exists"
-else
-    pushd $BUILDDIR > /dev/null
-    if [[ -f node-${NODE_VERSION}.tar.gz ]]; then
-        echo "--- node source archive exists, extracting."
-        tar zxf node-${NODE_VERSION}.tar.gz
+
+node_src() {
+    echo "Checking for node-$NODE_VERSION source"
+    if [[ -d $BUILDDIR/node-$NODE_VERSION ]]; then
+        echo "--- node source dir exists"
     else
-        echo "--- node source archive not found, downloading."
-        wget $NODE_SOURCE
-        echo "--- extracting source archive"
-        tar zxf node-${NODE_VERSION}.tar.gz
+        pushd $BUILDDIR > /dev/null
+        if [[ -f node-${NODE_VERSION}.tar.gz ]]; then
+            echo "--- node source archive exists, extracting."
+            tar zxf node-${NODE_VERSION}.tar.gz
+        else
+            echo "--- node source archive not found, downloading."
+            wget $NODE_SOURCE
+            echo "--- extracting source archive"
+            tar zxf node-${NODE_VERSION}.tar.gz
+        fi
     fi
-fi
+}
         
-echo "Building node"
-pushd $BUILDDIR/node-$NODE_VERSION > /dev/null
-make clean || make distclean
-./configure --prefix=$PREFIX/embedded
-make -j $MAKE_JOBS
-make DESTDIR=$INSTALLDIR install
+build_node() {
+    echo "Building node"
+    pushd $BUILDDIR/node-$NODE_VERSION > /dev/null
+    make clean || make distclean
+    ./configure --prefix=$PREFIX/embedded
+    make -j $MAKE_JOBS
+    make DESTDIR=$INSTALLDIR install
+}
 
-echo "Checking for nad source"
-if [[ -d $BUILDDIR/nad ]]; then
+nad_src() {
+    echo "Checking for nad source"
+    if [[ -d $BUILDDIR/nad ]]; then
+        pushd $BUILDDIR/nad > /dev/null
+        echo "--- checkout exists, pulling latest revision"
+        git pull
+        popd > /dev/null
+    else
+        pushd $BUILDDIR > /dev/null
+        echo "--- no checkout, cloning from $NAD_REPO"
+        git clone $NAD_REPO
+        popd > /dev/null
+    fi
+    
     pushd $BUILDDIR/nad > /dev/null
-    echo "--- checkout exists, pulling latest revision"
-    git pull
+    # Looks like: 2013-07-23 11:23:43 -0700
+    NAD_VERSION=$(git log -1  --format=format:%ad --date=iso)
+    # Normalize to UTC
+    # This requires GNU date-- maybe there's a better way
+    TSTAMP=$(date -d "$NAD_VERSION" -u +%Y%m%dT%H%M%SZ)
     popd > /dev/null
-else
-    pushd $BUILDDIR > /dev/null
-    echo "--- no checkout, cloning from $NAD_REPO"
-    git clone $NAD_REPO
+}
+
+build_nad() {
+    echo "Building nad"
+    pushd $BUILDDIR/nad > /dev/null
+    make DESTDIR=$INSTALLDIR PREFIX=$PREFIX $INSTALL_TARGET
     popd > /dev/null
-fi
+}
 
-echo "Building nad"
-pushd $BUILDDIR/nad > /dev/null
-# Looks like: 2013-07-23 11:23:43 -0700
-NAD_VERSION=$(git log -1  --format=format:%ad --date=iso)
-# Normalize to UTC
-# This requires GNU date-- maybe there's a better way
-TSTAMP=$(date -d "$NAD_VERSION" -u +%Y%m%dT%H%M%SZ)
+make_package() {
+    if [[ "$OS" == "rhel5" || "$OS" == "rhel6" ]]; then
+        echo "Creating nad-omnibus RPM for $OS $PLATFORM"
+        pushd $BUILDDIR/nad/packaging >/dev/null
+        sed -e "s#@@RPMVER@@#$TSTAMP#" omnibus-rpm.spec.in > omnibus-rpm.spec
+        rpmbuild -bb omnibus-rpm.spec
+        rm -f omnibus-rpm.spec
+        popd >/dev/null
+    elif [[ "$OS" == "ubuntu.10.04" || "$OS" == "ubuntu.12.04" ]]; then
+        echo "Creating nad-omnibus DEB for $OS $PLATFORM"
+        deb_file="${BUILDDIR}/nad-omnibus-${TSTAMP}-1.${OS}_${PLATFORM}.deb"
+        $fpm -s dir -t deb -n nad-omnibus -v $TSTAMP --iteration 1 -C $INSTALLDIR \
+            -p $deb_file --url "https://github.com/circonus-labs/nad" \
+            --vendor "Circonus, Inc." --license "BSD" \
+            --maintainer "Circonus Support <packaging@circonus.com>" \
+            --description "A very thin, simply managed host agent written in Node.js" \
+            --deb-user root --deb-group root \
+            --after-install $BUILDDIR/nad/packaging/ubuntu-postinstall.sh \
+            --after-remove $BUILDDIR/nad/packaging/ubuntu-postremove.sh \
+            $(cd $INSTALLDIR; find . -not -type d | sed -e 's#^\./##')
+    else
+        echo "Creating omnibus tarball"
+        ARCHIVE="$BUILDDIR/nad-omnibus-${TSTAMP}-${OS}-${PLATFORM}.tar"
+        pushd $INSTALLDIR > /dev/null
+        tar cf $ARCHIVE .
+        gzip $ARCHIVE
+        echo "--- created ${ARCHIVE}.gz"
+    fi
+}
 
-make DESTDIR=$INSTALLDIR PREFIX=$PREFIX $INSTALL_TARGET
-popd > /dev/null
+node_src
+build_node
+nad_src
+build_nad
+make_package
 
-if [[ "$OS" =~ "^rhel" ]]; then
-    echo "Creating nad-omnibus RPM for $OS $PLATFORM"
-    pushd $BUILDDIR/nad/packaging >/dev/null
-    sed -e "s#@@RPMVER@@#$TSTAMP#" omnibus-rpm.spec.in > omnibus-rpm.spec
-    rpmbuild -bb omnibus-rpm.spec
-    rm -f omnibus-rpm.spec
-    popd >/dev/null
-else
-    echo "Creating omnibus tarball"
-    ARCHIVE="$BUILDDIR/nad-omnibus-${TSTAMP}-${OS}-${PLATFORM}.tar"
-    pushd $INSTALLDIR > /dev/null
-    tar cf $ARCHIVE .
-    gzip $ARCHIVE
-    echo "--- created ${ARCHIVE}.gz"
-fi
-    echo "Done."
-    exit 0
+echo "Done."
+exit 0
 
 # Vim hints
 # vim:ts=4:sw=4:et:
