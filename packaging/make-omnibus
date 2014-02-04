@@ -17,6 +17,11 @@ if [[ ! -d $INSTALLDIR ]]; then
     mkdir $INSTALLDIR
 fi
 
+PLATFORM=$(uname -m)
+if [[ "$PLATFORM" == "i686" ]]; then
+    PLATFORM="i386"  # Normalize
+fi
+
 OS=""
 if [[ -f /etc/redhat-release ]]; then
     INSTALL_TARGET="install-rhel"
@@ -51,11 +56,6 @@ elif [[ -f /etc/lsb-release ]]; then
             exit 1
             ;;
     esac
-fi
-
-PLATFORM=$(uname -m)
-if [[ "$PLATFORM" == "i686" ]]; then
-    PLATFORM="i386"  # Normalize
 fi
 
 if [[ -x /usr/bin/nproc ]]; then
