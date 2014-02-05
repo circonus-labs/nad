@@ -1169,6 +1169,7 @@ fi
 %{_prefix}/etc/node-agent.d/illumos/src/fs.c
 %{_prefix}/etc/node-agent.d/illumos/src/aggcpu.c
 %{_prefix}/etc/node-agent.d/illumos/src/cpu.c
+%{_prefix}/etc/node-agent.d/illumos/src/zpoolio.c
 %{_prefix}/etc/node-agent.d/illumos/src/Makefile
 %{_prefix}/etc/node-agent.d/illumos/vnic.sh
 %{_prefix}/etc/node-agent.d/illumos/udp.sh
