@@ -9,6 +9,7 @@ PREFIX=/opt/circonus
 NAD_REPO="https://github.com/circonus-labs/nad.git"
 BUILDDIR="/tmp/nad-omnibus-build"
 INSTALLDIR="/tmp/nad-omnibus-install"
+PUBLISHDIR="/mnt/node-agent"
 
 if [[ ! -d $BUILDDIR ]]; then
     mkdir $BUILDDIR
@@ -135,6 +136,7 @@ make_package() {
         pushd $BUILDDIR/nad/packaging >/dev/null
         sed -e "s#@@RPMVER@@#$TSTAMP#" omnibus-rpm.spec.in > omnibus-rpm.spec
         rpmbuild -bb omnibus-rpm.spec
+        cp ~/rpmbuild/RPMS/*/nad-omnibus-$TSTAMP-1.el*.*.rpm $PUBLISHDIR/packages/
         rm -f omnibus-rpm.spec
         popd >/dev/null
     elif [[ "$OS" == "ubuntu.10.04" || "$OS" == "ubuntu.12.04" ]]; then
@@ -149,6 +151,7 @@ make_package() {
             --after-install $BUILDDIR/nad/packaging/ubuntu-postinstall.sh \
             --after-remove $BUILDDIR/nad/packaging/ubuntu-postremove.sh \
             $(cd $INSTALLDIR; find . -not -type d | sed -e 's#^\./##')
+        cp $deb_file $PUBLISHDIR/packages/
     else
         echo "Creating omnibus tarball"
         ARCHIVE="$BUILDDIR/nad-omnibus-${TSTAMP}-${OS}-${PLATFORM}.tar"
@@ -156,6 +159,7 @@ make_package() {
         tar cf $ARCHIVE .
         gzip $ARCHIVE
         echo "--- created ${ARCHIVE}.gz"
+        cp ${ARCHIVE}.gz $PUBLISHDIR/
     fi
 }
 
