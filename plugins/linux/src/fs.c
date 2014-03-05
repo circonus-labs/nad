@@ -34,6 +34,9 @@ int main(int argc, char **argv) {
     if (suppress_fstype[i] == NULL && statvfs(mnt.mnt_dir, &buf) == 0) {
       long long unsigned int used = buf.f_blocks - buf.f_bfree,
                              adj = buf.f_blocks - buf.f_bfree + buf.f_bavail;
+      if (adj == 0) {
+        break;
+      }
       double pct = (used * 100) / adj + ((used * 100) % adj != 0);
       printf("%s`f_bsize\tL\t%llu\n", mnt.mnt_dir, (long long unsigned int) buf.f_bsize);
       printf("%s`f_frsize\tL\t%llu\n", mnt.mnt_dir, (long long unsigned int) buf.f_frsize);
