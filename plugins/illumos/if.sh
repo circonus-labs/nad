@@ -4,20 +4,21 @@ if [ -d $DIR/illumos ]; then . $DIR/illumos/lib/kstat.lib
 else . $DIR/lib/kstat.lib
 fi
 
-if [ "`/usr/bin/zonename`" = "global" ]; then
-  IFACES=`ifconfig -a | awk -F: '/^[^\t]/ {if($1 != "lo0") {print $1}}' | uniq`
-elif [ "`grep OmniOS /etc/release | awk '{print $1}'`" = "OmniOS" ]; then
-  IFACES=`ifconfig -a | awk -F: '/^[^\t]/ {if($1 != "lo0") {print $1}}' | uniq`
-else
-  ZN=`kstat -p -m tcp -n tcp -s crtime | awk -F: '{print $2;}'`
-  IFACES=`ifconfig -a | awk -F: '/^[^\t]/ {if($1 != "lo0") {print "z'$ZN'_"$1;}}' | uniq`
-fi
+kstat_opts="-p -m"
+distro=`awk 'NR==1 { print $1 }' /etc/release`
+case $distro in
+  SmartOS|Joyent)
+    kstat_opts="-p -c net -n"
+    ;;
+esac
+
+IFACES=`ifconfig -a | awk -F: '/^[^\t]/ {if($1 != "lo0") {print $1}}' | uniq`
 
 for iface in $IFACES
 do
-  /usr/bin/kstat -p -m $iface | \
+  /usr/bin/kstat $kstat_opts $iface | \
         /usr/xpg4/bin/awk '{
-                if(match($1, /:(class|crtime|snaptime)$/)) next; \
+                if(match($1, /:(class|crtime|snaptime|zonename)$/)) next; \
                 if(match($1, /_fanout[0-9]+:/)) next; \
                 if(match($1, /_misc_/) && !match($1, /(brd|multi)/)) next; \
                 if(index($2,".")) { print $1"\tn\t"$2; } \
