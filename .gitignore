@@ -3,5 +3,5 @@ cpu.elf
 fs.elf
 zpoolio.elf
 *~
-smf/circonus-nad
-smf/nad.xml
+smf/circonus-nad.out
+smf/nad.xml.out
