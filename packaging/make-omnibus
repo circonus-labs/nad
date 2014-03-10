@@ -11,13 +11,6 @@ BUILDDIR="/tmp/nad-omnibus-build"
 INSTALLDIR="/tmp/nad-omnibus-install"
 PUBLISHDIR="/mnt/node-agent"
 
-if [[ ! -d $BUILDDIR ]]; then
-    mkdir $BUILDDIR
-fi
-if [[ ! -d $INSTALLDIR ]]; then
-    mkdir $INSTALLDIR
-fi
-
 PLATFORM=$(uname -m)
 if [[ "$PLATFORM" == "i686" ]]; then
     PLATFORM="i386"  # Normalize
@@ -70,6 +63,19 @@ let MAKE_JOBS="$NPROC + ($NPROC / 2)" # 1.5x the number of CPUs
 echo "Building for $OS $PLATFORM"
 echo
 
+if [[ ! -d $BUILDDIR ]]; then
+    echo "--- Creating top-level build directory"
+    mkdir $BUILDDIR
+fi
+if [[ -d $INSTALLDIR ]]; then
+    echo "--- Clearing existing install directory hierarchy"
+    rm -rf $INSTALLDIR
+    mkdir $INSTALLDIR
+else
+    echo "--- Creating top-level install directory"
+    mkdir $INSTALLDIR
+fi
+
 NODE_VERSION="v0.10.25"
 NODE_SOURCE="http://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}.tar.gz"
 
@@ -91,7 +97,7 @@ node_src() {
         popd > /dev/null
     fi
 }
-        
+
 build_node() {
     echo "Building node"
     pushd $BUILDDIR/node-$NODE_VERSION > /dev/null
@@ -115,7 +121,7 @@ nad_src() {
         git clone $NAD_REPO
         popd > /dev/null
     fi
-    
+
     pushd $BUILDDIR/nad > /dev/null
     # Looks like: 2013-07-23 11:23:43 -0700
     NAD_VERSION=$(git log -1  --format=format:%ad --date=iso)
