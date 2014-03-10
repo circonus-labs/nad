@@ -30,8 +30,15 @@ install-modules:
 	rsync -a node_modules/ $(DESTDIR)$(MODULES)/
 
 install-illumos:	install
-	/bin/sed -e "s#@@PREFIX@@#$(PREFIX)#g" -e "s#@@METHOD_DIR@@#$(METHOD_DIR)#g" smf/nad.xml > smf/nad.xml.out
-	/bin/sed -e "s#@@PREFIX@@#$(PREFIX)#g" smf/circonus-nad > smf/circonus-nad.out
+	/bin/sed \
+		-e "s#@@PREFIX@@#$(PREFIX)#g" \
+		-e "s#@@METHOD_DIR@@#$(METHOD_DIR)#g" \
+		-e "s#@@CONF@@#$(CONF)#g" \
+		smf/nad.xml > smf/nad.xml.out
+	/bin/sed \
+		-e "s#@@PREFIX@@#$(PREFIX)#g" \
+		-e "s#@@CONF@@#$(CONF)#g" \
+		smf/circonus-nad > smf/circonus-nad.out
 	mkdir -p $(DESTDIR)$(MANIFEST_DIR)
 	mkdir -p $(DESTDIR)$(METHOD_DIR)
 	./install-sh -c -m 0644 smf/nad.xml.out $(DESTDIR)$(MANIFEST_DIR)/nad.xml
@@ -40,7 +47,7 @@ install-illumos:	install
 	cd $(DESTDIR)$(CONF) ; for f in aggcpu.elf cpu.elf fs.elf zpoolio.elf if.sh sdinfo.sh smf.sh tcp.sh udp.sh vminfo.sh vnic.sh zfsinfo.sh zone_vfs.sh; do /bin/ln -sf illumos/$$f ; done
 
 install-linux:	install
-	/bin/sed -e "s#@@PREFIX@@#$(PREFIX)#g" linux-init/defaults > linux-init/defaults.out
+	/bin/sed -e "s#@@CONF@@#$(CONF)#g" linux-init/defaults > linux-init/defaults.out
 	cd $(DESTDIR)$(CONF)/linux ; $(MAKE)
 	cd $(DESTDIR)$(CONF) ; for f in cpu.sh disk.sh fs.elf if.sh vm.sh ; do /bin/ln -sf linux/$$f ; done
 

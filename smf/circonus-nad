@@ -5,9 +5,9 @@
 LISTEN_ADDRESS=$1
 
 if smf_is_nonglobalzone; then
-	@@PREFIX@@/sbin/nad -c @@PREFIX@@/etc/node-agent.d -p $LISTEN_ADDRESS -u 60001
+	@@PREFIX@@/sbin/nad -c @@CONF@@ -p $LISTEN_ADDRESS -u 60001
 else
-	/bin/ppriv -e -s EI+dtrace_kernel @@PREFIX@@/sbin/nad -c @@PREFIX@@/etc/node-agent.d -p $LISTEN_ADDRESS -u 60001
+	/bin/ppriv -e -s EI+dtrace_kernel @@PREFIX@@/sbin/nad -c @@CONF@@ -p $LISTEN_ADDRESS -u 60001
 fi
 
 exit $SMF_EXIT_OK

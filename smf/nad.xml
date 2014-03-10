@@ -13,9 +13,9 @@
     <dependency name='localfs' grouping='require_all' restart_on='error' type='service'>
       <service_fmri value='svc:/system/filesystem/local:default'/>
     </dependency>
-    <method_context working_directory='@@PREFIX@@/etc'>
+    <method_context working_directory='@@CONF@@'>
       <method_environment>
-        <envvar name='HOME' value='@@PREFIX@@/etc'/>
+        <envvar name='HOME' value='@@CONF@@'/>
         <envvar name='NODE_PATH' value='@@PREFIX@@/lib/node_modules'/>
         <envvar name='PATH' value='/usr/xpg4/bin:/opt/local/bin:/usr/bin:/usr/sbin:/sbin:/usr/sfw/bin:/usr/local/bin:@@PREFIX@@/bin:/opt/omni/bin'/>
       </method_environment>
