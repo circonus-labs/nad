@@ -133,12 +133,10 @@ build_nad() {
 make_package() {
     if [[ "$OS" == "rhel5" || "$OS" == "rhel6" ]]; then
         echo "Creating nad-omnibus RPM for $OS $PLATFORM"
-        pushd $BUILDDIR/nad/packaging >/dev/null
         sed -e "s#@@RPMVER@@#$TSTAMP#" omnibus-rpm.spec.in > omnibus-rpm.spec
         rpmbuild -bb omnibus-rpm.spec
         cp ~/rpmbuild/RPMS/*/nad-omnibus-$TSTAMP-1.el*.*.rpm $PUBLISHDIR/packages/
         rm -f omnibus-rpm.spec
-        popd >/dev/null
     elif [[ "$OS" == "ubuntu.10.04" || "$OS" == "ubuntu.12.04" ]]; then
         echo "Creating nad-omnibus DEB for $OS $PLATFORM"
         deb_file="${BUILDDIR}/nad-omnibus-${TSTAMP}-1.${OS}_${PLATFORM}.deb"
@@ -159,12 +157,13 @@ make_package() {
         tar cf $ARCHIVE .
         gzip $ARCHIVE
         echo "--- created ${ARCHIVE}.gz"
+        popd > /dev/null
         cp ${ARCHIVE}.gz $PUBLISHDIR/
     fi
 }
 
-node_src
-build_node
+#node_src
+#build_node
 nad_src
 build_nad
 make_package
