@@ -162,8 +162,8 @@ make_package() {
     fi
 }
 
-#node_src
-#build_node
+node_src
+build_node
 nad_src
 build_nad
 make_package
