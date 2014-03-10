@@ -75,7 +75,7 @@ On Ubuntu, assuming you did `make install-ubuntu`:
 On other platforms, just run nad in the background. There is one required
 environment variable:
 
-   `# export NODE_PATH="/opt/circonus/etc/node-agent.d/"`
+   `# export NODE_PATH="/opt/circonus/lib/node_modules"`
 
 Setup
 ---

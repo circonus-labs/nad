@@ -36,7 +36,7 @@ if [ -s $NAD_DEFAULTS_FILE ]; then
 fi
 
 export PATH="@@PREFIX@@/embedded/bin:@@PREFIX@@/sbin:/opt/omni/bin:$PATH"
-export NODE_PATH="@@PREFIX@@/etc/node_modules"
+export NODE_PATH="@@PREFIX@@/lib/node_modules"
 
 run_app() {
         runuser -p -s /bin/bash -c "nohup $NAD $NAD_OPTS >/dev/null 2>&1 &" nobody

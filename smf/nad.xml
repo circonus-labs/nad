@@ -16,7 +16,7 @@
     <method_context working_directory='@@PREFIX@@/etc'>
       <method_environment>
         <envvar name='HOME' value='@@PREFIX@@/etc'/>
-        <envvar name='NODE_PATH' value='@@PREFIX@@/etc/node_modules'/>
+        <envvar name='NODE_PATH' value='@@PREFIX@@/lib/node_modules'/>
         <envvar name='PATH' value='/usr/xpg4/bin:/opt/local/bin:/usr/bin:/usr/sbin:/sbin:/usr/sfw/bin:/usr/local/bin:@@PREFIX@@/bin:/opt/omni/bin'/>
       </method_environment>
     </method_context>
