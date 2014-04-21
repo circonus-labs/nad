@@ -88,7 +88,6 @@ fi
 %{_prefix}/embedded/lib/node_modules/npm/man/man5/package.json.5
 %{_prefix}/embedded/lib/node_modules/npm/man/man5/npm-global.5
 %{_prefix}/embedded/lib/node_modules/npm/man/man1/npm-owner.1
-%{_prefix}/embedded/lib/node_modules/npm/man/man1/repo.1
 %{_prefix}/embedded/lib/node_modules/npm/man/man1/npm-docs.1
 %{_prefix}/embedded/lib/node_modules/npm/man/man1/npm-cache.1
 %{_prefix}/embedded/lib/node_modules/npm/man/man1/npm-prune.1
@@ -175,7 +174,6 @@ fi
 %{_prefix}/embedded/lib/node_modules/npm/man/man3/npm-start.3
 %{_prefix}/embedded/lib/node_modules/npm/man/man3/npm-test.3
 %{_prefix}/embedded/lib/node_modules/npm/man/man3/npm-submodule.3
-%{_prefix}/embedded/lib/node_modules/npm/man/man3/repo.3
 %{_prefix}/embedded/lib/node_modules/npm/man/man3/npm-owner.3
 %{_prefix}/embedded/lib/node_modules/npm/man/man3/npm-prune.3
 %{_prefix}/embedded/lib/node_modules/npm/man/man3/npm-prefix.3
@@ -698,11 +696,6 @@ fi
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/npm-registry-client/index.js
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/npm-registry-client/package.json
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/npm-registry-client/.npmignore
-%{_prefix}/embedded/lib/node_modules/npm/node_modules/npm-registry-client/node_modules/couch-login/couch-login.js
-%{_prefix}/embedded/lib/node_modules/npm/node_modules/npm-registry-client/node_modules/couch-login/LICENSE
-%{_prefix}/embedded/lib/node_modules/npm/node_modules/npm-registry-client/node_modules/couch-login/README.md
-%{_prefix}/embedded/lib/node_modules/npm/node_modules/npm-registry-client/node_modules/couch-login/package.json
-%{_prefix}/embedded/lib/node_modules/npm/node_modules/npm-registry-client/node_modules/couch-login/.npmignore
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/npm-registry-client/lib/star.js
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/npm-registry-client/lib/publish.js
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/npm-registry-client/lib/upload.js
@@ -879,6 +872,13 @@ fi
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/github-url-from-git/Makefile
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/github-url-from-git/History.md
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/github-url-from-git/Readme.md
+%{_prefix}/embedded/lib/node_modules/npm/node_modules/npm-install-checks/LICENSE
+%{_prefix}/embedded/lib/node_modules/npm/node_modules/npm-install-checks/README.md
+%{_prefix}/embedded/lib/node_modules/npm/node_modules/npm-install-checks/index.js
+%{_prefix}/embedded/lib/node_modules/npm/node_modules/npm-install-checks/package.json
+%{_prefix}/embedded/lib/node_modules/npm/node_modules/read-package-json/.npmignore
+%{_prefix}/embedded/lib/node_modules/npm/node_modules/read-package-json/node_modules/normalize-package-data/lib/safe_format.js
+%{_prefix}/embedded/lib/node_modules/npm/node_modules/read-package-json/node_modules/normalize-package-data/lib/warning_messages.json
 %{_prefix}/embedded/lib/node_modules/npm/doc/misc/npm-scripts.md
 %{_prefix}/embedded/lib/node_modules/npm/doc/misc/npm-registry.md
 %{_prefix}/embedded/lib/node_modules/npm/doc/misc/npm-faq.md
@@ -979,6 +979,7 @@ fi
 %{_prefix}/embedded/lib/node_modules/npm/doc/cli/npm-adduser.md
 %{_prefix}/embedded/lib/node_modules/npm/doc/cli/npm-deprecate.md
 %{_prefix}/embedded/lib/node_modules/npm/configure
+%{_prefix}/embedded/lib/node_modules/npm/CONTRIBUTING.md
 %{_prefix}/embedded/lib/node_modules/npm/lib/outdated.js
 %{_prefix}/embedded/lib/node_modules/npm/lib/unbuild.js
 %{_prefix}/embedded/lib/node_modules/npm/lib/edit.js
@@ -1044,9 +1045,6 @@ fi
 %{_prefix}/embedded/lib/node_modules/npm/lib/bin.js
 %{_prefix}/embedded/lib/node_modules/npm/lib/substack.js
 %{_prefix}/embedded/lib/node_modules/npm/html/static/style.css
-%{_prefix}/embedded/lib/node_modules/npm/html/static/webfonts/23242D_3_0.woff
-%{_prefix}/embedded/lib/node_modules/npm/html/static/webfonts/23242D_3_0.eot
-%{_prefix}/embedded/lib/node_modules/npm/html/static/webfonts/23242D_3_0.ttf
 %{_prefix}/embedded/lib/node_modules/npm/html/index.html
 %{_prefix}/embedded/lib/node_modules/npm/html/docfoot-script.html
 %{_prefix}/embedded/lib/node_modules/npm/html/docfoot.html
@@ -1096,7 +1094,6 @@ fi
 %{_prefix}/embedded/lib/node_modules/npm/html/doc/api/npm-pack.html
 %{_prefix}/embedded/lib/node_modules/npm/html/doc/api/npm-prune.html
 %{_prefix}/embedded/lib/node_modules/npm/html/doc/api/npm-install.html
-%{_prefix}/embedded/lib/node_modules/npm/html/doc/api/repo.html
 %{_prefix}/embedded/lib/node_modules/npm/html/doc/api/npm-ls.html
 %{_prefix}/embedded/lib/node_modules/npm/html/doc/api/npm-deprecate.html
 %{_prefix}/embedded/lib/node_modules/npm/html/doc/api/npm-repo.html
@@ -1148,7 +1145,6 @@ fi
 %{_prefix}/embedded/lib/node_modules/npm/html/doc/cli/npm-stars.html
 %{_prefix}/embedded/lib/node_modules/npm/html/doc/cli/npm-prune.html
 %{_prefix}/embedded/lib/node_modules/npm/html/doc/cli/npm-install.html
-%{_prefix}/embedded/lib/node_modules/npm/html/doc/cli/repo.html
 %{_prefix}/embedded/lib/node_modules/npm/html/doc/cli/npm-dedupe.html
 %{_prefix}/embedded/lib/node_modules/npm/html/doc/cli/npm-ls.html
 %{_prefix}/embedded/lib/node_modules/npm/html/doc/cli/npm-deprecate.html
