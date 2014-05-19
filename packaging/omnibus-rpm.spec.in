@@ -71,7 +71,7 @@ fi
 %{_prefix}/embedded/include/node/common.gypi
 %{_prefix}/embedded/include/node/v8-profiler.h
 %{_prefix}/embedded/include/node/node.h
-%{_prefix}/embedded/lib/dtrace/node.d
+%{_prefix}/embedded/lib/node_modules/npm/.travis.yml
 %{_prefix}/embedded/lib/node_modules/npm/LICENSE
 %{_prefix}/embedded/lib/node_modules/npm/README.md
 %{_prefix}/embedded/lib/node_modules/npm/AUTHORS
@@ -311,6 +311,7 @@ fi
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/node-gyp/gyp/pylib/gyp/generator/ninja.py
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/node-gyp/gyp/pylib/gyp/generator/xcode_test.py
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/node-gyp/gyp/pylib/gyp/generator/make.py
+%{_prefix}/embedded/lib/node_modules/npm/node_modules/node-gyp/gyp/pylib/gyp/generator/cmake.py
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/node-gyp/gyp/pylib/gyp/generator/gypd.py
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/node-gyp/gyp/pylib/gyp/generator/gypsh.py
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/node-gyp/gyp/pylib/gyp/generator/dump_dependency_json.py
@@ -328,6 +329,7 @@ fi
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/node-gyp/gyp/pylib/gyp/MSVSUserFile.py
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/node-gyp/gyp/pylib/gyp/mac_tool.py
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/node-gyp/gyp/pylib/gyp/easy_xml.py
+%{_prefix}/embedded/lib/node_modules/npm/node_modules/node-gyp/gyp/pylib/gyp/ordered_dict.py
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/node-gyp/gyp/buildbot/buildbot_run.py
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/node-gyp/.npmignore
@@ -672,6 +674,7 @@ fi
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/glob/examples/g.js
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/glob/.npmignore
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/glob/glob.js
+%{_prefix}/embedded/lib/node_modules/npm/node_modules/init-package-json/LICENSE
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/init-package-json/README.md
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/init-package-json/package.json
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/init-package-json/init-package-json.js
@@ -861,10 +864,15 @@ fi
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/osenv/README.md
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/osenv/package.json
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/osenv/osenv.js
+%{_prefix}/embedded/lib/node_modules/npm/node_modules/read-installed/.npmignore
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/read-installed/LICENSE
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/read-installed/README.md
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/read-installed/package.json
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/read-installed/read-installed.js
+%{_prefix}/embedded/lib/node_modules/npm/node_modules/read-installed/node_modules/util-extend/README.md
+%{_prefix}/embedded/lib/node_modules/npm/node_modules/read-installed/node_modules/util-extend/extend.js
+%{_prefix}/embedded/lib/node_modules/npm/node_modules/read-installed/node_modules/util-extend/package.json
+%{_prefix}/embedded/lib/node_modules/npm/node_modules/read-installed/node_modules/util-extend/test.js
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/github-url-from-git/index.js
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/github-url-from-git/package.json
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/github-url-from-git/.npmignore
@@ -877,8 +885,14 @@ fi
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/npm-install-checks/index.js
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/npm-install-checks/package.json
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/read-package-json/.npmignore
+%{_prefix}/embedded/lib/node_modules/npm/node_modules/read-package-json/node_modules/normalize-package-data/lib/make_warning.js
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/read-package-json/node_modules/normalize-package-data/lib/safe_format.js
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/read-package-json/node_modules/normalize-package-data/lib/warning_messages.json
+%{_prefix}/embedded/lib/node_modules/npm/node_modules/sorted-object/LICENSE.txt
+%{_prefix}/embedded/lib/node_modules/npm/node_modules/sorted-object/README.md
+%{_prefix}/embedded/lib/node_modules/npm/node_modules/sorted-object/lib/sorted-object.js
+%{_prefix}/embedded/lib/node_modules/npm/node_modules/sorted-object/package.json
+%{_prefix}/embedded/lib/node_modules/npm/node_modules/uid-number/LICENSE
 %{_prefix}/embedded/lib/node_modules/npm/doc/misc/npm-scripts.md
 %{_prefix}/embedded/lib/node_modules/npm/doc/misc/npm-registry.md
 %{_prefix}/embedded/lib/node_modules/npm/doc/misc/npm-faq.md
@@ -1045,8 +1059,8 @@ fi
 %{_prefix}/embedded/lib/node_modules/npm/lib/bin.js
 %{_prefix}/embedded/lib/node_modules/npm/lib/substack.js
 %{_prefix}/embedded/lib/node_modules/npm/html/static/style.css
+%{_prefix}/embedded/lib/node_modules/npm/html/static/toc.js
 %{_prefix}/embedded/lib/node_modules/npm/html/index.html
-%{_prefix}/embedded/lib/node_modules/npm/html/docfoot-script.html
 %{_prefix}/embedded/lib/node_modules/npm/html/docfoot.html
 %{_prefix}/embedded/lib/node_modules/npm/html/dochead.html
 %{_prefix}/embedded/lib/node_modules/npm/html/favicon.ico
@@ -1155,6 +1169,7 @@ fi
 %{_prefix}/embedded/lib/node_modules/npm/html/doc/cli/npm-stop.html
 %{_prefix}/embedded/lib/node_modules/npm/Makefile
 %{_prefix}/embedded/lib/node_modules/npm/cli.js
+%{_prefix}/embedded/lib/node_modules/npm/wercker.yml
 %{_prefix}/man/man8/nad.8
 %{_prefix}/etc/node-agent.d/disk.sh
 %{_prefix}/etc/node-agent.d/haproxy/haproxy_backends.sh
@@ -1223,3 +1238,15 @@ fi
 %{_prefix}/lib/node_modules/thirty-two/lib/thirty-two/thirty-two.js
 %{_prefix}/lib/node_modules/thirty-two/Makefile
 %{_prefix}/sbin/nad
+
+%exclude %{_prefix}/embedded/lib/node_modules/npm/node_modules/node-gyp/gyp/*.pyc
+%exclude %{_prefix}/embedded/lib/node_modules/npm/node_modules/node-gyp/gyp/*.pyo
+%exclude %{_prefix}/embedded/lib/node_modules/npm/node_modules/node-gyp/gyp/buildbot/*.pyc
+%exclude %{_prefix}/embedded/lib/node_modules/npm/node_modules/node-gyp/gyp/buildbot/*.pyo
+%exclude %{_prefix}/embedded/lib/node_modules/npm/node_modules/node-gyp/gyp/pylib/gyp/*.pyc
+%exclude %{_prefix}/embedded/lib/node_modules/npm/node_modules/node-gyp/gyp/pylib/gyp/*.pyo
+%exclude %{_prefix}/embedded/lib/node_modules/npm/node_modules/node-gyp/gyp/pylib/gyp/generator/*.pyc
+%exclude %{_prefix}/embedded/lib/node_modules/npm/node_modules/node-gyp/gyp/pylib/gyp/generator/*.pyo
+%exclude %{_prefix}/embedded/lib/node_modules/npm/node_modules/node-gyp/gyp/tools/*.pyc
+%exclude %{_prefix}/embedded/lib/node_modules/npm/node_modules/node-gyp/gyp/tools/*.pyo
+
