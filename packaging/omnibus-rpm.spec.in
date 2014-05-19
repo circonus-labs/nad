@@ -1239,14 +1239,3 @@ fi
 %{_prefix}/lib/node_modules/thirty-two/Makefile
 %{_prefix}/sbin/nad
 
-%exclude %{_prefix}/embedded/lib/node_modules/npm/node_modules/node-gyp/gyp/*.pyc
-%exclude %{_prefix}/embedded/lib/node_modules/npm/node_modules/node-gyp/gyp/*.pyo
-%exclude %{_prefix}/embedded/lib/node_modules/npm/node_modules/node-gyp/gyp/buildbot/*.pyc
-%exclude %{_prefix}/embedded/lib/node_modules/npm/node_modules/node-gyp/gyp/buildbot/*.pyo
-%exclude %{_prefix}/embedded/lib/node_modules/npm/node_modules/node-gyp/gyp/pylib/gyp/*.pyc
-%exclude %{_prefix}/embedded/lib/node_modules/npm/node_modules/node-gyp/gyp/pylib/gyp/*.pyo
-%exclude %{_prefix}/embedded/lib/node_modules/npm/node_modules/node-gyp/gyp/pylib/gyp/generator/*.pyc
-%exclude %{_prefix}/embedded/lib/node_modules/npm/node_modules/node-gyp/gyp/pylib/gyp/generator/*.pyo
-%exclude %{_prefix}/embedded/lib/node_modules/npm/node_modules/node-gyp/gyp/tools/*.pyc
-%exclude %{_prefix}/embedded/lib/node_modules/npm/node_modules/node-gyp/gyp/tools/*.pyo
-
