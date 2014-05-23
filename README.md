@@ -130,6 +130,8 @@ so is safe to use while running normally.
 
  * --configfile <string> The path to the config file to use that defines the metrics and graphs to create in Circonus.  Look at config/illumos.json for an example.  Required
 
+ * --debugdir <string> Create debug files for each script and write them to this directory. Optional
+
 Config file
 ---
 

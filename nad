@@ -27,6 +27,7 @@ var fs = require('fs'),
     api_setup = false, auth_token = null,
     target = null, hostname = null,
     brokerid = null, configfile = null,
+    debugdir = null,
     platform = process.platform,
     is_windows = (platform === "win32"),
     procre = null;
@@ -55,7 +56,8 @@ function help(err) {
               "\t--target\t\tTarget Circonus will use to contact this host.\n" +
               "\t--hostname\t\tHostname used in check and graph names, if not passed we will attempt to look it up.\n" +
               "\t--brokerid\t\tID of the Circonus broker to configure the check on.\n" +
-              "\t--configfile\t\tName of the file in the config directory to use for Circonus configuration.\n"
+              "\t--configfile\t\tName of the file in the config directory to use for Circonus configuration.\n" +
+              "\t--debugdir\t\tCreate debug files for each script and write them to this directory.\n"
             );
   if(err) {
     console.log("\nError: " + err + "\n");
@@ -168,6 +170,7 @@ for(var i=2; i<process.argv.length; i++) {
     case "--hostname": hostname = process.argv[++i]; break;
     case "--brokerid": brokerid = process.argv[++i]; break;
     case "--configfile": configfile = fs.realpathSync(process.argv[++i]); break;
+    case "--debugdir": debugdir = process.argv[++i]; break;
     default: help("unknown argument: " + process.argv[i]);
   }
 }
@@ -248,6 +251,10 @@ function rescan_modules() {
               var module = require(d.command);
               d.obj = new module();
             }
+            //Only remove items on initial scan
+            if (generation == 1) {
+              init_debug(name);
+            }
           }
           progress--;
           sweep();
@@ -265,6 +272,22 @@ function init_script(d, req, cb) {
   }
 
   get_config(req, d, cb);
+}
+
+function init_debug(name) {
+  if (debugdir) {
+    var debug_file = debugdir + "/" + name + ".nad_debug";
+    try {
+      var exists = fs.existsSync(debug_file);
+      if (exists) {
+        fs.unlinkSync(debug_file);
+      }
+    }
+    catch (e) {
+      console.log("Error checking for debug file " + debug_file);
+      console.log(e);
+    }
+  }
 }
 
 function get_config(req, d, cb) {
@@ -317,6 +340,17 @@ function run_script(d, cb, req, args, instance) {
     if(proc_data.timeout) clearTimeout(proc_data.timeout);
     d.last_finish = +(new Date());
     var i, results = {}, parts;
+    if (debugdir) {
+      var debug_file = debugdir + "/" + d.name + ".nad_debug";
+      try {
+        var output = "-----START RECORD-----\n" + proc_data.lines.join('\n') + "\n-----END RECORD-----\n";
+        fs.appendFile(debug_file, output);
+      }
+      catch (e) {
+        console.log("Error writing to debug file " + debug_file);
+        console.log(e);
+      }
+	}
     try { results = JSON.parse(proc_data.lines.join(' ')); }
     catch(e) {
       for(i=0; i<proc_data.lines.length; i++) {
