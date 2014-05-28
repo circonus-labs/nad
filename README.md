@@ -21,24 +21,45 @@ If you write a set of scripts/programs, you can describe them in a
 Installation
 ===
 
-If your operating system vendor doesn't package it for you, just check
-it out and run make install.
+If your operating system vendor doesn't package it for you, you may be
+interested in Circonus-maintained 
+[omnibus packages](http://updates.circonus.net/node-agent/packages/ "nad omnibus packages").
+Otherwise, check it out and run make install.
 
 There are install targets for some operating systems, which enable
 all the default checks and install init scripts and default configuration 
 helper files.
 
+System Requirements
+---
+You will need a basic development environment (compiler, GNU make, etc.)
+in order to build the default plugins.
+
+Node.js v0.10 or later is required.
+
 RHEL/CentOS
 ---
+    # make install
+
+Optionally, to build the default plugins and install an init script:
+
     # make install-rhel
 
 Ubuntu
 ---
+    # make install
+
+Optionally, to build the default plugins and install an init script:
+
     # make install-ubuntu
 
 illumos (SmartOS, OmniOS, OpenIndiana, etc.)
 ---
-    # make install-illumos
+    # gmake install
+
+Optionally, to build the default plugins and create an SMF manifest:
+
+    # gmake install-illumos
 
 
 Operations
@@ -60,9 +81,7 @@ Running
 On Solaris or illumos you can use smf.  First, node needs to be in your path,
 so you might need to edit the SMF manifest to alter the PATH. After install:
 
-    # svccfg import smf/nad.xml
-
-If you used the `install-illumos` target above, this step is not necessary.
+    # svccfg import /var/svc/manifest/network/circonus/nad.xml
 
 On RHEL/CentOS, assuming you did `make install-rhel`:
 
@@ -79,15 +98,10 @@ environment variable:
 
 Setup
 ---
-
-So, if you are on a Joyent SmartOS box and you want to monitor vm, cpu,
-and zfs stuff, you would do the following as root:
-
-    # cd /opt/circonus/etc/node-agent.d
-    # (cd illumos && test -f Makefile && make)
-    # ln -s illumos/aggcpu.elf
-    # ln -s illumos/zfsinfo.sh
-    # ln -s illumos/vminfo.sh
+If you used one of the `install-<os>` options above, the default set of
+plugins is already enabled.  You may enable additional plugins and/or
+create your own custom plugins.  See the man page for details on creating
+and activating plugins.
 
 After which, you should be able to:
 
@@ -98,14 +112,10 @@ and see all the beautiful metrics.
 Why did we "make" in the config directory?
 ---
 
-You'll notice above we actually did a "make" before we linked thing up.
-Why? For illumos, aggcpu.elf is a compiled binary (as calculating
-aggregate CPU info is expensive using "the UNIX way"). The make will
-compile and link any plugins that need compiling and linking.  We
-don't build this on install because we're lazy and think it is a tad
-easier to only build what you need as you need it; it is very rare that
-you can't write your metrics check in shell or some other scripting
-language.
+You'll notice that some plugins require compilation.  Why?
+For example, on illumos, aggcpu.elf is a compiled binary 
+(as calculating aggregate CPU info is expensive using "the UNIX way").
+The install will compile and link any plugins that need compiling and linking.
 
 What about SSL?
 ---

@@ -38,7 +38,7 @@ if (is_windows) {
   procre = /^(?!\.)([^\/]*?)(?:\..*)$/;
 }
 
-var configdir = '/etc/node-agent.d',
+var configdir = '/opt/circonus/etc/node-agent.d',
     port = [],
     defaultport = [ [ 2609, null ] ],
     sslport = [],
