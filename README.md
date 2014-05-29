@@ -24,6 +24,9 @@ Installation
 If your operating system vendor doesn't package it for you, you may be
 interested in Circonus-maintained 
 [omnibus packages](http://updates.circonus.net/node-agent/packages/ "nad omnibus packages").
+These are self-contained packages that come with a private copy of node
+and will automatically install and start the service.
+
 Otherwise, check it out and run make install.
 
 There are install targets for some operating systems, which enable
@@ -47,6 +50,10 @@ Optionally, to build the default plugins and install an init script:
 
 Ubuntu
 ---
+Note: on Ubuntu 13.10 and later, the node binary has been renamed, so you will
+also need the `nodejs-legacy` package.
+See [these notes](https://github.com/joyent/node/wiki/Installing-Node.js-via-package-manager#ubuntu-mint-elementary-os "Ubuntu notes").
+
     # make install
 
 Optionally, to build the default plugins and install an init script:
