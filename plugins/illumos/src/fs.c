@@ -70,8 +70,10 @@ int main(int argc, char **argv) {
           ZFS_PULL_N_PRINT(ZFS_PROP_RESERVATION, "reservation", "L", "%llu", datum);
           ZFS_PULL_N_PRINT(ZFS_PROP_REFRESERVATION, "ref_reservation", "L", "%llu", datum);
           ZFS_PULL_N_PRINT(ZFS_PROP_USEDREFRESERV, "ref_reservation_used", "L", "%llu", datum);
-          ZFS_PULL_N_PRINT(ZFS_PROP_LOGICALUSED, "logical_used", "L", "%llu", datum);
-          ZFS_PULL_N_PRINT(ZFS_PROP_LOGICALREFERENCED, "logical_referenced", "L", "%llu", datum);
+#ifdef HAVE_LOGICAL_USED
+  ZFS_PULL_N_PRINT(ZFS_PROP_LOGICALUSED, "logical_used", "L", "%llu", datum);
+  ZFS_PULL_N_PRINT(ZFS_PROP_LOGICALREFERENCED, "logical_referenced", "L", "%llu", datum);
+#endif
           ZFS_PULL_N_PRINT(ZFS_PROP_COMPRESSRATIO, "compress_ratio", "n", "%f", (double)datum/100.0);
           zfs_close(handle);
         }
