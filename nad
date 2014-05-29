@@ -44,6 +44,10 @@ var configdir = '/opt/circonus/etc/node-agent.d',
     sslport = [],
     verify = false;
 
+////////////////////////////////////////////////////////////////////////
+// help
+////////////////////////////////////////////////////////////////////////
+
 function help(err) {
   console.log(process.argv[1] + "\n" +
               "\t-h\t\t\tthis help message\n" +
@@ -64,6 +68,10 @@ function help(err) {
     process.exit(-1);
   }
 }
+
+////////////////////////////////////////////////////////////////////////
+// index
+////////////////////////////////////////////////////////////////////////
 
 function index(dir) {
   try { process.chdir(dir); }
@@ -140,12 +148,28 @@ function index(dir) {
   }
 }
 
+////////////////////////////////////////////////////////////////////////
+// process commmand line arguments
+////////////////////////////////////////////////////////////////////////
+
 for(var i=2; i<process.argv.length; i++) {
   switch(process.argv[i]) {
+
+    // display help
     case "-h": help(); process.exit(-1);
+
+    // set the config dir
     case "-c": configdir = fs.realpathSync(process.argv[++i]); break;
+
+    // offline inventory
     case "-i": do_index = true; break;
+
+    // switch to uid after starting
+    // (only if node supports it on the host os)
     case "-u": drop_uid = parseInt(process.argv[++i]); break;
+
+    // specify an port to listen for http requests on
+    // either in the form "8080" or "127.0.0.1:8080"
     case "-p": {
       var p = process.argv[++i].split(/:/);
       if(p.length == 1) p.unshift(null);
@@ -153,6 +177,9 @@ for(var i=2; i<process.argv.length; i++) {
       port.push( [ parseInt(p[1]), p[0] ] );
       break;
     }
+
+    // specify an port to listen for https requests on
+    // either in the form "4443" or "127.0.0.1:4443"
     case "-s": {
       var p = process.argv[++i].split(/:/);
       if(p.length == 1) p.unshift(null);
@@ -160,7 +187,13 @@ for(var i=2; i<process.argv.length; i++) {
       sslport.push( [ parseInt(p[1]), p[0] ] );
       break;
     }
+
+    // should we verify using a certifcate authority the
+    // SSL certificate presented?
     case "-v": verify = true; break;
+
+    //// options for autoconfig with circonus api ////
+
     case "--authtoken": {
         api_setup = true;
         auth_token = process.argv[++i];
@@ -201,7 +234,12 @@ if(sslport.length > 0) {
   }
 }
 
-function onchange(cb) { return function(c,p) { if(c.ino != p.ino || c.size != p.size || c.mtime.valueOf() != p.mtime.valueOf() || c.mode != p.mode) cb(); }}
+function onchange(cb) {
+  return function(c,p) {
+    if(c.ino != p.ino || c.size != p.size || c.mtime.valueOf() != p.mtime.valueOf() || c.mode != p.mode)
+      cb();
+  };
+}
 
 function initial_pass() {
   for(which in scripts) {
@@ -211,6 +249,7 @@ function initial_pass() {
     }
   }
 }
+
 function rescan_modules() {
   var progress = 0;
   var sweep = function () {
@@ -437,9 +476,20 @@ function run_scripts(req, res, which) {
     send_complete();
   }
 }
+
+////////////////////////////////////////////////////////////////////////
+// process web requests
+////////////////////////////////////////////////////////////////////////
+
+// this is the callback that's called whenever something connects
+// to our webserver (either any of the http or the https servers)
+
 function handler(req, res) {
+  // wait for the request to be completely formed (by registering
+  // a callback on the 'end' event) and then send bac kthe data
   req.addListener('end', function() {
     var m, path = url.parse(this.url).pathname;
+
     if(/^\/inventory/.test(path)) {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.write(JSON.stringify(scripts));
@@ -455,6 +505,10 @@ function handler(req, res) {
   // if we don't have a data listener the stream starts paused in node 10+
   req.addListener('data', function(){});
 }
+
+////////////////////////////////////////////////////////////////////////
+// autoconfig with circonus
+////////////////////////////////////////////////////////////////////////
 
 function configure_circonus() {
   var error = false;
@@ -481,10 +535,18 @@ function configure_circonus() {
   nadapi.configure(auth_token, target, hostname, brokerid, configfile);
 }
 
+////////////////////////////////////////////////////////////////////////
+// start webservers
+////////////////////////////////////////////////////////////////////////
+
 if ( ! api_setup ) {
+    // initialize: look for modules, and register a handler to
+    // rescan the modules every time the directory with the modules
+    // in it changes
     fs.watchFile(configdir, onchange(rescan_modules));
     rescan_modules();
 
+    // listen on all non-secure ports
     try {
       for(var i=0; i<port.length; i++)
         http.createServer(handler).listen(port[i][0] , port[i][1]);
@@ -492,6 +554,8 @@ if ( ! api_setup ) {
       console.log("Failed to start server on port " + port + ": " + e);
       process.exit(-1);
     }
+
+    // listen on all secure ports
     try {
       for(var i=0; i<sslport.length; i++)
         https.createServer(creds).addListener(handler).listen(sslport[i][0], sslport[i][1]);
@@ -501,5 +565,17 @@ if ( ! api_setup ) {
     }
 }
 
+////////////////////////////////////////////////////////////////////////
+// setuid
+////////////////////////////////////////////////////////////////////////
+
 if(process.setuid && drop_uid)
   process.setuid(drop_uid);
+
+////////////////////////////////////////////////////////////////////////
+// done
+////////////////////////////////////////////////////////////////////////
+
+// initial setup is all done now
+// at this point if we've started servers etc the process will keep
+// running even though we "fall off the end" of the code here
