@@ -24,6 +24,7 @@ var fs = require('fs'),
     creds = {},
     drop_uid = 0,
     generation = 0, do_index = false,
+    api_options = {},
     api_setup = false, auth_token = null,
     target = null, hostname = null,
     brokerid = null, configfile = null,
@@ -61,7 +62,11 @@ function help(err) {
               "\t--hostname\t\tHostname used in check and graph names, if not passed we will attempt to look it up.\n" +
               "\t--brokerid\t\tID of the Circonus broker to configure the check on.\n" +
               "\t--configfile\t\tName of the file in the config directory to use for Circonus configuration.\n" +
-              "\t--debugdir\t\tCreate debug files for each script and write them to this directory.\n"
+              "\t--debugdir\t\tCreate debug files for each script and write them to this directory.\n" +
+              "\t--apihost\t\tOverride the host for the Circonus API server (default: api.circonus.com)\n" +
+              "\t--apiport\t\tOverride the port for the Circonus API server (default: 443)\n" +
+              "\t--apipath\t\tOverride the path for the Circonus API server (default: /v2)\n" +
+              "\t--apiprotocol\t\tOverride the protocol for the Circonus API server (default: https)\n"
             );
   if(err) {
     console.log("\nError: " + err + "\n");
@@ -204,6 +209,10 @@ for(var i=2; i<process.argv.length; i++) {
     case "--brokerid": brokerid = process.argv[++i]; break;
     case "--configfile": configfile = fs.realpathSync(process.argv[++i]); break;
     case "--debugdir": debugdir = process.argv[++i]; break;
+    case "--apihost": api_options['host'] = process.argv[++i]; break;
+    case "--apiport": api_options['port'] = process.argv[++i]; break;
+    case "--apipath": api_options['path'] = process.argv[++i]; break;
+    case "--apiprotocol": api_options['protocol'] = process.argv[++i]; break;
     default: help("unknown argument: " + process.argv[i]);
   }
 }
@@ -532,7 +541,7 @@ function configure_circonus() {
     process.exit(1);
   }
 
-  nadapi.configure(auth_token, target, hostname, brokerid, configfile);
+  nadapi.configure(auth_token, target, hostname, brokerid, configfile, api_options);
 }
 
 ////////////////////////////////////////////////////////////////////////

@@ -149,6 +149,18 @@ so is safe to use while running normally.
 
  * --debugdir <string> Create debug files for each script and write them to this directory. Optional
 
+By default nad talks to the main Circonus installation.  You can also
+configure nad to talk to a Circonus Inside install with the following
+config options:
+
+ * --apihost <string> An alternative host to 'api.circonus.com'
+
+ * --apiport <integer> An alternative port to 443
+
+ * --apiprotocol <stirng> An alternative protocol to 'https' (i.e. 'http')
+
+ * --apipath <string> An alternative base path for the API server
+
 Config file
 ---
 
