@@ -89,6 +89,7 @@ api.prototype.delete = function (endpoint, callback) {
  * reset error.
  */ 
 api.prototype.do_request = function (options, callback) {
+  var self = this;
   var req = this.protocol.request(options, function(res) {
     var body = '';
 
@@ -119,7 +120,7 @@ api.prototype.do_request = function (options, callback) {
       options.circapi.retry += 1;
       // sleep 1 second and try again, probably hit the rate limit
       setTimeout(function() {
-        this.do_request(options, callback);
+        self.do_request(options, callback);
       }, 1000 * options.circapi.retry);
     }
     else {
