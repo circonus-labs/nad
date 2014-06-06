@@ -1,2 +1,2 @@
 all:
-		(cd src && make)
+		(cd src && gmake)
