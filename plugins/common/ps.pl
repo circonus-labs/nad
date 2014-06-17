@@ -26,5 +26,5 @@ for my $proc (`$cmd`) {
 }
 
 for my $kind (keys %count_by_state) {
-    print "count`$kind\t\L\t" . $count_by_state{$kind} . "\n";
+    print "count`$kind\tL\t" . $count_by_state{$kind} . "\n";
 }
