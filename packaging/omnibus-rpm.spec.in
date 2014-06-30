@@ -727,7 +727,6 @@ fi
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/uid-number/package.json
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/uid-number/get-uid-gid.js
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/uid-number/uid-number.js
-%{_prefix}/embedded/lib/node_modules/npm/node_modules/uid-number/LICENCE
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/npmlog/LICENSE
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/npmlog/README.md
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/npmlog/package.json
@@ -812,7 +811,6 @@ fi
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/abbrev/LICENSE
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/abbrev/README.md
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/abbrev/package.json
-%{_prefix}/embedded/lib/node_modules/npm/node_modules/abbrev/lib/abbrev.js
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/mkdirp/LICENSE
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/mkdirp/index.js
 %{_prefix}/embedded/lib/node_modules/npm/node_modules/mkdirp/package.json
@@ -1014,7 +1012,6 @@ fi
 %{_prefix}/embedded/lib/node_modules/npm/lib/publish.js
 %{_prefix}/embedded/lib/node_modules/npm/lib/prefix.js
 %{_prefix}/embedded/lib/node_modules/npm/lib/utils/tar.js
-%{_prefix}/embedded/lib/node_modules/npm/lib/utils/find-prefix.js
 %{_prefix}/embedded/lib/node_modules/npm/lib/utils/lifecycle.js
 %{_prefix}/embedded/lib/node_modules/npm/lib/utils/link.js
 %{_prefix}/embedded/lib/node_modules/npm/lib/utils/fetch.js
