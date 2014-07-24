@@ -29,6 +29,7 @@ api = function(token, app, options) {
   this.apihost = options.host || 'api.circonus.com';
   this.apiport = options.port || 443;
   this.apipath = options.path || '/v2/';
+  this.verbose = options.verbose;
 };
 
 /**
@@ -90,6 +91,11 @@ api.prototype.delete = function (endpoint, callback) {
  */ 
 api.prototype.do_request = function (options, callback) {
   var self = this;
+
+  if (self.verbose) {
+    console.error(options.method + " REQUEST:");
+  }
+
   var req = this.protocol.request(options, function(res) {
     var body = '';
 
@@ -99,6 +105,11 @@ api.prototype.do_request = function (options, callback) {
 
     res.on('end', function() {
       var err_msg = null;
+
+      if (self.verbose) {
+        console.error("RESPONSE "+res.statusCode + ":");
+        console.error(body);
+      }
 
       // If this isn't a 200 level, extract the message from the body
       if ( res.statusCode < 200 || res.statusCode > 299 ) {
@@ -129,7 +140,12 @@ api.prototype.do_request = function (options, callback) {
   });
 
   if ( options.method.toUpperCase() === 'POST' || options.method.toUpperCase() === 'PUT' ) {
-    req.write(JSON.stringify(options.circapi.data));
+    var stringified = JSON.stringify(options.circapi.data);
+    req.write(stringified);
+    if (self.verbose) {
+      console.error(stringified);
+  }
+
   }
   req.end();
 };

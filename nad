@@ -66,7 +66,8 @@ function help(err) {
               "\t--apihost\t\tOverride the host for the Circonus API server (default: api.circonus.com)\n" +
               "\t--apiport\t\tOverride the port for the Circonus API server (default: 443)\n" +
               "\t--apipath\t\tOverride the path for the Circonus API server (default: /v2)\n" +
-              "\t--apiprotocol\t\tOverride the protocol for the Circonus API server (default: https)\n"
+              "\t--apiprotocol\t\tOverride the protocol for the Circonus API server (default: https)\n" +
+              "\t--apiverbose\t\tOutput API traffic to STDERR\n"
             );
   if(err) {
     console.log("\nError: " + err + "\n");
@@ -213,6 +214,7 @@ for(var i=2; i<process.argv.length; i++) {
     case "--apiport": api_options['port'] = process.argv[++i]; break;
     case "--apipath": api_options['path'] = process.argv[++i]; break;
     case "--apiprotocol": api_options['protocol'] = process.argv[++i]; break;
+    case "--apiverbose": api_options['verbose'] = true; break;
     default: help("unknown argument: " + process.argv[i]);
   }
 }
