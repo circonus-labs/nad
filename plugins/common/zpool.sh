@@ -6,6 +6,8 @@
 # See https://github.com/zfsonlinux/zfs/issues/362 for a potential workaround
 # https://github.com/zfsonlinux/zfs/issues/434 should address privilege delegation
 
+PATH="/usr/xpg4/bin:$PATH"
+
 pools=`/sbin/zpool list -H -o name`
 
 for zp in $pools; do \
