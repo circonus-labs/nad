@@ -45,11 +45,15 @@ install-illumos:	install
 	./install-sh -c -m 0755 smf/circonus-nad.out $(DESTDIR)$(METHOD_DIR)/circonus-nad
 	cd $(DESTDIR)$(CONF)/illumos ; $(MAKE)
 	cd $(DESTDIR)$(CONF) ; for f in aggcpu.elf cpu.elf fs.elf zpoolio.elf if.sh sdinfo.sh smf.sh tcp.sh udp.sh vminfo.sh vnic.sh zfsinfo.sh zone_vfs.sh; do /bin/ln -sf illumos/$$f ; done
+	/bin/ln -sf common/zpool.sh
 
 install-linux:	install
 	/bin/sed -e "s#@@CONF@@#$(CONF)#g" linux-init/defaults > linux-init/defaults.out
 	cd $(DESTDIR)$(CONF)/linux ; $(MAKE)
 	cd $(DESTDIR)$(CONF) ; for f in cpu.sh disk.sh fs.elf if.sh vm.sh ; do /bin/ln -sf linux/$$f ; done
+ifneq ($(wildcard /sbin/zpool),)
+	cd $(DESTDIR)$(CONF) ; /bin/ln -sf common/zpool.sh
+endif
 
 install-ubuntu:	install-linux
 	/bin/sed -e "s#@@PREFIX@@#$(PREFIX)#g" linux-init/ubuntu-init > linux-init/ubuntu-init.out
