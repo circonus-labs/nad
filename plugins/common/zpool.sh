@@ -12,7 +12,7 @@ pools=`/sbin/zpool list -H -o name`
 
 for zp in $pools; do \
     /sbin/zpool status $zp | awk -v poolname=$zp '{
-        if ($1 ~ /(pool:|scan:|config:|errors:|NAME|^$)/) {
+        if ($1 ~ /(pool:|scan:|config:|errors:|NAME|^logs$|^cache$|^$)/) {
             next;
         }
         if ($1 == "state:") {
