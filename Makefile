@@ -45,7 +45,7 @@ install-illumos:	install
 	./install-sh -c -m 0755 smf/circonus-nad.out $(DESTDIR)$(METHOD_DIR)/circonus-nad
 	cd $(DESTDIR)$(CONF)/illumos ; $(MAKE)
 	cd $(DESTDIR)$(CONF) ; for f in aggcpu.elf cpu.elf fs.elf zpoolio.elf if.sh sdinfo.sh smf.sh tcp.sh udp.sh vminfo.sh vnic.sh zfsinfo.sh zone_vfs.sh; do /bin/ln -sf illumos/$$f ; done
-	/bin/ln -sf common/zpool.sh
+	cd $(DESTDIR)$(CONF) ; /bin/ln -sf common/zpool.sh
 
 install-linux:	install
 	/bin/sed -e "s#@@CONF@@#$(CONF)#g" linux-init/defaults > linux-init/defaults.out
