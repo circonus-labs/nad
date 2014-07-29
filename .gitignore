@@ -1,5 +1,6 @@
 aggcpu.elf
 cpu.elf
+disk.elf
 fs.elf
 zpoolio.elf
 *~
