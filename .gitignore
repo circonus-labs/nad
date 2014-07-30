@@ -4,5 +4,7 @@ disk.elf
 fs.elf
 zpoolio.elf
 *~
+freebsd-init/nad.out
+linux-init/*.out
 smf/circonus-nad.out
 smf/nad.xml.out

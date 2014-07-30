@@ -65,5 +65,16 @@ install-rhel:	install-linux
 	./install-sh -c -m 0644 linux-init/defaults.out $(DESTDIR)/etc/sysconfig/nad
 	./install-sh -c -m 0755 linux-init/rhel-init.out $(DESTDIR)/etc/init.d/nad
 
+install-freebsd:	install
+	/usr/bin/sed \
+		-e "s#@@PREFIX@@#$(PREFIX)#g" \
+		-e "s#@@CONF@@#$(CONF)#g" \
+		freebsd-init/nad > freebsd-init/nad.out
+	./install-sh -d -m 0755 -o root -g wheel $(DESTDIR)/etc/init.d
+	./install-sh -c -m 0755 freebsd-init/nad.out $(DESTDIR)/etc/rc.d/nad
+	cd $(DESTDIR)$(CONF)/freebsd ; $(MAKE)
+	cd $(DESTDIR)$(CONF) ; for f in cpu.sh disk.elf fs.elf if.sh vm.sh zfsinfo.sh ; do /bin/ln -sf freebsd/$$f ; done
+	cd $(DESTDIR)$(CONF) ; /bin/ln -sf common/zpool.sh
+
 clean:
-	rm -f linux-init/*.out smf/*.out
+	rm -f freebsd-init/*.out linux-init/*.out smf/*.out

@@ -68,6 +68,18 @@ Optionally, to build the default plugins and create an SMF manifest:
 
     # gmake install-illumos
 
+FreeBSD
+---
+    # gmake install
+
+Optionally, to build the default plugins and install an init script:
+
+    # gmake install-freebsd
+
+The init script defaults to nad being enabled. If you wish to disable
+nad, add `nad_enable="NO"` to `/etc/rc.conf`.  Additionally if you
+wish to override the default options, you may add them to rc.conf as
+`nad_flags`.
 
 Operations
 ===
