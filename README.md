@@ -110,6 +110,10 @@ On Ubuntu, assuming you did `make install-ubuntu`:
 
     # /usr/sbin/update-rc.d nad defaults 98 02 && /etc/init.d/nad start
 
+On FreeBSD, assuming you did `make install-freebsd`:
+
+    # /etc/rc.d/nad start
+
 On other platforms, just run nad in the background. There is one required
 environment variable:
 
