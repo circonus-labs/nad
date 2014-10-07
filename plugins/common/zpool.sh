@@ -14,9 +14,11 @@ for zp in $pools; do \
     /sbin/zpool status $zp | awk -v poolname=$zp '
         function convert (val)
         {
-            if (val ~ /K$/) { val = val*1000 }
-            if (val ~ /M$/) { val = val*1000000 }
-            if (val ~ /G$/) { val = val*1000000000 }
+            len = length(val)
+            if (val ~ /K$/) { val = substr(val, 1, len - 1); val = val * 1000 }
+            if (val ~ /M$/) { val = substr(val, 1, len - 1); val = val * 1000000 }
+            if (val ~ /G$/) { val = substr(val, 1, len - 1); val = val * 1000000000 }
+
             return val
         }
         {
