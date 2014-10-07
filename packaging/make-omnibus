@@ -11,6 +11,11 @@ BUILDDIR="/tmp/nad-omnibus-build"
 INSTALLDIR="/tmp/nad-omnibus-install"
 PUBLISHDIR="/mnt/node-agent"
 
+if [[ ! -d $PUBLISHDIR ]]; then
+    echo "Destination for package files ($PUBLISHDIR) does not exist; all is doomed."
+    exit 1
+fi
+
 PLATFORM=$(uname -m)
 if [[ "$PLATFORM" == "i686" ]]; then
     PLATFORM="i386"  # Normalize
