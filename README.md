@@ -132,6 +132,12 @@ After which, you should be able to:
 
 and see all the beautiful metrics.
 
+You can run a single plugin by name like so:
+
+    # curl http://localhost:2609/run/name
+
+where "name" is the plugin name, minus any file extension.
+
 Why did we "make" in the config directory?
 ---
 
