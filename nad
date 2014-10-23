@@ -23,6 +23,7 @@ var fs = require('fs'),
 
 // "globals" ///////////////////////////////////////////////////////////
 
+var booted = false;
 var ext = /(?:\.([^.]+))?$/;
 
 // cache of previous results of running scripts
@@ -346,6 +347,10 @@ function initial_pass() {
       scripts_once[which] = true;
     }
   }
+  if(!booted) {
+    post_boot();
+    booted = true;
+  }
 }
 
 // look on disk for updates to the config dir where
@@ -394,6 +399,9 @@ function rescan_modules() {
       console.log("Can't read config dir '"+configdir+"': "+err);
       process.exit(-1);
     }
+
+    // inc our reference count
+    progress++;
 
     // for each file in the config directory
     for(var i = 0; i < files.length; i++) {
@@ -460,8 +468,9 @@ function rescan_modules() {
         }
       })(filename,m[1]));
     }
+    progress--;
+    sweep();
   });
-  sweep();
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -864,8 +873,12 @@ if ( ! api_setup ) {
 // setuid
 ////////////////////////////////////////////////////////////////////////
 
-if(process.setuid && drop_uid)
-  process.setuid(drop_uid);
+function post_boot() {
+  if(process.setuid && drop_uid) {
+    console.log("Dropping privileges: " + drop_uid);
+    process.setuid(drop_uid);
+  }
+}
 
 ////////////////////////////////////////////////////////////////////////
 // done
