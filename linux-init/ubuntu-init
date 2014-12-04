@@ -31,7 +31,7 @@ if [ -s $NAD_DEFAULTS_FILE ]; then
     . $NAD_DEFAULTS_FILE
 fi
 
-export PATH="@@PREFIX@@/embedded/bin:@@PREFIX@@/sbin:/opt/omni/bin:$PATH"
+export PATH="@@PREFIX@@/embedded/bin:@@PREFIX@@/bin:/opt/omni/bin:$PATH"
 export NODE_PATH="@@PREFIX@@/lib/node_modules"
 
 nad_start() {
