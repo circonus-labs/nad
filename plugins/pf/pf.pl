@@ -46,34 +46,36 @@ my $pfctl = '/sbin/pfctl';
 my $status = {};
 my $getstats = $pfctl . ' -si';
 my ($in_state_tbl, $in_counters);
+
 open(my $gs, '-|', $getstats);
 while(<$gs>) {
-  chomp;
-  if (/^Status: (\S+)/) {
+  my $statline = $_;
+  chomp $statline;
+
+  if ($statline =~ /^Status: (\S+)/) {
     $status->{'status'} = $1;
   }
-  if (/^State Table/) {
+  if ($statline =~ /^State Table/) {
     $in_state_tbl = 1;
   }
   if ($in_state_tbl) {
-    if (/^\s+current entries\s+(\d+)/) {
+    if ($statline =~ /^\s+current entries\s+(\d+)/) {
       $status->{'state'}{'current_entries'} = Math::BigInt->new($1);
     }
-    if (/^\s+(\S+)\s+(\d+)/) {
+    if ($statline =~ /^\s+(\S+)\s+(\d+)/) {
       $status->{'state'}{$1} = Math::BigInt->new($2);
     }
   }
-  if (/^Counters/) {
+  if ($statline =~ /^Counters/) {
     $in_state_tbl = undef;
     $in_counters = 1;
   }
   if ($in_counters) {
-    if (/^\s+(\S+)\s+(\d+)/) {
+    if ($statline =~ /^\s+(\S+)\s+(\d+)/) {
       $status->{'counters'}{$1} = Math::BigInt->new($2);
     }
   }
 }
-
 close($gs);
 
 printf("status s %s\n", $status->{'status'});
@@ -93,12 +95,14 @@ my $labels = {};
 my $getlabels = $pfctl . ' -sl';
 open(my $gl, '-|', $getlabels);
 while(<$gl>) {
-  chomp;
-  my @line = split /\s+/;
+  my $lline = $_;
+  chomp $lline;
+  my @line = split(/\s+/, $lline);
   my $label = shift @line;
   if (exists $labels->{$label}) {
     foreach (0 .. $#line) {
-      $labels->{$label}->[$_]->badd(Math::BigInt->new($line[$_]));
+      my $idx = $_;
+      $labels->{$label}->[$idx]->badd(Math::BigInt->new($line[$idx]));
     }
   } else {
     $labels->{$label} = [ map { Math::BigInt->new($_) } @line ];
