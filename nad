@@ -65,6 +65,7 @@ var hostname = null;
 var brokerid = null
 var configfile = null;
 var debugdir = null;                        // if set, a dir to write debug logs to
+var wipedebugdir = false;                  // if true, wipe debug logs clean before each write
 var platform = process.platform;
 var is_windows = (platform === "win32");    // windows
 
@@ -101,6 +102,7 @@ function help(err) {
               "\t--brokerid\t\tID of the Circonus broker to configure the check on.\n" +
               "\t--configfile\t\tName of the file in the config directory to use for Circonus configuration.\n" +
               "\t--debugdir\t\tCreate debug files for each script and write them to this directory.\n" +
+              "\t--wipedebugdir\t\tWipe debug files clean before each write.\n" +
               "\t--apihost\t\tOverride the host for the Circonus API server (default: api.circonus.com)\n" +
               "\t--apiport\t\tOverride the port for the Circonus API server (default: 443)\n" +
               "\t--apipath\t\tOverride the path for the Circonus API server (default: /v2)\n" +
@@ -280,6 +282,7 @@ for(var i=2; i<process.argv.length; i++) {
     case "--brokerid": brokerid = process.argv[++i]; break;
     case "--configfile": configfile = fs.realpathSync(process.argv[++i]); break;
     case "--debugdir": debugdir = process.argv[++i]; break;
+    case "--wipedebugdir": wipedebugdir = true; ++i; break;
     case "--apihost": api_options['host'] = process.argv[++i]; break;
     case "--apiport": api_options['port'] = process.argv[++i]; break;
     case "--apipath": api_options['path'] = process.argv[++i]; break;
@@ -603,6 +606,9 @@ function run_script(d, cb, req, args, instance) {
     if (debugdir) {
       var debug_file = debugdir + "/" + d.name + ".nad_debug";
       try {
+	if (wipedebugdir) {
+          init_debug(d.name);
+        }
         var output = "-----START RECORD-----\n" + proc_data.lines.join('\n') + "\n-----END RECORD-----\n";
         fs.appendFile(debug_file, output);
       }

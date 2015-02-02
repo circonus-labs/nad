@@ -3,7 +3,7 @@
 nad \- node\-agent daemon
 .SH SYNOPSIS
 .B nad
-[\-h] [\-i] [\-u uid] [\-c configdir] [\-p [ip:]port] [\-s [ip:]sslport] [\-v] [\-\-debugdir debugdir]
+[\-h] [\-i] [\-u uid] [\-c configdir] [\-p [ip:]port] [\-s [ip:]sslport] [\-v] [\-\-debugdir debugdir] [\-\-wipedebugdir]
 .SH DESCRIPTION
 The node\-agent daemon provides a simple mechanism to expose
 systems and application metrics to external onlookers. It
@@ -73,6 +73,12 @@ file in the
 Writes debug files for each script in the directory specified. Existing files
 will be removed when nad starts up and new files will be created. Files will
 be in the format of <name of script>.nad_debug.
+.TP
+\-\-wipedebugdir
+Existing debug files for each script in the
+.I configdir
+directory will be removed before each write. This allows only the most recent
+debug output to persist on disk.
 .SH SCRIPT OUTPUT
 The executable programs that you place in the
 .I configdir

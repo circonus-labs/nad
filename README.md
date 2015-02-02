@@ -171,6 +171,8 @@ so is safe to use while running normally.
 
  * --debugdir <string> Create debug files for each script and write them to this directory. Optional
 
+ * --wipedebugdir Wipe debug files clean before each write. Optional
+
 By default nad talks to the main Circonus installation.  You can also
 configure nad to talk to a Circonus Inside install with the following
 config options:
