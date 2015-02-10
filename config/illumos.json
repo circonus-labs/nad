@@ -74,7 +74,7 @@
                     "hidden": false
                 },
                 {
-                    "name": "Aveage write ops being serviced",
+                    "name": "Average write ops being serviced",
                     "metric_name": "zone_vfs`zone_vfs:wlentime",
                     "metric_type": "numeric",
                     "axis": "r",
