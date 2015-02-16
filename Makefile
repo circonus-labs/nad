@@ -76,5 +76,10 @@ install-freebsd:	install
 	cd $(DESTDIR)$(CONF) ; for f in cpu.sh disk.elf fs.elf if.sh vm.sh zfsinfo.sh ; do /bin/ln -sf freebsd/$$f ; done
 	cd $(DESTDIR)$(CONF) ; /bin/ln -sf common/zpool.sh
 
+install-openbsd:	install
+	cd $(DESTDIR)$(CONF)/openbsd ; $(MAKE)
+	cd $(DESTDIR)$(CONF) ; for f in cpu.sh fs.elf if.sh ; do /bin/ln -sf openbsd/$$f ; done
+	cd $(DESTDIR)$(CONF) ; /bin/ln -sf pf/pf.pl
+
 clean:
 	rm -f freebsd-init/*.out linux-init/*.out smf/*.out

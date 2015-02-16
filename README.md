@@ -81,6 +81,21 @@ nad, add `nad_enable="NO"` to `/etc/rc.conf`.  Additionally if you
 wish to override the default options, you may add them to rc.conf as
 `nad_flags`.
 
+OpenBSD
+---
+    # gmake install
+
+Optionally, to build the default plugins:
+
+    # gmake install-openbsd
+
+To enable at startup, add the following to your `/etc/rc.local`:
+
+    if [ -x /opt/circonus/sbin/nad ]; then
+        export NODE_PATH="/opt/circonus/lib/node_modules"
+        echo -n ' nad'; /opt/circonus/sbin/nad >/dev/null 2>&1 &
+    fi
+
 Operations
 ===
 
