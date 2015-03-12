@@ -21,6 +21,9 @@ var fs = require('fs'),
     circwmi = require('circwmi'),
     spawn = require('child_process').spawn;
 
+var libdir = path.join(__dirname, "lib");
+var tunnel = require(path.join(libdir, "reversetunnel.js"));
+
 // "globals" ///////////////////////////////////////////////////////////
 
 var booted = false;
@@ -882,6 +885,16 @@ if ( ! api_setup ) {
     } catch(e) {
       console.log("Failed to start server on port " + sslport + ": " + e);
       process.exit(-1);
+    }
+
+    // set up reverse tunnel if necessary
+    if ( reversetunnel ) {
+      tunnel({
+          "target":     target,
+          "configdir":  configdir,
+          "ports":      [].concat(port, sslport),
+          "creds":       creds
+      });
     }
 }
 
