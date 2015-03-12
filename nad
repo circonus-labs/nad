@@ -893,8 +893,9 @@ if ( ! api_setup ) {
       tunnel({
           "target":     target,
           "configdir":  configdir,
-          "ports":      [].concat(port, sslport),
-          "creds":       creds
+          "ports":      port,
+          "sslports":   sslport,
+          "creds":      creds
       });
     }
 }
