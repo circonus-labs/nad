@@ -842,7 +842,14 @@ function configure_circonus() {
     process.exit(1);
   }
 
-  nadapi.configure(auth_token, target, hostname, brokerid, configfile, api_options);
+  nadapi.configure({
+      "auth_token":  auth_token,
+      "target":      target,
+      "hostname":    hostname,
+      "brokerid":    brokerid,
+      "configfile":  configfile,
+      "configdir":   configdir
+  }, api_options);
 }
 
 ////////////////////////////////////////////////////////////////////////
