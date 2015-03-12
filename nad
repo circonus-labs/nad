@@ -15,6 +15,7 @@
 var fs = require('fs'),
     sys = require('sys'),
     http = require('http'),
+    https = require('https'),
     url = require('url'),
     path = require('path'),
     nadapi = require('nad_circapi'),
@@ -320,7 +321,7 @@ if(sslport.length > 0) {
   try {
     // Setup creds
     creds.key = fs.readFileSync(path.join(configdir, "na.key")).toString();
-    creds.crt = fs.readFileSync(path.join(configdir, "na.crt")).toString();
+    creds.cert = fs.readFileSync(path.join(configdir, "na.crt")).toString();
     if(verify) creds.ca = fs.readFileSync(path.join(configdir, "na.ca")).toString();
   } catch(e) {
     console.log("Make sure:");
@@ -881,7 +882,7 @@ if ( ! api_setup ) {
     // listen on all secure ports
     try {
       for(var i=0; i<sslport.length; i++)
-        https.createServer(creds).addListener(handler).listen(sslport[i][0], sslport[i][1]);
+        https.createServer(creds, handler).listen(sslport[i][1]);
     } catch(e) {
       console.log("Failed to start server on port " + sslport + ": " + e);
       process.exit(-1);
