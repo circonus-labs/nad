@@ -50,7 +50,7 @@ install-illumos:	install
 install-linux:	install
 	/bin/sed -e "s#@@CONF@@#$(CONF)#g" linux-init/defaults > linux-init/defaults.out
 	cd $(DESTDIR)$(CONF)/linux ; $(MAKE)
-	cd $(DESTDIR)$(CONF) ; for f in cpu.sh disk.sh fs.elf if.sh vm.sh ; do /bin/ln -sf linux/$$f ; done
+	cd $(DESTDIR)$(CONF) ; for f in cpu.sh disk.sh diskstats.sh fs.elf if.sh vm.sh ; do /bin/ln -sf linux/$$f ; done
 ifneq ($(wildcard /sbin/zpool),)
 	cd $(DESTDIR)$(CONF) ; /bin/ln -sf common/zpool.sh
 endif
