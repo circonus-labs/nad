@@ -19,6 +19,7 @@ var fs = require('fs'),
     path = require('path'),
     nadapi = require('nad_circapi'),
     circwmi = require('circwmi'),
+    dutil = require('debug_util'),
     spawn = require('child_process').spawn;
 
 // "globals" ///////////////////////////////////////////////////////////
@@ -463,7 +464,7 @@ function rescan_modules() {
 
             // Only remove items on initial scan
             if (generation == 1) {
-              init_debug(name);
+              dutil.init_debug(name, debugdir);
             }
           }
           progress--;
@@ -487,22 +488,6 @@ function init_script(d, req, cb) {
   }
 
   get_config(req, d, cb);
-}
-
-function init_debug(name) {
-  if (debugdir) {
-    var debug_file = debugdir + "/" + name + ".nad_debug";
-    try {
-      var exists = fs.existsSync(debug_file);
-      if (exists) {
-        fs.unlinkSync(debug_file);
-      }
-    }
-    catch (e) {
-      console.log("Error checking for debug file " + debug_file);
-      console.log(e);
-    }
-  }
 }
 
 // per script config
@@ -604,19 +589,8 @@ function run_script(d, cb, req, args, instance) {
     // if someone has specified a debug dir, then log out
     // the record we collected to that
     if (debugdir) {
-      var debug_file = debugdir + "/" + d.name + ".nad_debug";
-      try {
-	if (wipedebugdir) {
-          init_debug(d.name);
-        }
-        var output = "-----START RECORD-----\n" + proc_data.lines.join('\n') + "\n-----END RECORD-----\n";
-        fs.appendFile(debug_file, output);
-      }
-      catch (e) {
-        console.log("Error writing to debug file " + debug_file);
-        console.log(e);
-      }
-	  }
+      dutil.write_debug_output(d.name, proc_data.lines, debugdir, wipedebugdir);
+    }
 
     // attempt to process the lines as json...
     try { results = JSON.parse(proc_data.lines.join(' ')); }
@@ -806,7 +780,7 @@ function handler(req, res) {
     if(m = /^\/wmi\/get-categories$/.test(path))
       return circwmi.get_categories(res);
     if(m = /^\/wmi\/(.+)$/.exec(path))
-      return circwmi.get_counters_for_category(res, m[1]);
+      return circwmi.get_counters_for_category(res, m[1], debugdir, wipedebugdir);
 
     res.writeHead(404);
     res.end();
