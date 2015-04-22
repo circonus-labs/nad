@@ -33,6 +33,9 @@ if [[ -f /etc/redhat-release ]]; then
         6)
             OS="rhel6"
             ;;
+        7)
+            OS="rhel7"
+            ;;
         *)
             echo "Unsupported release: $relver"
             exit 1
@@ -148,7 +151,7 @@ build_nad() {
 }
 
 make_package() {
-    if [[ "$OS" == "rhel5" || "$OS" == "rhel6" ]]; then
+    if [[ $OS =~ ^rhel ]]; then
         echo "Creating nad-omnibus RPM for $OS $PLATFORM"
         sed -e "s#@@RPMVER@@#$TSTAMP#" omnibus-rpm.spec.in > omnibus-rpm.spec
         rpmbuild -bb omnibus-rpm.spec

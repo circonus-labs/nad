@@ -54,6 +54,9 @@ install-linux:	install
 ifneq ($(wildcard /sbin/zpool),)
 	cd $(DESTDIR)$(CONF) ; /bin/ln -sf common/zpool.sh
 endif
+ifneq ($(wildcard /usr/bin/systemctl),)
+	cd $(DESTDIR)$(CONF) ; /bin/ln -sf linux/systemd.sh
+endif
 
 install-ubuntu:	install-linux
 	/bin/sed -e "s#@@PREFIX@@#$(PREFIX)#g" linux-init/ubuntu-init > linux-init/ubuntu-init.out
