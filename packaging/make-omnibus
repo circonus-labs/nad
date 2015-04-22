@@ -157,10 +157,7 @@ make_package() {
         rpmbuild -bb omnibus-rpm.spec
         cp ~/rpmbuild/RPMS/*/nad-omnibus-$TSTAMP-1.el*.*.rpm $PUBLISHDIR/packages/
         rm -f omnibus-rpm.spec
-    elif [[ "$OS" == "ubuntu.10.04" || \
-            "$OS" == "ubuntu.12.04" || \
-            "$OS" == "ubuntu.14.04" \
-         ]]; then
+    elif [[ $OS =~ ^ubuntu ]]; then
         echo "Creating nad-omnibus DEB for $OS $PLATFORM"
         deb_file="${BUILDDIR}/nad-omnibus-${TSTAMP}-1.${OS}_${PLATFORM}.deb"
         $fpm -s dir -t deb -n nad-omnibus -v $TSTAMP --iteration 1 -C $INSTALLDIR \
