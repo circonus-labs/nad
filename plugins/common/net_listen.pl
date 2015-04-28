@@ -10,6 +10,13 @@ my $portspec = shift;
 
 my %YAY_PORTABILITY = 
   (
+   'freebsd' => {
+               netstat => 'sockstat -l -L -4 -6 | grep -v ^USER',
+               all_iface => '*',
+               separator => ':',
+               match_col => 5,
+               proc_col => 2,
+              },
    'linux' => {
                netstat => "netstat -nlp --inet 2>/dev/null | grep LISTEN",
                all_iface => '0.0.0.0',
