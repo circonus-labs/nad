@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+'use strict';
 //
 // Toss executables (scripts too) in /etc/node-agent.d
 // Each program should produce lines as follows:
@@ -13,10 +14,13 @@
 // require //////////////////////////////////////////////////////////////
 
 var fs = require('fs'),
+    os = require('os'),
     sys = require('sys'),
     http = require('http'),
     url = require('url'),
     path = require('path'),
+    crypto = require('crypto'),
+    circapi = require('circonusapi2'),
     nadapi = require('nad_circapi'),
     circwmi = require('circwmi'),
     dutil = require('debug_util'),
@@ -60,9 +64,11 @@ var do_index = false;
 // command line options for api setup
 var api_options = {};
 var api_setup = false;
+var attempt_reverse = false;
 var auth_token = null;
 var target = null;
-var hostname = null;
+var cafile = null;
+var hostname = os.hostname();
 var brokerid = null
 var configfile = null;
 var debugdir = null;                        // if set, a dir to write debug logs to
@@ -97,10 +103,12 @@ function help(err) {
               "\t-p [ip:]<port>\t\tunsecured port\n" +
               "\t-s [ip:]<secureport>\tsecured port\n" +
               "\t-v\t\t\tverify secured traffic\n" +
+              "\t-r\t\t\tattempt reverse connection\n" +
               "\t--authtoken\t\tCirconus API auth token to use, if passed will attempt to configure via the Circonus API then exit.\n" +
               "\t--target\t\tTarget Circonus will use to contact this host.\n" +
               "\t--hostname\t\tHostname used in check and graph names, if not passed we will attempt to look it up.\n" +
               "\t--brokerid\t\tID of the Circonus broker to configure the check on.\n" +
+              "\t--cafile\t\tpath to CA certificate file.\n" +
               "\t--configfile\t\tName of the file in the config directory to use for Circonus configuration.\n" +
               "\t--debugdir\t\tCreate debug files for each script and write them to this directory.\n" +
               "\t--wipedebugdir\t\tWipe debug files clean before each write.\n" +
@@ -160,7 +168,7 @@ function index(dir) {
       for(var script in j) {
         try {
           var info = fs.statSync(path.join(".", dir, script));
-          if(!info.isFile() || (!(is_windows) && (!(info.mode & 0100)))) throw Exception("");
+          if(!info.isFile() || (!(is_windows) && (!(info.mode & parseInt('0100',8))))) throw Exception("");
         } catch(e) { missing[path.join(dir, script)] = true; }
       }
     } catch(e) { }
@@ -190,7 +198,7 @@ function index(dir) {
     if(info.isSymbolicLink()) info = fs.statSync(files[i]);
 
     // if this is executable (or we're running on windows)
-    if(info.isFile() && (is_windows || info.mode & 0100)) {
+    if(info.isFile() && (is_windows || info.mode & parseInt('0100',8))) {
       var realpath = fs.realpathSync(files[i]);
       if(realpath.indexOf(base) == 0)
         realpath = realpath.substr(base.length);
@@ -274,13 +282,15 @@ for(var i=2; i<process.argv.length; i++) {
     //// options for autoconfig with circonus api ////
 
     case "--authtoken": {
-        api_setup = true;
         auth_token = process.argv[++i];
+        api_setup=true;
         break;
     }
+    case "-r": attempt_reverse = true; break;
     case "--target": target = process.argv[++i]; break;
     case "--hostname": hostname = process.argv[++i]; break;
     case "--brokerid": brokerid = process.argv[++i]; break;
+    case "--cafile": cafile = process.argv[++i]; break;
     case "--configfile": configfile = fs.realpathSync(process.argv[++i]); break;
     case "--debugdir": debugdir = process.argv[++i]; break;
     case "--wipedebugdir": wipedebugdir = true; ++i; break;
@@ -295,6 +305,8 @@ for(var i=2; i<process.argv.length; i++) {
     default: help("unknown argument: " + process.argv[i]);
   }
 }
+
+if (attempt_reverse) api_setup = false;
 
 // if we're just indexing, do that then quit
 if(do_index) {
@@ -345,7 +357,7 @@ function onchange(cb) {
 // run each script in scripts that hasn't had an initial
 // run yet (and then remember it _has_ had an initial run)
 function initial_pass() {
-  for(which in scripts) {
+  for(var which in scripts) {
     if(!(which in scripts_once)) {
       init_script(scripts[which], null, function() {});
       scripts_once[which] = true;
@@ -442,7 +454,7 @@ function rescan_modules() {
           // if the file is something we should deal with
           // (is a file, and either ends in .js or is executable, or we're running on
           // windows where everything is considered executable)
-          if(sb && sb.isFile() && (is_windows || /\.js$/.test(filename) || sb.mode & 0111)) {
+          if(sb && sb.isFile() && (is_windows || /\.js$/.test(filename) || sb.mode & parseInt('0111',8))) {
             // setup the details in the scripts object for this file
             if(!(name in scripts)) scripts[name] = {};
             var d = scripts[name];
@@ -850,6 +862,67 @@ if ( ! api_setup ) {
 }
 
 ////////////////////////////////////////////////////////////////////////
+// setup optional reverse sockets
+////////////////////////////////////////////////////////////////////////
+
+var revs = {}
+
+function setup_reverse() {
+  var noit;
+  try { noit = require('noit'); }
+  catch(e) {
+    console.log("Failed to load noit module");
+    return;
+  }
+  circapi.setup(auth_token, 'nad', api_options);
+  circapi.get('/check_bundle?f_type=json:nad&f_target=' + hostname, null,
+    function(code, err, data) {
+      if(typeof(data) == 'object' && data.length == 1) {
+        var check = data[0];
+        if(check._reverse_connection_urls && check._reverse_connection_urls.length > 0) {
+          check._reverse_connection_urls.forEach(function(url) {
+            var m = /^mtev_reverse:\/\/(.+):(\d+)\/([^.]+)$/.exec(url);
+            if(m) {
+              var creds = crypto.createCredentials({ca:
+"-----BEGIN CERTIFICATE-----\n" +
+"MIID4zCCA0ygAwIBAgIJAMelf8skwVWPMA0GCSqGSIb3DQEBBQUAMIGoMQswCQYD\n" +
+"VQQGEwJVUzERMA8GA1UECBMITWFyeWxhbmQxETAPBgNVBAcTCENvbHVtYmlhMRcw\n" +
+"FQYDVQQKEw5DaXJjb251cywgSW5jLjERMA8GA1UECxMIQ2lyY29udXMxJzAlBgNV\n" +
+"BAMTHkNpcmNvbnVzIENlcnRpZmljYXRlIEF1dGhvcml0eTEeMBwGCSqGSIb3DQEJ\n" +
+"ARYPY2FAY2lyY29udXMubmV0MB4XDTA5MTIyMzE5MTcwNloXDTE5MTIyMTE5MTcw\n" +
+"NlowgagxCzAJBgNVBAYTAlVTMREwDwYDVQQIEwhNYXJ5bGFuZDERMA8GA1UEBxMI\n" +
+"Q29sdW1iaWExFzAVBgNVBAoTDkNpcmNvbnVzLCBJbmMuMREwDwYDVQQLEwhDaXJj\n" +
+"b251czEnMCUGA1UEAxMeQ2lyY29udXMgQ2VydGlmaWNhdGUgQXV0aG9yaXR5MR4w\n" +
+"HAYJKoZIhvcNAQkBFg9jYUBjaXJjb251cy5uZXQwgZ8wDQYJKoZIhvcNAQEBBQAD\n" +
+"gY0AMIGJAoGBAKz2X0/0vJJ4ad1roehFyxUXHdkjJA9msEKwT2ojummdUB3kK5z6\n" +
+"PDzDL9/c65eFYWqrQWVWZSLQK1D+v9xJThCe93v6QkSJa7GZkCq9dxClXVtBmZH3\n" +
+"hNIZZKVC6JMA9dpRjBmlFgNuIdN7q5aJsv8VZHH+QrAyr9aQmhDJAmk1AgMBAAGj\n" +
+"ggERMIIBDTAdBgNVHQ4EFgQUyNTsgZHSkhhDJ5i+6IFlPzKYxsUwgd0GA1UdIwSB\n" +
+"1TCB0oAUyNTsgZHSkhhDJ5i+6IFlPzKYxsWhga6kgaswgagxCzAJBgNVBAYTAlVT\n" +
+"MREwDwYDVQQIEwhNYXJ5bGFuZDERMA8GA1UEBxMIQ29sdW1iaWExFzAVBgNVBAoT\n" +
+"DkNpcmNvbnVzLCBJbmMuMREwDwYDVQQLEwhDaXJjb251czEnMCUGA1UEAxMeQ2ly\n" +
+"Y29udXMgQ2VydGlmaWNhdGUgQXV0aG9yaXR5MR4wHAYJKoZIhvcNAQkBFg9jYUBj\n" +
+"aXJjb251cy5uZXSCCQDHpX/LJMFVjzAMBgNVHRMEBTADAQH/MA0GCSqGSIb3DQEB\n" +
+"BQUAA4GBAAHBtl15BwbSyq0dMEBpEdQYhHianU/rvOMe57digBmox7ZkPEbB/baE\n" +
+"sYJysziA2raOtRxVRtcxuZSMij2RiJDsLxzIp1H60Xhr8lmf7qF6Y+sZl7V36KZb\n" +
+"n2ezaOoRtsQl9dhqEMe8zgL76p9YZ5E69Al0mgiifTteyNjjMuIW\n" +
+"-----END CERTIFICATE-----"});
+              creds.rejectUnauthorized = false;
+              revs[url] = new noit.connection(m[2],m[1],
+                            cafile ? noit.utils.hashToCreds({ca:cafile}) : creds);
+              revs[url].reverse(m[3], '127.0.0.1', port[0][0]);
+            }
+          });
+        } else {
+          console.log("configuration error for reverse: no URLs found");
+        }
+      } else {
+        console.log("configuration error for reverse: no check found (hostname mismatch?)");
+      }
+  });
+}
+
+////////////////////////////////////////////////////////////////////////
 // setuid
 ////////////////////////////////////////////////////////////////////////
 
@@ -858,6 +931,7 @@ function post_boot() {
     console.log("Dropping privileges: " + drop_uid);
     process.setuid(drop_uid);
   }
+  if(attempt_reverse) setup_reverse();
 }
 
 ////////////////////////////////////////////////////////////////////////
