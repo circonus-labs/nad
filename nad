@@ -738,7 +738,7 @@ function run_scripts(req, res, which) {
     // if nothing was passed in which, with every script
 
     // first work out how many scripts we're going to wait to run
-    for(file in scripts) {
+    for(var file in scripts) {
       if ( which && file != which ) continue;
       req.nad_run_count++;
     }
@@ -747,7 +747,7 @@ function run_scripts(req, res, which) {
     // then when it returns in the callback populate set with
     // the result.  Keep track of how many scripts are left to run
     //
-    for(file in scripts) {
+    for(var file in scripts) {
       if ( which && file != which ) continue;
       init_script(scripts[file], req, function(d, results, name) {
         req.nad_run_count--;
