@@ -1,3 +1,4 @@
+DESTDIR?=
 PREFIX?=/opt/circonus
 MAN=$(PREFIX)/man/man8
 SBIN=$(PREFIX)/sbin
