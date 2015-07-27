@@ -5,7 +5,7 @@
 . @@CONF@@/freebsd/common.sh
 
 print_vm() {
-    ${BIN_PRINTF} "%s\`%s\tL\t%s\n" $1 $2 $3
+    printf "%s\`%s\tL\t%s\n" $1 $2 $3
 }
 
 # Total system memory: active + wired + cache + inactive + free
@@ -42,8 +42,8 @@ SWAP_PERC=`echo "scale=2;$SWAP_USED/$SWAP_TOTAL" | ${BIN_BC}`
 print_vm memory total $(($ACTIVE+$WIRED+$CACHE+$INACTIVE+$FREE))
 print_vm memory used $(($ACTIVE+$WIRED))
 print_vm memory free $(($CACHE+$INACTIVE+$FREE))
-${BIN_PRINTF} "memory\`percent_used\tn\t%0.2f\n" $MEM_PERC
+printf "memory\`percent_used\tn\t%0.2f\n" $MEM_PERC
 print_vm swap total $SWAP_TOTAL
 print_vm swap used $SWAP_USED
 print_vm swap free $SWAP_FREE
-${BIN_PRINTF} "swap\`percent_used\tn\t%0.2f\n" $SWAP_PERC
+printf "swap\`percent_used\tn\t%0.2f\n" $SWAP_PERC

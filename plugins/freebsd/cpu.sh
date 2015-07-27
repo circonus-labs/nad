@@ -6,7 +6,7 @@
 
 # Print ordinary metrics
 print_cssum() {
-    ${BIN_PRINTF} "%s\tL\t%s\n" $1 $2
+    printf "%s\tL\t%s\n" $1 $2
 }
 
 # Print metrics normalized to a single CPU and 100Hz tick rate
@@ -14,7 +14,7 @@ print_norm_cssum() {
     per_cpu_count=`${BIN_EXPR} $2 / $NCPUS`
     rate_factor=`echo "scale=2; 100/$STATHZ" | ${BIN_BC}`
     value=`echo "$per_cpu_count*$rate_factor" | ${BIN_BC}`
-    ${BIN_PRINTF} "%s\tL\t%.0f\n" $1 $value
+    printf "%s\tL\t%.0f\n" $1 $value
 }
 
 NCPUS=`${BIN_SYSCTL} -n hw.ncpu`
