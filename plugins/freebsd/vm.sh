@@ -28,7 +28,7 @@ FREE=$(($PG_FREE*$PGSIZE))
 
 MEM_USED=$(($ACTIVE+$WIRED))
 MEM_TOTAL=$(($ACTIVE+$WIRED+$CACHE+$INACTIVE+$FREE))
-MEM_PERC=`echo "scale=2;$MEM_USED/$MEM_TOTAL" | ${BIN_BC}`
+MEM_PERC=`${BIN_BC} -e "scale=2;$MEM_USED/$MEM_TOTAL" -e quit`
 
 # Swap
 # There doesn't seem to be a direct sysctl for swap used. Use pstat instead.
@@ -37,7 +37,7 @@ stats=`${BIN_PSTAT} -T | ${BIN_AWK} '$2 == "swap" { print $1; }'`
 SWAP_USED=$((`echo $stats | ${BIN_CUT} -d'/' -f1 | ${BIN_SED} -e 's/M//'`*1048576))
 SWAP_TOTAL=$((`echo $stats | ${BIN_CUT} -d'/' -f2 | ${BIN_SED} -e 's/M//'`*1048576))
 SWAP_FREE=$(($SWAP_TOTAL-$SWAP_USED))
-SWAP_PERC=`echo "scale=2;$SWAP_USED/$SWAP_TOTAL" | ${BIN_BC}`
+SWAP_PERC=`${BIN_BC} -e "scale=2;$SWAP_USED/$SWAP_TOTAL" -e quit`
 
 print_vm memory total $(($ACTIVE+$WIRED+$CACHE+$INACTIVE+$FREE))
 print_vm memory used $(($ACTIVE+$WIRED))
