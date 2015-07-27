@@ -11,7 +11,7 @@ print_cssum() {
 
 # Print metrics normalized to a single CPU and 100Hz tick rate
 print_norm_cssum() {
-    per_cpu_count=`${BIN_EXPR} $2 / $NCPUS`
+    per_cpu_count="$(( $2 / $NCPUS))"
     rate_factor=`echo "scale=2; 100/$STATHZ" | ${BIN_BC}`
     value=`echo "$per_cpu_count*$rate_factor" | ${BIN_BC}`
     printf "%s\tL\t%.0f\n" $1 $value
@@ -37,22 +37,22 @@ CPU_GUEST=0
 CPU_GUEST_NICE=0
 
 # Summarize interrupts
-CPU_INTR=`${BIN_EXPR} $CPU_IRQ + $CPU_SOFTIRQ`
+CPU_INTR=$(( $CPU_IRQ + $CPU_SOFTIRQ ))
 
 # Summarize kernel time
 #
 # "guest" and "guest_nice" are time spent running virtual CPUs, and count as
 # kernel time
-CPU_KERNEL=`${BIN_EXPR} $CPU_SYS + $CPU_GUEST + $CPU_GUEST_NICE`
+CPU_KERNEL=$(( $CPU_SYS + $CPU_GUEST + $CPU_GUEST_NICE ))
 
 # Summarize idle time
 #
 # "steal" is time while we, a guest, are runnable but a real CPU isn't
 # servicing our virtual CPU
-CPU_IDLE=`${BIN_EXPR} $CPU_IDLE_NORMAL + $CPU_STEAL`
+CPU_IDLE=$(( $CPU_IDLE_NORMAL + $CPU_STEAL ))
 
 # Summarize user time
-CPU_USER=`${BIN_EXPR} $CPU_USER_NORMAL + $CPU_USER_NICE`
+CPU_USER=$(( $CPU_USER_NORMAL + $CPU_USER_NICE ))
 
 # Context switches
 CTXT=`${BIN_SYSCTL} -n vm.stats.sys.v_swtch`
