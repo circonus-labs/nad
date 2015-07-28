@@ -10,6 +10,7 @@ BIN_CUT=/usr/bin/cut
 BIN_SED=/usr/bin/sed
 BIN_BC=/usr/bin/bc
 BIN_EXPR=/bin/expr
+BIN_NETSTAT=/usr/bin/netstat
 BIN_PSTAT=/usr/sbin/pstat
 BIN_SYSCTL=/sbin/sysctl
 
