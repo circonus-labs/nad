@@ -4,7 +4,7 @@
 
 . @@CONF@@/freebsd/common.sh
 
-${BIN_NETSTAT} -i -b -n -W -f link | ${AWK_BIN} '{
+${BIN_NETSTAT} -i -b -n -W -f link | ${BIN_AWK} '{
     if ($1 == "Name") next;
     if ($1 ~ /^lo[0-9]/) next;
     printf("%s`in_bytes\tL\t%d\n", $1, $8);
