@@ -82,13 +82,12 @@ install-freebsd:	install
 		-e "s#@@PREFIX@@#${PREFIX}#g" \
 		-e "s#@@CONF@@#${CONF}#g" \
 		freebsd-init/nad > freebsd-init/nad.out
-	#./install-sh -d -m 0755 -o root -g wheel $(DESTDIR)$(PREFIX)/etc/init.d
 	./install-sh -d -m 0755 $(DESTDIR)$(PREFIX)/etc/init.d
 	./install-sh -c -m 0755 freebsd-init/nad.out $(DESTDIR)$(PREFIX)/etc/rc.d/nad
 	cd $(DESTDIR)$(CONF)/freebsd ; $(MAKE)
 	cd $(DESTDIR)$(CONF) ; \
 		for f in `ls -1 freebsd/*.sh | grep -v common.sh` freebsd/*.elf ; do \
-			/bin/ln -sf freebsd/$$f . ; \
+			/bin/ln -sf $$f . ; \
 		 done
 	cd $(DESTDIR)$(CONF) ; /bin/ln -sf common/zpool.sh
 
