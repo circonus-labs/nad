@@ -1,3 +1,4 @@
+DESTDIR?=
 PREFIX?=/opt/circonus
 MAN=$(PREFIX)/man/man8
 SBIN=$(PREFIX)/sbin
@@ -69,14 +70,26 @@ install-rhel:	install-linux
 	./install-sh -c -m 0755 linux-init/rhel-init.out $(DESTDIR)/etc/init.d/nad
 
 install-freebsd:	install
+	for f in plugins/freebsd/*.sh ; do \
+		filename=`echo "$${f}" | /usr/bin/sed -e 's#plugins/##'`; \
+		/usr/bin/sed \
+			-e "s#@@PREFIX@@#${PREFIX}#g" \
+			-e "s#@@CONF@@#${CONF}#g" \
+			$${f} > "${DESTDIR}${CONF}/$${filename}"; \
+	done
+
 	/usr/bin/sed \
-		-e "s#@@PREFIX@@#$(PREFIX)#g" \
-		-e "s#@@CONF@@#$(CONF)#g" \
+		-e "s#@@PREFIX@@#${PREFIX}#g" \
+		-e "s#@@CONF@@#${CONF}#g" \
 		freebsd-init/nad > freebsd-init/nad.out
-	./install-sh -d -m 0755 -o root -g wheel $(DESTDIR)/etc/init.d
-	./install-sh -c -m 0755 freebsd-init/nad.out $(DESTDIR)/etc/rc.d/nad
+	#./install-sh -d -m 0755 -o root -g wheel $(DESTDIR)$(PREFIX)/etc/init.d
+	./install-sh -d -m 0755 $(DESTDIR)$(PREFIX)/etc/init.d
+	./install-sh -c -m 0755 freebsd-init/nad.out $(DESTDIR)$(PREFIX)/etc/rc.d/nad
 	cd $(DESTDIR)$(CONF)/freebsd ; $(MAKE)
-	cd $(DESTDIR)$(CONF) ; for f in cpu.sh disk.elf fs.elf if.sh vm.sh zfsinfo.sh ; do /bin/ln -sf freebsd/$$f ; done
+	cd $(DESTDIR)$(CONF) ; \
+		for f in `ls -1 freebsd/*.sh | grep -v common.sh` freebsd/*.elf ; do \
+			/bin/ln -sf freebsd/$$f . ; \
+		 done
 	cd $(DESTDIR)$(CONF) ; /bin/ln -sf common/zpool.sh
 
 install-openbsd:	install
