@@ -93,21 +93,17 @@ NODE_SOURCE="http://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}.tar.gz"
 
 node_src() {
     echo "Checking for node-$NODE_VERSION source"
-    if [[ -d $BUILDDIR/node-$NODE_VERSION ]]; then
-        echo "--- node source dir exists"
+    pushd $BUILDDIR > /dev/null
+    if [[ -f node-${NODE_VERSION}.tar.gz ]]; then
+        echo "--- node source archive exists, extracting."
+        tar zxf node-${NODE_VERSION}.tar.gz
     else
-        pushd $BUILDDIR > /dev/null
-        if [[ -f node-${NODE_VERSION}.tar.gz ]]; then
-            echo "--- node source archive exists, extracting."
-            tar zxf node-${NODE_VERSION}.tar.gz
-        else
-            echo "--- node source archive not found, downloading."
-            wget $NODE_SOURCE
-            echo "--- extracting source archive"
-            tar zxf node-${NODE_VERSION}.tar.gz
-        fi
-        popd > /dev/null
+        echo "--- node source archive not found, downloading."
+        wget $NODE_SOURCE
+        echo "--- extracting source archive"
+        tar zxf node-${NODE_VERSION}.tar.gz
     fi
+    popd > /dev/null
 }
 
 build_node() {
