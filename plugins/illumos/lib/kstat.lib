@@ -25,7 +25,33 @@ _kstat() {
 	  }'
   fi
 }
-           
+   
+_kstat_val() {
+for c in $*; do
+    if [ "$c" = "--" ]; then
+      shift;
+      break;
+    fi
+    args="$args $c"
+    shift
+  done
+  if [ -n "$*" ]; then
+    /usr/bin/kstat -p $args | \
+      /usr/xpg4/bin/awk '{
+          if(match($1, /:(class|crtime|snaptime)$/)) next; \
+          if(index($2,".")) { print $2; } \
+          else { print $2; }
+      }' | $*
+  else
+    /usr/bin/kstat -p $args | \
+      /usr/xpg4/bin/awk '{
+          if(match($1, /:(class|crtime|snaptime)$/)) next; \
+          if(index($2,".")) { print $2; } \
+          else { print $2; }
+      }'
+  fi
+}  
+
 _kstat_sum() {
 	/usr/bin/kstat -p  $* | \
 	/usr/xpg4/bin/awk '{
