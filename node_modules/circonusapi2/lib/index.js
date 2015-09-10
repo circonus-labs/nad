@@ -172,9 +172,6 @@ api.prototype.get_request_options = function (method, endpoint, data) {
       };
 
   options.circapi.data = data;
-  if ( options.method === 'GET' && data !== null && Object.keys(data).length !== 0 ) {
-    options.path += '?' + qs.stringify(data);
-  }
   if ( options.method === 'POST' || options.method === 'PUT' && data ) {
     options.headers['Content-Length'] = JSON.stringify(data).length;
   }
@@ -183,6 +180,9 @@ api.prototype.get_request_options = function (method, endpoint, data) {
     endpoint = endpoint.substring(1);
   }
   options.path += endpoint;
+  if ( options.method === 'GET' && data !== null && Object.keys(data).length !== 0 ) {
+    options.path += '?' + qs.stringify(data);
+  }
 
   return options;
 };
