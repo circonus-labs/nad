@@ -328,7 +328,7 @@ if(sslport.length > 0) {
   try {
     // Setup creds
     creds.key = fs.readFileSync(path.join(configdir, "na.key")).toString();
-    creds.crt = fs.readFileSync(path.join(configdir, "na.crt")).toString();
+    creds.cert = fs.readFileSync(path.join(configdir, "na.crt")).toString();
     if(verify) creds.ca = fs.readFileSync(path.join(configdir, "na.ca")).toString();
   } catch(e) {
     console.log("Make sure:");
