@@ -855,7 +855,7 @@ if ( ! api_setup ) {
     // listen on all secure ports
     try {
       for(var i=0; i<sslport.length; i++)
-        https.createServer(creds).addListener(handler).listen(sslport[i][0], sslport[i][1]);
+        https.createServer(creds, handler).listen(sslport[i][0], sslport[i][1]);
     } catch(e) {
       console.log("Failed to start server on port " + sslport + ": " + e);
       process.exit(-1);
