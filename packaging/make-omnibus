@@ -88,7 +88,7 @@ else
     mkdir $INSTALLDIR
 fi
 
-NODE_VERSION="v0.10.38"
+NODE_VERSION="v0.10.42"
 NODE_SOURCE="http://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}.tar.gz"
 
 node_src() {
