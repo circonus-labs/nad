@@ -25,11 +25,11 @@ let PG_MINFAULTS=$PG_FAULTS-$PG_MAJFAULTS
 print_vm memory total $MEM_TOTAL
 print_vm memory used $MEM_USED
 print_vm memory free $MEM_FREE
-print_vm memory percent_used $MEM_PERC
+printf "memory\`percent_used\tn\t%0.2f\n" $MEM_PERC
 print_vm swap total $SWAP_TOTAL
 print_vm swap used $SWAP_USED
 print_vm swap free $SWAP_FREE
-print_vm swap percent_used $SWAP_PERC
+printf "swap\`percent_used\tn\t%0.2f\n" $SWAP_PERC
 print_vm info page_fault $PG_FAULTS
 print_vm info page_fault\`minor $PG_MINFAULTS
 print_vm info page_fault\`major $PG_MAJFAULTS
