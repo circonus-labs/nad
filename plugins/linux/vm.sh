@@ -9,13 +9,13 @@ MEM_TOTAL=${MEM[1]}
 # For consistency across platforms, count cache as free, not used
 let MEM_USED=${MEM[1]}-${MEM[3]}-${MEM[5]}-${MEM[6]}
 let MEM_FREE=${MEM[3]}+${MEM[5]}+${MEM[6]}
-let MEM_PERC=100*$MEM_USED/$MEM_TOTAL
+let MEM_PERC=$MEM_USED/$MEM_TOTAL
 
 SWAP=($(free -k | grep ^Swap:))
 SWAP_TOTAL=${SWAP[1]}
 SWAP_USED=${SWAP[2]}
 SWAP_FREE=${SWAP[3]}
-let SWAP_PERC=100*${SWAP[2]}/${SWAP[1]}
+let SWAP_PERC=${SWAP[2]}/${SWAP[1]}
 
 # pgfault is min+maj
 PG_FAULTS=$(grep ^pgfault /proc/vmstat | awk '{ print $2 }')
