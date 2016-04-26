@@ -7,9 +7,10 @@ print_cssum() {
     printf "%s\tL\t%s\n" $1 $2
 }
 
-# Print metrics normalized to a single CPU
+# Print metrics normalized to a single CPU and 100 Hz tick rate
 print_norm_cssum() {
-    printf "%s\tL\t%s\n" $1 `expr $2 / $NCPUS`
+    let norm_val="($2 / $NCPUS) / $NORMHZ"
+    printf "%s\tL\t%s\n" $1 $norm_val
 }
 
 if [[ -x /usr/bin/nproc ]]; then
@@ -17,6 +18,10 @@ if [[ -x /usr/bin/nproc ]]; then
 else
     NCPUS=$(/bin/grep -c ^processor /proc/cpuinfo)
 fi
+
+# System tick rate, and divisor to normalize to 100 Hz
+TICKHZ=`getconf CLK_TCK`
+NORMHZ=`expr $TICKHZ / 100`
 
 # Kernel version madness.  Number of columns in cpu line changed several times.
 OSREV=`/bin/uname -r`
