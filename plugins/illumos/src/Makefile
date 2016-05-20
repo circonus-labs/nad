@@ -7,7 +7,7 @@ else
 	CFLAGS+=-DHAVE_LOGICAL_USED
 endif
 
-all:	../aggcpu.elf ../cpu.elf ../fs.elf ../zpoolio.elf
+all:	../aggcpu.elf ../cpu.elf ../fs.elf ../zpoolio.elf ../swap.elf
 
 ../aggcpu.elf:	aggcpu.c
 	$(CC) -o $@ aggcpu.c -lkstat
@@ -17,6 +17,9 @@ all:	../aggcpu.elf ../cpu.elf ../fs.elf ../zpoolio.elf
 
 ../fs.elf:	fs.c
 	$(CC) -m64 $(CFLAGS) -o $@ fs.c -lzfs
+
+../swap.elf:	swap.c
+	$(CC) -m64 $(CFLAGS) -o $@ swap.c
 
 ../zpoolio.elf:	zpoolio.c
 	$(CC) -m64 -o $@ zpoolio.c -lzfs -lnvpair
