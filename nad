@@ -70,6 +70,7 @@ var auth_token = null;
 var target = null;
 var cafile = null;
 var hostname = os.hostname();
+var check_bundle_id = null;
 var brokerid = null
 var configfile = null;
 var debugdir = null;                        // if set, a dir to write debug logs to
@@ -109,6 +110,7 @@ function help(err) {
               "\t--target\t\tTarget Circonus will use to contact this host.\n" +
               "\t--hostname\t\tHostname used in check and graph names, if not passed we will attempt to look it up.\n" +
               "\t--brokerid\t\tID of the Circonus broker to configure the check on.\n" +
+              "\t--cid\t\tID of the Circonus check bundle which we will use to find the proper broker for reverse connections.\n" +
               "\t--cafile\t\tpath to CA certificate file.\n" +
               "\t--configfile\t\tName of the file in the config directory to use for Circonus configuration.\n" +
               "\t--debugdir\t\tCreate debug files for each script and write them to this directory.\n" +
@@ -289,6 +291,7 @@ for(var i=2; i<process.argv.length; i++) {
     }
     case "-r": attempt_reverse = true; break;
     case "--target": target = process.argv[++i]; break;
+    case "--cid": check_bundle_id = process.argv[++i]; break;
     case "--hostname": hostname = process.argv[++i]; break;
     case "--brokerid": brokerid = process.argv[++i]; break;
     case "--cafile": cafile = process.argv[++i]; break;
@@ -866,17 +869,22 @@ if ( ! api_setup ) {
 // setup optional reverse sockets
 ////////////////////////////////////////////////////////////////////////
 
+
+// this is a module local dict to hold the reverse connections we make
+// in setup_reverse.  it exists merely to keep the connections alive which
+// act as proxies and all incoming calls to this nad instance will be "pull"
+// style HTTP GET requests and be handled in the normal "handler" function.
 var revs = {}
 
 function setup_reverse() {
   var noit;
-  try { noit = require('noit'); }
+  try { noit = require('noit-connection'); }
   catch(e) {
-    console.log("Failed to load noit module");
+    console.log("Failed to load noit-connection module");
     return;
   }
-  circapi.setup(auth_token, 'nad', api_options);
-  circapi.get('/check_bundle?f_type=json:nad&f_target=' + hostname, null,
+
+  var circapi_cb =
     function(code, err, data) {
       if(typeof(data) == 'object' && data.length == 1) {
         var check = data[0];
@@ -920,7 +928,14 @@ function setup_reverse() {
       } else {
         console.log("configuration error for reverse: no check found (hostname mismatch?)");
       }
-  });
+  }
+
+  circapi.setup(auth_token, 'nad', api_options);
+  if (check_bundle_id == null) {
+      circapi.get('/check_bundle?f_type=json:nad&f_target=' + hostname, null, circapi_cb);
+  else {
+      circapi.get('/check_bundle/' + check_bundle_id, null, circapi_cb);
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////
