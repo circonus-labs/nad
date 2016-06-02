@@ -933,7 +933,7 @@ function setup_reverse() {
   circapi.setup(auth_token, 'nad', api_options);
   if (check_bundle_id == null) {
       circapi.get('/check_bundle?f_type=json:nad&f_target=' + hostname, null, circapi_cb);
-  else {
+  } else {
       circapi.get('/check_bundle/' + check_bundle_id, null, circapi_cb);
   }
 }
