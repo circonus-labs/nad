@@ -895,7 +895,7 @@ function setup_reverse() {
         if (typeof(data) == 'object') {
             var check = {};
 
-            if (data.length == 1) {
+            if (data.length >= 1) {
                 check = data[0];
             } else {
                 check = data;
