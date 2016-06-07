@@ -43,19 +43,20 @@ if [[ -f /etc/redhat-release ]]; then
     esac
 elif [[ -f /etc/lsb-release ]]; then
     INSTALL_TARGET="install-ubuntu"
-    relver=$(awk -F'=' '$1 == "DISTRIB_RELEASE" { print $2 }' /etc/lsb-release)
+    . /etc/lsb-release
+    relver=$DISTRIB_RELEASE
     [[ "$PLATFORM" == "x86_64" ]] && PLATFORM="amd64"
     case "$relver" in
-        10.04)
-            OS="ubuntu.10.04"
-            fpm="/var/lib/gems/1.8/bin/fpm"
-            ;;
         12.04)
             OS="ubuntu.12.04"
             fpm="/var/lib/gems/1.8/gems/fpm-0.4.29/bin/fpm"
             ;;
         14.04)
             OS="ubuntu.14.04"
+            fpm="/usr/local/bin/fpm"
+            ;;
+        16.04)
+            OS="ubuntu.16.04"
             fpm="/usr/local/bin/fpm"
             ;;
         *)
