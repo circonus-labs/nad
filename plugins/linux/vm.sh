@@ -32,7 +32,7 @@ $AWK 'BEGIN {
     if (substr(item, 0, 9) == "HugePages") {
         list[item] = value
     } else {
-        list[item] = value * 8
+        list[item] = value * 1024
     }
 }
 END {
