@@ -1,35 +1,94 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+AWK=$(type -P awk)
+[[ $? -eq 0 ]] || {
+    echo "Unable to find 'awk'"
+    exit 1
+}
 
 print_vm() {
     printf "%s\`%s\tL\t%s\n" $1 $2 $3
 }
 
-MEM=($(free -b | grep ^Mem:))
-MEM_TOTAL=${MEM[1]}
-# For consistency across platforms, count cache as free, not used
-let MEM_USED=${MEM[1]}-${MEM[3]}-${MEM[5]}-${MEM[6]}
-let MEM_FREE=${MEM[3]}+${MEM[5]}+${MEM[6]}
-MEM_PERC=`echo "scale=2; $MEM_USED/$MEM_FREE" | bc`
+PROCFILE="/proc/meminfo"
+[[ -f "$PROCFILE" ]] || {
+    echo "Unable to find '${PROCFILE}'"
+    exit 1
+}
 
-SWAP=($(free -b | grep ^Swap:))
-SWAP_TOTAL=${SWAP[1]}
-SWAP_USED=${SWAP[2]}
-SWAP_FREE=${SWAP[3]}
-SWAP_PERC=`echo "scale=2; ${SWAP[2]}/${SWAP[1]}" | bc`
+set -eu
+
+$AWK 'BEGIN {
+    list[""] = 0;
+}
+{
+    item=$1
+    value=$2
+
+    if ((idx = index(item, ":")) > 0) {
+        item = substr(item, 1, idx - 1)
+    }
+
+    if (substr(item, 0, 9) == "HugePages") {
+        list[item] = value
+    } else {
+        list[item] = value * 8
+    }
+}
+END {
+    memTotal=list["MemTotal"]
+
+    memFree=list["MemFree"]
+    memBuffers=list["Buffers"]
+    memCached=list["Cached"]
+    memFreeTotal=(memFree + memBuffers + memCached)
+
+    memUsed=memTotal - memFreeTotal
+    memFreePct=memFreeTotal / memTotal
+    memUsedPct=memUsed / memTotal
+
+    swapTotal=list["SwapTotal"]
+    swapFree=list["SwapFree"]
+    swapUsed=swapTotal - swapFree
+    if (swapTotal > 0) {
+        swapFreePct=swapFree / swapTotal
+        swapUsedPct=swapUsed / swapTotal
+    } else {
+        swapFreePct=0
+        swapUsedPct=0
+    }
+
+    for (key in list) {
+        if (key != "") {
+            printf("meminfo`%s\tL\t%d\n", key, list[key])
+        }
+    }
+
+    printf("memory`total\tL\t%d\n", memTotal)
+    printf("memory`used\tL\t%d\n", memUsed)
+    printf("memory`free\tL\t%d\n", memFreeTotal)
+    printf("memory`percent_used\tL\t%.02f\n", memUsedPct)
+    printf("memory`percent_free\tL\t%.02f\n", memFreePct)
+    printf("swap`total\tL\t%d\n", swapTotal)
+    printf("swap`used\tL\t%d\n", swapUsed)
+    printf("swap`free\tL\t%d\n", swapFreeTotal)
+    printf("swap`percent_used\tL\t%.02f\n", swapUsedPct)
+    printf("swap`percent_free\tL\t%.02f\n", swapFreePct)
+}' < $PROCFILE
+
+
+PROCFILE="/proc/vmstat"
+[[ -f "$PROCFILE" ]] || {
+    echo "Unable to find '${PROCFILE}'"
+    exit 1
+}
 
 # pgfault is min+maj
-PG_FAULTS=$(grep ^pgfault /proc/vmstat | awk '{ print $2 }')
-PG_MAJFAULTS=$(grep ^pgmajfault /proc/vmstat | awk '{ print $2 }')
+PG_FAULTS=$(grep ^pgfault $PROCFILE | $AWK '{ print $2 }')
+PG_MAJFAULTS=$(grep ^pgmajfault $PROCFILE | $AWK '{ print $2 }')
 let PG_MINFAULTS=$PG_FAULTS-$PG_MAJFAULTS
 
-print_vm memory total $MEM_TOTAL
-print_vm memory used $MEM_USED
-print_vm memory free $MEM_FREE
-printf "memory\`percent_used\tn\t%0.2f\n" $MEM_PERC
-print_vm swap total $SWAP_TOTAL
-print_vm swap used $SWAP_USED
-print_vm swap free $SWAP_FREE
-printf "swap\`percent_used\tn\t%0.2f\n" $SWAP_PERC
 print_vm info page_fault $PG_FAULTS
 print_vm info page_fault\`minor $PG_MINFAULTS
 print_vm info page_fault\`major $PG_MAJFAULTS
+
