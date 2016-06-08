@@ -19,7 +19,7 @@ if [ ! -d $OUTPUT_DIR ]; then
 	echo "error\ts\tbad cache directory"
 	OUTPUT_FILE=/dev/null
 else
-	find $OUTPUT_FILE -mmin $CACHE_MINUTES -exec rm {} \; 2>/dev/null
+	find $OUTPUT_FILE -mmin +$CACHE_MINUTES -exec rm {} \; 2>/dev/null
 	if [ -r $OUTPUT_FILE ]; then
 		LMOD=`/bin/stat -c "%Y" $OUTPUT_FILE`
 		CTIME=`/bin/date +%s`
