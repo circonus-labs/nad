@@ -143,7 +143,7 @@ nad_src() {
 build_nad() {
     echo "Building nad"
     pushd $BUILDDIR/nad > /dev/null
-    make DESTDIR=$INSTALLDIR PREFIX=$PREFIX $INSTALL_TARGET
+    make DESTDIR=$INSTALLDIR PREFIX=$PREFIX RUNSTATE_USER=`id -u` $INSTALL_TARGET
     popd > /dev/null
 }
 
