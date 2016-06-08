@@ -19,6 +19,7 @@ install-dirs:
 	./mkinstalldirs $(DESTDIR)$(CONF)
 	./mkinstalldirs $(DESTDIR)$(MODULES)
 	./mkinstalldirs $(DESTDIR)$(RUNSTATE_DIR)
+	chown nobody $(DESTDIR)$(RUNSTATE_DIR)
 
 install-nad:	install-dirs
 	./install-sh -c -m 0755 nad $(DESTDIR)$(SBIN)/nad
