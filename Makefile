@@ -4,6 +4,7 @@ MAN=$(PREFIX)/man/man8
 SBIN=$(PREFIX)/sbin
 CONF=$(PREFIX)/etc/node-agent.d
 MODULES=$(PREFIX)/lib/node_modules
+RUNSTATE_DIR=$(PREFIX)/var/run/nad
 MANIFEST_DIR=/var/svc/manifest/network/circonus
 METHOD_DIR=/var/svc/method
 MAKE?=make
@@ -17,6 +18,7 @@ install-dirs:
 	./mkinstalldirs $(DESTDIR)$(SBIN)
 	./mkinstalldirs $(DESTDIR)$(CONF)
 	./mkinstalldirs $(DESTDIR)$(MODULES)
+	./mkinstalldirs $(DESTDIR)$(RUNSTATE_DIR)
 
 install-nad:	install-dirs
 	./install-sh -c -m 0755 nad $(DESTDIR)$(SBIN)/nad
