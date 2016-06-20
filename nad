@@ -969,7 +969,7 @@ function setup_reverse() {
             return;
         }
 
-        if (data === null || typeof data !== 'object') {
+        if (data === null || typeof data !== 'object' || (Array.isArray(data) && data.length === 0)) {
             if (check_bundle_id == null) {
                 console.error('ERROR: configuration for reverse - searching yielded no applicable json:nad check for', hostname);
             }
@@ -984,7 +984,7 @@ function setup_reverse() {
 
         var check = {};
 
-        if (Array.isArray(data) && data.length >= 1) {
+        if (Array.isArray(data)) {
             check = data[0];
         } else {
             check = data;
