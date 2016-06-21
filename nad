@@ -1007,7 +1007,7 @@ function setup_reverse() {
                 revs[url].reverse(m[3], '127.0.0.1', port[0][0]);
             }
             else {
-                var isFatal = check._reverse_connection_urls === 1;
+                var isFatal = check._reverse_connection_urls.length === 1;
                 console.error(isFatal ? 'ERROR:' : 'WARN:', 'invalid reverse connection URL,', isFatal ? 'exiting.' : 'skipping.', url);
                 if (isFatal) {
                     process.exit(1);
