@@ -913,8 +913,7 @@ function setup_reverse() {
             else if (typeof crypto.createCredentials === 'function') {
                 credFunc = crypto.createCredentials;
             }
-
-            if (credFunc === null) {
+            else {
                 console.error('ERROR: Unable to determine correct method to create secure context for reverse connection.');
                 process.exit(1);
             }
@@ -970,7 +969,7 @@ function setup_reverse() {
         }
 
         if (data === null || typeof data !== 'object' || (Array.isArray(data) && data.length === 0)) {
-            if (check_bundle_id == null) {
+            if (check_bundle_id === null) {
                 console.error('ERROR: configuration for reverse - searching yielded no applicable json:nad check for', hostname);
             }
             else {
@@ -990,28 +989,35 @@ function setup_reverse() {
             check = data;
         }
 
-        if (check._reverse_connection_urls && check._reverse_connection_urls.length > 0) {
-            check._reverse_connection_urls.forEach(function(url) {
-                var m = /^mtev_reverse:\/\/(.+):(\d+)\/([^.]+)$/.exec(url);
-
-                if (m) {
-                    revs[url] = new noit.connection(m[2], m[1], getNoitCreds());
-                    revs[url].reverse(m[3], '127.0.0.1', port[0][0]);
-                }
-            });
-        }
-        else {
-            console.error('ERROR: configuration for reverse - no reverse URLs found in', check._cid);
-            // explicit request to use reverse connections but, incorrect configuration prevents
-            // correct functionality. exit intentionally so there is a record in logging and
-            // service management can handle a persistently failing service in its usual manner.
+        if (!check.hasOwnProperty('_reverse_connection_urls')) {
+            console.error('ERROR: invalid check, does not contain a reverse connection URL.', check._cid);
             process.exit(1);
         }
+
+        if (!Array.isArray(check._reverse_connection_urls) || check._reverse_connection_urls.length === 0) {
+            console.error('ERROR: invalid check, reverse connection URL attribute is invalid.', check._cid);
+            process.exit(1);
+        }
+
+        check._reverse_connection_urls.forEach(function(url) {
+            var m = /^mtev_reverse:\/\/(.+):(\d+)\/([^.]+)$/.exec(url);
+
+            if (m) {
+                revs[url] = new noit.connection(m[2], m[1], getNoitCreds());
+                revs[url].reverse(m[3], '127.0.0.1', port[0][0]);
+            }
+            else {
+                console.error('WARN: invalid reverse connection URL,', check._reverse_connection_urls.length === 1 ? 'exiting.' : 'skipping.', url);
+                if (check._reverse_connection_urls.length === 1) {
+                    process.exit(1);
+                }
+            }
+        });
     };
 
     circapi.setup(auth_token, 'nad', api_options);
 
-    if (check_bundle_id == null) {
+    if (check_bundle_id === null) {
         circapi.get('/check_bundle?f_type=json:nad&f_target=' + hostname, null, circapi_cb);
     }
     else {
