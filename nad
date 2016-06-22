@@ -15,7 +15,7 @@
 
 var fs = require('fs'),
     os = require('os'),
-    sys = require('sys'),
+    tls = require('tls'),
     http = require('http'),
     https = require('https'),
     url = require('url'),
@@ -122,7 +122,7 @@ function help(err) {
               "\t--apiverbose\t\tOutput API traffic to STDERR\n"
             );
   if(err) {
-    console.log("\nError: " + err + "\n");
+    console.error("Error:", err);
     process.exit(-1);
   }
 }
@@ -140,8 +140,7 @@ function index(dir) {
   // attempt to change to this directory or die trying
   try { process.chdir(dir); }
   catch (e) {
-    console.log("Cannot use configdir: " + configdir);
-    console.log(e.message);
+    console.error("Cannot use configdir:", configdir, e);
     process.exit(-1);
   }
 
@@ -334,12 +333,12 @@ if(sslport.length > 0) {
     creds.cert = fs.readFileSync(path.join(configdir, "na.crt")).toString();
     if(verify) creds.ca = fs.readFileSync(path.join(configdir, "na.ca")).toString();
   } catch(e) {
-    console.log("Make sure:");
-    console.log("\tyour key is available: " + path.join(configdir, "na.key"));
-    console.log("\tyour cert is available: " + path.join(configdir, "na.crt"));
+    console.error("Make sure:");
+    console.error("\tyour key is available: " + path.join(configdir, "na.key"));
+    console.error("\tyour cert is available: " + path.join(configdir, "na.crt"));
     if(verify)
-      console.log("\tyour ca is available: " + path.join(configdir, "na.ca"));
-    console.log("\n" + e);
+      console.error("\tyour ca is available: " + path.join(configdir, "na.ca"));
+    console.error("\n" + e);
     process.exit(-1);
   }
 }
@@ -416,7 +415,7 @@ function rescan_modules() {
     // bomb out if there's any error (we don't do any fancy
     // error handling or attempt any form of recovery)
     if (err) {
-      console.log("Can't read config dir '"+configdir+"': "+err);
+      console.error("Can't read config dir '"+configdir+"':", err);
       process.exit(-1);
     }
 
@@ -851,7 +850,7 @@ if ( ! api_setup ) {
       for(var i=0; i<port.length; i++)
         http.createServer(handler).listen(port[i][0] , port[i][1]);
     } catch(e) {
-      console.log("Failed to start server on port " + port + ": " + e);
+      console.error("Failed to start server on port", port, e);
       process.exit(-1);
     }
 
@@ -860,7 +859,7 @@ if ( ! api_setup ) {
       for(var i=0; i<sslport.length; i++)
         https.createServer(creds, handler).listen(sslport[i][0], sslport[i][1]);
     } catch(e) {
-      console.log("Failed to start server on port " + sslport + ": " + e);
+      console.error("Failed to start server on port", sslport, e);
       process.exit(-1);
     }
 }
@@ -876,6 +875,15 @@ if ( ! api_setup ) {
 // style HTTP GET requests and be handled in the normal "handler" function.
 var revs = {}
 
+var revSetupAttempts = 0;
+var maxRevSetupAttempts = 5;
+
+function getRetryInterval() {
+    var minRetryInterval = 5 * 1000; // 5 seconds
+    var maxRetryInterval = 30 * 1000; // 30 seconds
+    return Math.floor(Math.random() * (maxRetryInterval - minRetryInterval + 1)) + minRetryInterval;
+}
+
 function setup_reverse() {
     var noit;
 
@@ -883,75 +891,134 @@ function setup_reverse() {
         noit = require('noit-connection');
     }
     catch (e) {
-        console.error("Failed to load noit-connection module");
-        return;
+        console.error('ERROR: Failed to load noit-connection module -', e);
+        // explicit request to use reverse connections but, unable to establish the connection
+        // exit intentionally so there is a record in logging and service management can handle
+        // a persistently failing service in its usual manner.
+        process.exit(1);
     }
+
+    var getNoitCreds = function getNoitCreds() {
+        var noitCreds = null;
+        var credFunc = null;
+
+        if (cafile) {
+            noitCreds = noit.hashToCreds({ca: cafile});
+        }
+        else {
+            // crypto.createCredentials is deprecated in v4+
+            if (typeof tls.createSecureContext === 'function') {
+                credFunc = tls.createSecureContext;
+            }
+            else if (typeof crypto.createCredentials === 'function') {
+                credFunc = crypto.createCredentials;
+            }
+            else {
+                console.error('ERROR: Unable to determine correct method to create secure context for reverse connection.');
+                process.exit(1);
+            }
+
+            noitCreds = credFunc({ ca: [
+                '-----BEGIN CERTIFICATE-----',
+                'MIID4zCCA0ygAwIBAgIJAMelf8skwVWPMA0GCSqGSIb3DQEBBQUAMIGoMQswCQYD',
+                'VQQGEwJVUzERMA8GA1UECBMITWFyeWxhbmQxETAPBgNVBAcTCENvbHVtYmlhMRcw',
+                'FQYDVQQKEw5DaXJjb251cywgSW5jLjERMA8GA1UECxMIQ2lyY29udXMxJzAlBgNV',
+                'BAMTHkNpcmNvbnVzIENlcnRpZmljYXRlIEF1dGhvcml0eTEeMBwGCSqGSIb3DQEJ',
+                'ARYPY2FAY2lyY29udXMubmV0MB4XDTA5MTIyMzE5MTcwNloXDTE5MTIyMTE5MTcw',
+                'NlowgagxCzAJBgNVBAYTAlVTMREwDwYDVQQIEwhNYXJ5bGFuZDERMA8GA1UEBxMI',
+                'Q29sdW1iaWExFzAVBgNVBAoTDkNpcmNvbnVzLCBJbmMuMREwDwYDVQQLEwhDaXJj',
+                'b251czEnMCUGA1UEAxMeQ2lyY29udXMgQ2VydGlmaWNhdGUgQXV0aG9yaXR5MR4w',
+                'HAYJKoZIhvcNAQkBFg9jYUBjaXJjb251cy5uZXQwgZ8wDQYJKoZIhvcNAQEBBQAD',
+                'gY0AMIGJAoGBAKz2X0/0vJJ4ad1roehFyxUXHdkjJA9msEKwT2ojummdUB3kK5z6',
+                'PDzDL9/c65eFYWqrQWVWZSLQK1D+v9xJThCe93v6QkSJa7GZkCq9dxClXVtBmZH3',
+                'hNIZZKVC6JMA9dpRjBmlFgNuIdN7q5aJsv8VZHH+QrAyr9aQmhDJAmk1AgMBAAGj',
+                'ggERMIIBDTAdBgNVHQ4EFgQUyNTsgZHSkhhDJ5i+6IFlPzKYxsUwgd0GA1UdIwSB',
+                '1TCB0oAUyNTsgZHSkhhDJ5i+6IFlPzKYxsWhga6kgaswgagxCzAJBgNVBAYTAlVT',
+                'MREwDwYDVQQIEwhNYXJ5bGFuZDERMA8GA1UEBxMIQ29sdW1iaWExFzAVBgNVBAoT',
+                'DkNpcmNvbnVzLCBJbmMuMREwDwYDVQQLEwhDaXJjb251czEnMCUGA1UEAxMeQ2ly',
+                'Y29udXMgQ2VydGlmaWNhdGUgQXV0aG9yaXR5MR4wHAYJKoZIhvcNAQkBFg9jYUBj',
+                'aXJjb251cy5uZXSCCQDHpX/LJMFVjzAMBgNVHRMEBTADAQH/MA0GCSqGSIb3DQEB',
+                'BQUAA4GBAAHBtl15BwbSyq0dMEBpEdQYhHianU/rvOMe57digBmox7ZkPEbB/baE',
+                'sYJysziA2raOtRxVRtcxuZSMij2RiJDsLxzIp1H60Xhr8lmf7qF6Y+sZl7V36KZb',
+                'n2ezaOoRtsQl9dhqEMe8zgL76p9YZ5E69Al0mgiifTteyNjjMuIW',
+                '-----END CERTIFICATE-----'
+            ].join('\n')});
+        }
+
+        creds.rejectUnauthorized = false;
+
+        return noitCreds;
+    };
 
     var circapi_cb = function(code, err, data) {
         if (err) {
-            console.error("reverse connection callback:", code, err, data);
+            revSetupAttempts++;
+            var retryInterval = getRetryInterval();
+            console.error('WARN: reverse connection -', code, err, data,
+                'trying again in', Math.round(retryInterval / 1000)+'s. Attempt',
+                revSetupAttempts, 'of', maxRevSetupAttempts);
+            if (revSetupAttempts >= maxRevSetupAttempts) {
+                console.error('ERROR: Failed to setup reverse connection after', maxRevSetupAttempts, 'attempts.');
+                // explicit request to use reverse connections but, unable to establish the connection
+                // exit intentionally so there is a record in logging and service management can handle
+                // a persistently failing service in its usual manner.
+                process.exit(1);
+            }
+            setTimeout(setup_reverse, retryInterval);
+            return;
         }
 
-        if (typeof(data) == 'object') {
-            var check = {};
-
-            if (data.length >= 1) {
-                check = data[0];
-            } else {
-                check = data;
-            }
-
-            if (check._reverse_connection_urls && check._reverse_connection_urls.length > 0) {
-                check._reverse_connection_urls.forEach(function(url) {
-                    var m = /^mtev_reverse:\/\/(.+):(\d+)\/([^.]+)$/.exec(url);
-
-                    if (m) {
-                        var creds = crypto.createCredentials({
-                            ca: "-----BEGIN CERTIFICATE-----\n" +
-                            "MIID4zCCA0ygAwIBAgIJAMelf8skwVWPMA0GCSqGSIb3DQEBBQUAMIGoMQswCQYD\n" +
-                            "VQQGEwJVUzERMA8GA1UECBMITWFyeWxhbmQxETAPBgNVBAcTCENvbHVtYmlhMRcw\n" +
-                            "FQYDVQQKEw5DaXJjb251cywgSW5jLjERMA8GA1UECxMIQ2lyY29udXMxJzAlBgNV\n" +
-                            "BAMTHkNpcmNvbnVzIENlcnRpZmljYXRlIEF1dGhvcml0eTEeMBwGCSqGSIb3DQEJ\n" +
-                            "ARYPY2FAY2lyY29udXMubmV0MB4XDTA5MTIyMzE5MTcwNloXDTE5MTIyMTE5MTcw\n" +
-                            "NlowgagxCzAJBgNVBAYTAlVTMREwDwYDVQQIEwhNYXJ5bGFuZDERMA8GA1UEBxMI\n" +
-                            "Q29sdW1iaWExFzAVBgNVBAoTDkNpcmNvbnVzLCBJbmMuMREwDwYDVQQLEwhDaXJj\n" +
-                            "b251czEnMCUGA1UEAxMeQ2lyY29udXMgQ2VydGlmaWNhdGUgQXV0aG9yaXR5MR4w\n" +
-                            "HAYJKoZIhvcNAQkBFg9jYUBjaXJjb251cy5uZXQwgZ8wDQYJKoZIhvcNAQEBBQAD\n" +
-                            "gY0AMIGJAoGBAKz2X0/0vJJ4ad1roehFyxUXHdkjJA9msEKwT2ojummdUB3kK5z6\n" +
-                            "PDzDL9/c65eFYWqrQWVWZSLQK1D+v9xJThCe93v6QkSJa7GZkCq9dxClXVtBmZH3\n" +
-                            "hNIZZKVC6JMA9dpRjBmlFgNuIdN7q5aJsv8VZHH+QrAyr9aQmhDJAmk1AgMBAAGj\n" +
-                            "ggERMIIBDTAdBgNVHQ4EFgQUyNTsgZHSkhhDJ5i+6IFlPzKYxsUwgd0GA1UdIwSB\n" +
-                            "1TCB0oAUyNTsgZHSkhhDJ5i+6IFlPzKYxsWhga6kgaswgagxCzAJBgNVBAYTAlVT\n" +
-                            "MREwDwYDVQQIEwhNYXJ5bGFuZDERMA8GA1UEBxMIQ29sdW1iaWExFzAVBgNVBAoT\n" +
-                            "DkNpcmNvbnVzLCBJbmMuMREwDwYDVQQLEwhDaXJjb251czEnMCUGA1UEAxMeQ2ly\n" +
-                            "Y29udXMgQ2VydGlmaWNhdGUgQXV0aG9yaXR5MR4wHAYJKoZIhvcNAQkBFg9jYUBj\n" +
-                            "aXJjb251cy5uZXSCCQDHpX/LJMFVjzAMBgNVHRMEBTADAQH/MA0GCSqGSIb3DQEB\n" +
-                            "BQUAA4GBAAHBtl15BwbSyq0dMEBpEdQYhHianU/rvOMe57digBmox7ZkPEbB/baE\n" +
-                            "sYJysziA2raOtRxVRtcxuZSMij2RiJDsLxzIp1H60Xhr8lmf7qF6Y+sZl7V36KZb\n" +
-                            "n2ezaOoRtsQl9dhqEMe8zgL76p9YZ5E69Al0mgiifTteyNjjMuIW\n" +
-                            "-----END CERTIFICATE-----" }
-                        );
-
-                        creds.rejectUnauthorized = false;
-
-                        revs[url] = new noit.connection(m[2], m[1],
-                            cafile ? noit.utils.hashToCreds({ ca:cafile }) : creds);
-                        revs[url].reverse(m[3], "127.0.0.1", port[0][0]);
-                    }
-                });
+        if (data === null || typeof data !== 'object' || (Array.isArray(data) && data.length === 0)) {
+            if (check_bundle_id === null) {
+                console.error('ERROR: configuration for reverse - searching yielded no applicable json:nad check for', hostname);
             }
             else {
-                console.log("configuration error for reverse: no URLs found");
+                console.error('ERROR: configuration for reverse - unable to retrieve check', check_bundle_id, 'object with API.');
             }
+            // explicit request to use reverse connections but, incorrect configuration prevents
+            // correct functionality. exit intentionally so there is a record in logging and
+            // service management can handle a persistently failing service in its usual manner.
+            process.exit(1);
         }
-        else {
-            console.log("configuration error for reverse: no applicable check found");
+
+        var check = {};
+
+        if (Array.isArray(data)) {
+            check = data[0];
+        } else {
+            check = data;
         }
+
+        if (!check.hasOwnProperty('_reverse_connection_urls')) {
+            console.error('ERROR: invalid check, does not contain a reverse connection URL.', check._cid);
+            process.exit(1);
+        }
+
+        if (!Array.isArray(check._reverse_connection_urls) || check._reverse_connection_urls.length === 0) {
+            console.error('ERROR: invalid check, reverse connection URL attribute is invalid.', check._cid);
+            process.exit(1);
+        }
+
+        check._reverse_connection_urls.forEach(function(url) {
+            var m = /^mtev_reverse:\/\/(.+):(\d+)\/([^.]+)$/.exec(url);
+
+            if (m) {
+                revs[url] = new noit.connection(m[2], m[1], getNoitCreds());
+                revs[url].reverse(m[3], '127.0.0.1', port[0][0]);
+            }
+            else {
+                var isFatal = check._reverse_connection_urls.length === 1;
+                console.error(isFatal ? 'ERROR:' : 'WARN:', 'invalid reverse connection URL,', isFatal ? 'exiting.' : 'skipping.', url);
+                if (isFatal) {
+                    process.exit(1);
+                }
+            }
+        });
     };
 
     circapi.setup(auth_token, 'nad', api_options);
 
-    if (check_bundle_id == null) {
+    if (check_bundle_id === null) {
         circapi.get('/check_bundle?f_type=json:nad&f_target=' + hostname, null, circapi_cb);
     }
     else {
