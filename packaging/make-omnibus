@@ -89,31 +89,22 @@ else
     mkdir $INSTALLDIR
 fi
 
-NODE_VERSION="v0.10.45"
-NODE_SOURCE="http://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}.tar.gz"
-
-node_src() {
-    echo "Checking for node-$NODE_VERSION source"
+[[ "$PLATFORM" == "i386" ]] && NODE_ARCH="x86"
+[[ "$PLATFORM" == "x86_64" || "$PLATFORM" == "amd64" ]] && NODE_ARCH="x64"
+NODE_VER="4.4.5"
+NODE_TGZ="node-v${NODE_VER}-linux-${NODE_ARCH}.tar.gz"
+NODE_URL="https://nodejs.org/dist/v${NODE_VER}/${NODE_TGZ}"
+install_prebuilt_nodejs() {
+    local NODE_DEST_DIR="${INSTALLDIR}/${PREFIX}/embedded"
+    echo "Checking for node-$NODE_VER prebuilt archive"
     pushd $BUILDDIR > /dev/null
-    if [[ -f node-${NODE_VERSION}.tar.gz ]]; then
-        echo "--- node source archive exists, extracting."
-        tar zxf node-${NODE_VERSION}.tar.gz
-    else
-        echo "--- node source archive not found, downloading."
-        wget $NODE_SOURCE
-        echo "--- extracting source archive"
-        tar zxf node-${NODE_VERSION}.tar.gz
+    if [[ ! -f $NODE_TGZ ]]; then
+        echo "--- node prebuilt archive not found, downloading."
+        wget "$NODE_URL"
     fi
-    popd > /dev/null
-}
-
-build_node() {
-    echo "Building node"
-    pushd $BUILDDIR/node-$NODE_VERSION > /dev/null
-    make clean || make distclean
-    ./configure --prefix=$PREFIX/embedded
-    make -j $MAKE_JOBS
-    make DESTDIR=$INSTALLDIR install
+    echo "--- extracting node prebuilt archive"
+    mkdir -pv $NODE_DEST_DIR
+    tar zxf $NODE_TGZ -C $NODE_DEST_DIR --strip-components=1
     popd > /dev/null
 }
 
@@ -179,8 +170,7 @@ make_package() {
     fi
 }
 
-node_src
-build_node
+install_prebuilt_nodejs
 nad_src
 build_nad
 make_package
@@ -190,3 +180,4 @@ exit 0
 
 # Vim hints
 # vim:ts=4:sw=4:et:
+
