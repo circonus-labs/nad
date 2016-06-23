@@ -11,6 +11,10 @@ BUILDDIR="/tmp/nad-omnibus-build"
 INSTALLDIR="/tmp/nad-omnibus-install"
 PUBLISHDIR="/mnt/node-agent"
 NODE_VERSION="4.4.5"
+# CentOS 5/6 wget is unable to verify nodejs cert
+# ERROR: certificate common name `*.nodejs.org' doesn't match requested host name `nodejs.org'.
+# To connect to nodejs.org insecurely, use `--no-check-certificate'.
+WGET_OPTS=""
 
 if [[ ! -d $PUBLISHDIR ]]; then
     echo "Destination for package files ($PUBLISHDIR) does not exist; all is doomed."
@@ -29,10 +33,12 @@ if [[ -f /etc/redhat-release ]]; then
     case "$relver" in
         5)
             OS="rhel5"
+            WGET_OPTS="--no-check-certificate"
             export GIT_SSL_NO_VERIFY=true
             ;;
         6)
             OS="rhel6"
+            WGET_OPTS="--no-check-certificate"
             ;;
         7)
             OS="rhel7"
@@ -98,7 +104,7 @@ build_nodejs() {
     pushd $BUILDDIR > /dev/null
     if [[ ! -f $node_src_tgz ]]; then
         echo "--- node source archive not found, downloading."
-        wget $node_src_url
+        wget $WGET_OPTS $node_src_url
     fi
     echo "--- extracting source archive"
     tar zxf $node_src_tgz
@@ -128,7 +134,7 @@ install_binary_nodejs() {
     pushd $BUILDDIR > /dev/null
     if [[ ! -f $node_binary_tgz ]]; then
         echo "--- node binary archive not found, downloading."
-        wget "$node_binary_url"
+        wget $WGET_OPTS $node_binary_url
     fi
     echo "--- extracting binary archive"
     mkdir -pv $node_dest_dir
@@ -149,13 +155,15 @@ install_nodejs() {
 
 nad_src() {
     echo "Checking for nad source"
-    if [[ -d $BUILDDIR/nad ]]; then
+    if [[ -d $BUILDDIR/nad/.git ]]; then
         pushd $BUILDDIR/nad > /dev/null
         echo "--- checkout exists, pulling latest revision"
         git pull
         popd > /dev/null
     else
         pushd $BUILDDIR > /dev/null
+        # remove invalid nad directory, if it exists
+        [[ -d nad ]] && rm -rf nad
         echo "--- no checkout, cloning from $NAD_REPO"
         git clone $NAD_REPO
         popd > /dev/null
