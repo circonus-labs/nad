@@ -154,17 +154,28 @@ install_nodejs() {
 }
 
 nad_src() {
+    local force_clone=1
+
     echo "Checking for nad source"
+
     if [[ -d $BUILDDIR/nad/.git ]]; then
         pushd $BUILDDIR/nad > /dev/null
         echo "--- checkout exists, pulling latest revision"
+        set +e
         git pull
+        force_clone=$?
+        [[ $force_clone -ne 0 ]] && echo "--- 'git pull' exited with code:$force_clone"
+        set -e
         popd > /dev/null
-    else
+    fi
+
+    if [[ $force_clone -ne 0 ]]; then
         pushd $BUILDDIR > /dev/null
-        # remove invalid nad directory, if it exists
-        [[ -d nad ]] && rm -rf nad
-        echo "--- no checkout, cloning from $NAD_REPO"
+        [[ -d nad ]] && {
+            echo "--- removing invalid nad directory"
+            rm -rf nad
+        }
+        echo "--- cloning from $NAD_REPO"
         git clone $NAD_REPO
         popd > /dev/null
     fi
