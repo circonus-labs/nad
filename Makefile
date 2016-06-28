@@ -93,13 +93,13 @@ install-freebsd:	install
 	A=$(shell /sbin/sysctl kstat.zfs > /dev/null 2>&1 ; echo $$?)
 ifeq ($(A),0)
 	cd $(DESTDIR)$(CONF) ; /bin/ln -sf zfsinfo.sh ; \
-	cd $(DESTDIR)$(CONF) ; /bin/ln -sf common/zpool.sh
-endif
+	cd $(DESTDIR)$(CONF) ; /bin/ln -sf common/zpool.sh 
+endif 
 
 install-openbsd:	install
 	cd $(DESTDIR)$(CONF)/openbsd ; $(MAKE)
 	cd $(DESTDIR)$(CONF) ; for f in cpu.sh fs.elf if.sh ; do /bin/ln -sf openbsd/$$f ; done
-	cd $(DESTDIR)$(CONF) ; chmod 755 pf/pf.pl ; /bin/ln -sf pf/pf.pl
+	cd $(DESTDIR)$(CONF) ; /bin/ln -sf pf/pf.pl
 
 clean:
 	rm -f freebsd-init/*.out linux-init/*.out smf/*.out
