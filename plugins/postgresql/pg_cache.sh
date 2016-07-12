@@ -12,9 +12,9 @@ DB_LIST=$(psql -U "$PGUSER" -F, -Atc "select sum(heap_blks_read) * current_setti
 for db in $DB_LIST; do
    IFS=','
   DATA=( `echo "${db}"` )
-  echo -e "${PGDATABASE}\\\`disk_bytes_read\tL\t${DATA[0]}"
-  echo -e "${PGDATABASE}\\\`cache_bytes_read\tL\t${DATA[1]}"
-  echo -e "${PGDATABASE}\\\`cache_hit_ratio\tn\t${DATA[2]}"
+  echo -e "${PGDATABASE}\`disk_bytes_read\tL\t${DATA[0]}"
+  echo -e "${PGDATABASE}\`cache_bytes_read\tL\t${DATA[1]}"
+  echo -e "${PGDATABASE}\`cache_hit_ratio\tn\t${DATA[2]}"
 done
 
 IFS=$OLDIFS
