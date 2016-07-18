@@ -51,20 +51,3 @@ for c in $*; do
       }'
   fi
 }  
-
-_kstat_sum() {
-	/usr/bin/kstat -p  $* | \
-	/usr/xpg4/bin/awk '{
-		if(match($1, /:(class|crtime|snaptime)$/)) next; \
-		split($1,a,":"); name=a[4]; \
-                n[name]++; \
-		if((name) in c) c[name] = sprintf("%s+%s", c[name], $2); \
-		else c[name] = $2; \
-	} \
-	END { \
-		for (name in c) { \
-			print name"\tL\t(L(("c[name]")%2^64))"; \
-		} \
-	}' | \
-	perl -pe 'BEGIN { sub f { my $flag = ($_[0] eq "n") ? "-l" : ""; my $r = `echo "$_[1]" | bc $flag`; chomp($r); $r; } } s/\((L|n)\((.*)\)\)$/f($1,$2)/eg;'
-}
