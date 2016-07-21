@@ -3,10 +3,11 @@ source /opt/circonus/etc/pg-conf.sh
 
 which psql >/dev/null 2>&1 || exit 1
 PGUSER="${PGUSER:="postgres"}"
+PGDATABASE="${PGDATABASE:="postgres"}"
 IFS=','
 OLDIFS=$IFS
 LINEBREAKS=$'\n\b'
-STATS=$(psql -U "$PGUSER" -F, -Atc "select 'tables', sum(n_tup_ins) as inserts, sum(n_tup_upd) as updates, sum(n_tup_del) as deletes, sum(idx_scan) as index_scans, sum(seq_scan) as seq_scans, sum(idx_tup_fetch) as index_tup_fetch, sum(seq_tup_read) as seq_tup_read, coalesce(extract(epoch from now() - max(last_autovacuum))) as max_last_autovacuum , coalesce(extract(epoch from now() - max(last_vacuum))) as max_last_vacuum , coalesce(extract(epoch from now() - max(last_autoanalyze))) as max_last_autoanalyze , coalesce(extract(epoch from now() - max(last_analyze))) as max_last_analyze from pg_stat_all_tables")
+STATS=$(psql -U "$PGUSER" -F, -Atc "select 'tables', sum(n_tup_ins) as inserts, sum(n_tup_upd) as updates, sum(n_tup_del) as deletes, sum(idx_scan) as index_scans, sum(seq_scan) as seq_scans, sum(idx_tup_fetch) as index_tup_fetch, sum(seq_tup_read) as seq_tup_read, coalesce(extract(epoch from now() - max(last_autovacuum))) as max_last_autovacuum , coalesce(extract(epoch from now() - max(last_vacuum))) as max_last_vacuum , coalesce(extract(epoch from now() - max(last_autoanalyze))) as max_last_autoanalyze , coalesce(extract(epoch from now() - max(last_analyze))) as max_last_analyze from pg_stat_all_tables" $PGDATABASE)
 
 print_norm_int() {
     printf "%s\tL\t%s\n" $1 $2

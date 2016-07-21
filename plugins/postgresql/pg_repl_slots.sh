@@ -3,8 +3,9 @@ source /opt/circonus/etc/pg-conf.sh
 
 which psql >/dev/null 2>&1 || exit 1
 PGUSER="${PGUSER:="postgres"}"
+PGDATABASE="${PGDATABASE:="postgres"}"
 
-SLOT=$(psql -U "$PGUSER" -F, -Atc "SELECT slot_name, active, pg_xlog_location_diff(pg_current_xlog_insert_location(), restart_lsn) AS retained_bytes FROM pg_replication_slots")
+SLOT=$(psql -U "$PGUSER" -F, -Atc "SELECT slot_name, active, pg_xlog_location_diff(pg_current_xlog_insert_location(), restart_lsn) AS retained_bytes FROM pg_replication_slots" $PGDATABASE)
 
 
 print_norm_int() {
@@ -22,5 +23,3 @@ for a in $SLOT; do
 	echo -e "retained_bytes\tL\t${DATA[2]}"	
 done
        
-
-
