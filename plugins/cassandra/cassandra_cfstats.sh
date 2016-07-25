@@ -1,9 +1,6 @@
 #!/bin/bash
-source /opt/circonus/etc/cassandra-conf.sh
-
 which nodetool >/dev/null 2>&1 || exit 1
 which awk >/dev/null 2>&1 || exit 1
-CASS_USER="${CASS_USER:="admin"}"
 
 nodetool cfstats 2>/dev/null | awk 'BEGIN {}
 /^Keyspace:/ { KS=$2 };

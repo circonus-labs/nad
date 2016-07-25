@@ -1,9 +1,7 @@
 #!/bin/bash
-source /opt/circonus/etc/cassandra-conf.sh
 
 which nodetool >/dev/null 2>&1 || exit 1
 which gawk >/dev/null 2>&1 || exit 1
-CASS_USER="${CASS_USER:="admin"}"
 
 nodetool info 2>/dev/null | gawk '
 function hr_to_bytes(NUMBER, U) {
