@@ -1,0 +1,24 @@
+#!/usr/sbin/dtrace -s
+#pragma D option quiet
+io:::start
+{
+    ts[arg0] = timestamp;
+}
+io:::done
+/this->ts = ts[arg0]/
+{
+    this->delta = timestamp - this->ts;
+    this->us = this->delta / 1000;
+    @l[strjoin(args[1]->dev_statname,strjoin("`",args[0]->b_flags & B_READ ? "read_latency_us" : "write_latency_us"))] = llquantize(this->us, 10, 0, 6, 100);
+    @l[strjoin(args[1]->dev_statname,"`latency_us")] = llquantize(this->us, 10, 0, 6, 100);
+    @l[strjoin(args[1]->dev_name,"`latency_us")] = llquantize(this->us, 10, 0, 6, 100);
+    ts[arg0] = 0;
+}
+tick-1sec
+{
+    printf(">START\n");
+    printa("=%s%@d\n", @l);
+    printf(">END\n");
+    
+    trunc(@l);
+}
