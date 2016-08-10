@@ -14,6 +14,8 @@
 
 #ifdef __APPLE__
 #define STAT_TIMESPEC
+#else
+#define STAT_TIME_T
 #endif
 
 void print_user(uid_t uid) {
@@ -45,7 +47,12 @@ int main(int argc, char **argv) {
   time_t now = time(NULL);
   if(stat(argv[1], &sb) == 0) {
     printf("exists\tL\t1\n");
-#ifdef STAT_TIMESPEC
+#if defined(STAT_TIME_T)
+#define PTIME(TYPE) do { \
+    printf(#TYPE "time\tL\t%ld\n", sb.st_##TYPE##time); \
+    printf(#TYPE "age\tL\t%ld\n", now - sb.st_##TYPE##time); \
+} while(0)
+#elif defined(STAT_TIMESPEC)
 #define PTIME(TYPE) do { \
     printf(#TYPE "time\tL\t%ld\n", sb.st_##TYPE##timespec.tv_sec); \
     printf(#TYPE "age\tL\t%ld\n", now - sb.st_##TYPE##timespec.tv_sec); \
