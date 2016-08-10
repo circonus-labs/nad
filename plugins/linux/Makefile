@@ -1,2 +1,3 @@
 all:
-		(cd src && make)
+	(cd src && make)
+	(cd ../common && make)

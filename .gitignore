@@ -3,6 +3,10 @@ cpu.elf
 disk.elf
 fs.elf
 zpoolio.elf
+boot_time.elf
+loadavg.elf
+user_logins.elf
+file_stat.elf
 *~
 freebsd-init/nad.out
 linux-init/*.out
