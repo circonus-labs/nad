@@ -1,3 +1,5 @@
+CC=gcc
+
 all:	../boot_time.elf ../loadavg.elf ../user_logins.elf ../file_stat.elf
 
 ../boot_time.elf:	boot_time.c
