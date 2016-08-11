@@ -544,7 +544,7 @@ function past_set_cb(cb) {
   }
 };
 
-// merge_types takes to char type descriptors and returns the
+// merge_types takes two char type descriptors and returns the
 // smallest type that could non-erroneously represent them
 function merge_types(a,b) {
   if(a == b) return a;
