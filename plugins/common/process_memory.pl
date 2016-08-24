@@ -54,6 +54,9 @@ print "count\tL\t" . (scalar @matches) . "\n";
 foreach my $metric (qw(vsz rss pmem)) {
     my $type = $metric eq 'pmem' ? 'n' : 'L';
     my @vals = sort map { $_->{$metric} }  @matches;
+    foreach my $val (@vals) {
+        print "${metric}\t$type\t$val\n";
+    }
     print "${metric}_sum\t$type\t" . sum(@vals) . "\n";
     print "${metric}_min\t$type\t" . min(@vals) . "\n";
     print "${metric}_max\t$type\t" . max(@vals) . "\n";
