@@ -15,6 +15,6 @@ SED="/usr/gnu/bin/sed"
     exit 1;
 }
 
-kstat_opts="-p link:"
+kstat_opts="-p -m link"
 
 $KSTAT $kstat_opts | $SED -e '/:\(class\|crtime\|snaptime\)/d; s/^link:[0-9]*://; s/:/`/g; s/\t/\tL\t/'
