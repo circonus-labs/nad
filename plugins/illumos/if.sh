@@ -7,7 +7,7 @@ fi
 kstat_opts="-p -m"
 distro=`awk 'NR==1 { print $1 }' /etc/release`
 case $distro in
-  SmartOS|Joyent)
+  SmartOS|Joyent|OmniOS)
     kstat_opts="-p -c net -n"
     ;;
 esac
