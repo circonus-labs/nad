@@ -1,5 +1,6 @@
-all::
+all:
 	$(MAKE) -C src
+	$(MAKE) -C ../common
 
-clean::
+clean:
 	$(MAKE) -C src clean

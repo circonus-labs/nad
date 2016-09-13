@@ -1,2 +1,3 @@
 all:
-		(cd src && gmake)
+	(cd src && gmake)
+	(cd ../common && gmake)

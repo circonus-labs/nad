@@ -206,6 +206,12 @@ make_package() {
     elif [[ $OS =~ ^ubuntu ]]; then
         echo "Creating nad-omnibus DEB for $OS $PLATFORM"
         deb_file="${BUILDDIR}/nad-omnibus-${TSTAMP}-1.${OS}_${PLATFORM}.deb"
+
+        if [[ -f $deb_file ]]; then
+            echo "Previously built at this version, removing file"
+            rm -f $deb_file
+        fi
+
         $fpm -s dir -t deb -n nad-omnibus -v $TSTAMP --iteration 1 -C $INSTALLDIR \
             -p $deb_file --url "https://github.com/circonus-labs/nad" \
             --vendor "Circonus, Inc." --license "BSD" \

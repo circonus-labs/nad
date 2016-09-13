@@ -510,12 +510,12 @@ function get_config(req, d, cb) {
   console.log(d.name);
   fs.exists(path.join(configdir, d.name + ".json"), function(exists) {
     if ( exists ) {
-      console.log("hey, a config file");
+      //console.log("hey, a config file");
       fs.readFile(path.join(configdir, d.name + ".json"), function(err, data) {
         if (err) throw err;
         var json_config = JSON.parse(data);
 
-      console.log(json_config);
+        //console.log(json_config);
 
         var instance_count = 0;
         for ( var instance in json_config ) instance_count++;
@@ -543,6 +543,19 @@ function past_set_cb(cb) {
     cb(_d,_r,_i);
   }
 };
+
+// merge_types takes two char type descriptors and returns the
+// smallest type that could non-erroneously represent them
+function merge_types(a,b) {
+  if(a == b) return a;
+  // There are four source cases where we can upgrade to int64_t
+  if(a == 'i' && (b == 'I' || b == 'l')) return 'l';
+  if(a == 'I' && (b == 'i' || b == 'l')) return 'l';
+  if(a == 'l' && (b == 'i' || b == 'I')) return 'l';
+  if(a == 'L' && b == 'I') return 'l';
+  // otherwise we have to just jump to a double
+  return 'n';
+}
 
 // runs a single script / native plugin and then fire a callback
 //   d is the object for the script that's stored in 'scripts'
@@ -621,9 +634,21 @@ function run_script(d, cb, req, args, instance) {
           val = parts[5];
           isnull = (space.length == 0 || val == "[[null]]");
           type = type.length > 1 ? type === "float" ? "n" : type.substr(0,1) : type;
-          results[name] = { '_type': type,
-                            '_value': isnull ? null : val
-                          };
+          if (type != 's' &&  // this is numeric
+              results.hasOwnProperty(name) && results[name]._type != 's' && // preexists as numeric
+              results[name].hasOwnProperty("_value")) {
+            if(!Array.isArray(results[name]._value)) { // upgrade to array
+              results[name]._value = [ results[name]._value ];
+            }
+            // we're in a position to append the result instead of set it.
+            results[name]._value.push(isnull ? null : val);
+            // we also might need to "upgrade the type"
+            results[name]._type = merge_types(type, results[name]._type);
+          } else {
+            results[name] = { '_type': type,
+                              '_value': isnull ? null : val
+                            };
+          }
         }
       }
     }
