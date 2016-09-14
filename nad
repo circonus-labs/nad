@@ -47,6 +47,8 @@ var scripts = {};
 // already
 var scripts_once = {};
 
+var push_script = undefined;
+
 // ssl credentials
 var creds = {};
 
@@ -771,6 +773,14 @@ function run_scripts(req, res, which) {
       req.nad_run_count++;
     }
 
+    // call the global push receiver script to spit out anything collected
+    // over http
+    if (!which) {
+        init_script(push_script, req, function(d, results, name) {
+            set[name] = results;
+        });
+    }
+
     // call init script for each script (which will run it) and
     // then when it returns in the callback populate set with
     // the result.  Keep track of how many scripts are left to run
@@ -795,10 +805,16 @@ function run_scripts(req, res, which) {
 // to our webserver (either any of the http or the https servers)
 
 function handler(req, res) {
+    var bodyChunks = [];
+    req.addListener('data', function(chunk) {
+        bodyChunks.push(chunk);
+    });
+
   // wait for the request to be completely formed (by registering
   // a callback on the 'end' event) and then send back the result
   req.addListener('end', function() {
     var m, path = url.parse(this.url).pathname;
+    var body = Buffer.concat(bodyChunks).toString();  
 
     // request for meta-info about the scripts
     if(/^\/inventory/.test(path)) {
@@ -822,6 +838,13 @@ function handler(req, res) {
     if(m = /^\/wmi\/(.+)$/.exec(path))
       return circwmi.get_counters_for_category(res, m[1], debugdir, wipedebugdir);
 
+    //plugin
+    if (m = /^\/write\/(.+)$/.exec(path)) {
+        push_script.obj.some_data(m[1], body); 
+        res.writeHead(200, "OK", { 'Content-Type': 'text/plan' });
+        res.end();
+        return;
+    }
     res.writeHead(404);
     res.end();
   });
@@ -869,6 +892,14 @@ if ( ! api_setup ) {
     // in it changes
     fs.watchFile(configdir, onchange(rescan_modules));
     rescan_modules();
+
+    // add our specialized push script that handles incoming POST data from any local data spurters
+    push_script = new Object();
+    push_script.name = "dumpster";
+    push_script.native_plugin = true;
+    push_script.running = false;
+    var module = require("./push_receiver.js");
+    push_script.obj = new module();
 
     // listen on all non-secure ports
     try {

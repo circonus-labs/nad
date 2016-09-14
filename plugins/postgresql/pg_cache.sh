@@ -7,7 +7,7 @@ PGDATABASE="${PGDATABASE:="postgres"}"
 OLDIFS=$IFS
 LINEBREAKS=$'\n\b'
 
-DB_LIST=$(psql -U "$PGUSER" -F, -Atc "select sum(heap_blks_read) * current_setting('block_size')::NUMERIC, sum(heap_blks_hit) * current_setting('block_size')::NUMERIC, sum(heap_blks_hit) / (sum(heap_blks_hit) + sum(heap_blks_read)) from pg_statio_user_tables" ${PGDATABASE})
+DB_LIST=$(psql -U "$PGUSER" -F, -Atc "select sum(heap_blks_read) * current_setting('block_size')::NUMERIC, sum(heap_blks_hit) * current_setting('block_size')::NUMERIC, sum(heap_blks_hit) / (sum(heap_blks_hit) + sum(heap_blks_read) + 0.000001) from pg_statio_user_tables" ${PGDATABASE})
 
 for db in $DB_LIST; do
    IFS=','

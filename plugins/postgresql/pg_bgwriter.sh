@@ -3,10 +3,11 @@ source /opt/circonus/etc/pg-conf.sh
 
 which psql >/dev/null 2>&1 || exit 1
 PGUSER="${PGUSER:="postgres"}"
+PGDATABASE="${PGDATABASE:="postgres"}"
 OLDIFS=$IFS
 LINEBREAKS=$'\n\b'
 
-DB_LIST=$(psql -U "$PGUSER" -F, -Atc "SELECT buffers_checkpoint, buffers_clean, buffers_backend, buffers_alloc FROM pg_stat_bgwriter")
+DB_LIST=$(psql -U "$PGUSER" -F, -Atc "SELECT buffers_checkpoint, buffers_clean, buffers_backend, buffers_alloc FROM pg_stat_bgwriter" $PGDATABASE)
 
 for db in $DB_LIST; do
    IFS=','

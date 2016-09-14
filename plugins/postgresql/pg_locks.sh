@@ -3,10 +3,11 @@ source /opt/circonus/etc/pg-conf.sh
 
 which psql >/dev/null 2>&1 || exit 1
 PGUSER="${PGUSER:="postgres"}"
+PGDATABASE="${PGDATABASE:="postgres"}"
 IFS=','
 OLDIFS=$IFS
 LINEBREAKS=$'\n\b'
-LOCKS=$(psql -U "$PGUSER" -F, -Atc "select 'locks', count(*) as total, count(nullif(granted,true)) as waiting, count(nullif(mode ilike '%exclusive%',false)) as exclusive from pg_locks")
+LOCKS=$(psql -U "$PGUSER" -F, -Atc "select 'locks', count(*) as total, count(nullif(granted,true)) as waiting, count(nullif(mode ilike '%exclusive%',false)) as exclusive from pg_locks" $PGDATABASE)
 
 print_norm_int() {
     printf "%s\tL\t%s\n" $1 $2
