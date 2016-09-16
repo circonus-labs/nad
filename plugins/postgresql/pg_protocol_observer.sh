@@ -6,9 +6,9 @@ IFACE="${IFACE:="auto"}"
 NAD_PORT="${NAD_PORT:="2609"}"
 
 # if protocol_observer is already running, exit
-POPID=`pgrep protocol_observer`
+POPID=`ps ax | grep protocol_observer | grep -v grep`
 if [ -n "$POPID" ]; then
   exit 0;
 fi
 
-sudo protocol_observer -wire postgres -iface $IFACE -submissionurl http://localhost:${NAD_PORT}/write/pg_protocol_observer
+sudo protocol_observer -wire postgres -submissionurl http://localhost:${NAD_PORT}/write/postgres_protocol_observer &

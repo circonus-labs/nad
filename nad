@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// -*-Javascript-*-
 'use strict';
 //
 // Toss executables (scripts too) in /etc/node-agent.d
@@ -751,6 +752,7 @@ function run_scripts(req, res, which) {
   // called when complete to actually send 'set' out as JSON
   var send_complete = function() {
     if(req.nad_run_count != 0) return;
+    console.log("************* send_complete ******************");
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.write(JSON.stringify(set));
     res.end();
@@ -773,13 +775,8 @@ function run_scripts(req, res, which) {
       req.nad_run_count++;
     }
 
-    // call the global push receiver script to spit out anything collected
-    // over http
-    if (!which) {
-        init_script(push_script, req, function(d, results, name) {
-            set[name] = results;
-        });
-    }
+    // add one for the push_script
+    if (!which) req.nad_run_count++;
 
     // call init script for each script (which will run it) and
     // then when it returns in the callback populate set with
@@ -793,6 +790,18 @@ function run_scripts(req, res, which) {
         send_complete();  // only sends if all scripts are done
       });
     }
+
+    // call the global push receiver script to spit out anything collected
+    // over http
+    if (!which) {
+        init_script(push_script, req, function(d, results, name) {
+	    console.log("Got results for push_script: " + JSON.stringify(results));
+            set[name] = results;
+        });
+	req.nad_run_count--;
+        send_complete();  // only sends if all scripts are done
+    }
+
     send_complete(); // only sends if there were no scripts to run
   }
 }
