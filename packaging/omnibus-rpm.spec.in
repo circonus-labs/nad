@@ -37,6 +37,7 @@ if [ $1 = 0 ]; then
 fi
 
 %files
+%defattr(644, root, root, 755)
 /etc/init.d/nad
 /etc/sysconfig/nad
 %{_prefix}/embedded
