@@ -752,7 +752,6 @@ function run_scripts(req, res, which) {
   // called when complete to actually send 'set' out as JSON
   var send_complete = function() {
     if(req.nad_run_count != 0) return;
-    console.log("************* send_complete ******************");
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.write(JSON.stringify(set));
     res.end();
@@ -795,10 +794,9 @@ function run_scripts(req, res, which) {
     // over http
     if (!which) {
         init_script(push_script, req, function(d, results, name) {
-	    console.log("Got results for push_script: " + JSON.stringify(results));
             set[name] = results;
         });
-	req.nad_run_count--;
+	      req.nad_run_count--;
         send_complete();  // only sends if all scripts are done
     }
 
