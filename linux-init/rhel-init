@@ -43,8 +43,14 @@ run_app() {
 	RETVAL=$?
 	if [[ "$RETVAL" == "0" ]]; then
 		pid=$(pgrep -f $NAD)
-		echo $pid > $NAD_PIDFILE
-		success
+		EC=$?
+		if [[ $EC -ne 0 || -z "$pid" ]]; then
+		    echo "$NAD appeared to start but, may have crashed."
+		    failure
+		else
+		    echo $pid > $NAD_PIDFILE
+		    success
+		fi
 	else
 		failure
 	fi
