@@ -907,7 +907,7 @@ if ( ! api_setup ) {
     push_script.name = "dumpster";
     push_script.native_plugin = true;
     push_script.running = false;
-    var module = require("./push_receiver.js");
+    var module = require("push_receiver");
     push_script.obj = new module();
 
     // listen on all non-secure ports
