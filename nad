@@ -795,7 +795,7 @@ function run_scripts(req, res, which) {
     if (!which) {
         init_script(push_script, req, function(d, results, name) {
             if (debugdir) {
-                dutil.write_debug_output(name, [JSON.stringify(results)], debugdir, wipedebugdir);
+                dutil.write_debug_output(name, ["Returning push_receiver data", JSON.stringify(results)], debugdir, wipedebugdir);
             }
             set[name] = results;
         });
@@ -850,8 +850,13 @@ function handler(req, res) {
 
     //plugin
     if (m = /^\/write\/(.+)$/.exec(path)) {
+        if (req.method !== 'PUT' && req.method !== 'POST') {
+            res.writeHead(405, "Method Not Allowed", { 'Allow' : 'PUT, POST' });
+            res.end();
+            return;
+        }
         if (debugdir) {
-            dutil.write_debug_output(m[1], [body], debugdir, wipedebugdir);
+            dutil.write_debug_output(m[1], ["Receiving push_receiver data", body], debugdir, wipedebugdir);
         }
         push_script.obj.some_data(m[1], body); 
         res.writeHead(200, "OK", { 'Content-Type': 'text/plan' });
