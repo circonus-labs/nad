@@ -794,6 +794,9 @@ function run_scripts(req, res, which) {
     // over http
     if (!which) {
         init_script(push_script, req, function(d, results, name) {
+            if (debugdir) {
+                dutil.write_debug_output(name, [JSON.stringify(results)], debugdir, wipedebugdir);
+            }
             set[name] = results;
         });
 	      req.nad_run_count--;
@@ -847,6 +850,9 @@ function handler(req, res) {
 
     //plugin
     if (m = /^\/write\/(.+)$/.exec(path)) {
+        if (debugdir) {
+            dutil.write_debug_output(m[1], [body], debugdir, wipedebugdir);
+        }
         push_script.obj.some_data(m[1], body); 
         res.writeHead(200, "OK", { 'Content-Type': 'text/plan' });
         res.end();
