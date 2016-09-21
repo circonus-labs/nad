@@ -6,8 +6,8 @@ nodetool cfstats 2>/dev/null | awk 'BEGIN {}
 /^Keyspace:/ { KS=$2 };
 /Read Count:/ {print KS"`read_count\tL\t"$3};
 /Write Count:/ {print KS"`write_count\tL\t"$3};
-/Read Latency:/ {print KS"`read_latency\tn\t"$2};
-/Write Latency:/ {print KS"`write_latency\tn\t"$2};
+/Read Latency:/ {print KS"`read_latency\tn\t"$3};
+/Write Latency:/ {print KS"`write_latency\tn\t"$3};
 /Table:/ { T = $2 };
 /Space used \(total\):/ { print KS"`"T"`space_used_total\tL\t"$4 };
 /Space used \(live\):/ { print KS"`"T"`space_used_live\tL\t"$4 };
