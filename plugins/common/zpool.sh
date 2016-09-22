@@ -122,3 +122,8 @@ for zp in $pools; do \
             }
         }'
 done
+
+# pool fragmentation
+zpool list -H -o name,fragmentation | sed 's/\%//g' | while read fraglist; do
+    echo $fraglist | awk {'printf("%s`fragmentation\tL\t%s\n", $1, $2)'};
+done
