@@ -7,7 +7,7 @@ po=/opt/circonus/bin/protocol_observer
 
 if [[ ! -x $po ]]; then
         po=`type -P protocol_observer`
-        [[ $? -eq 0 ]] || { echo 'Unable to location protocol_observer binary'; exit 1; }
+        [[ $? -eq 0 ]] || { echo 'Unable to locate protocol_observer binary'; exit 1; }
 fi
 IFACE="${IFACE:="auto"}"
 NADURL="${NADURL:="http://localhost:2609"}"
