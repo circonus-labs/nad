@@ -70,24 +70,27 @@ Optionally, to build the default plugins and create an SMF manifest:
 
 FreeBSD
 ---
-    # gmake install
+    # PREFIX=/usr/local gmake install
 
 Optionally, to build the default plugins and install an init script:
 
-    # gmake install-freebsd
+    # PREFIX=/usr/local gmake install-freebsd
 
 The init script defaults to nad being enabled. If you wish to disable
-nad, add `nad_enable="NO"` to `/etc/rc.conf`.  Additionally if you
-wish to override the default options, you may add them to rc.conf as
-`nad_flags`.
+nad, add `nad_enable="NO"` to `/etc/rc.conf`. Starting with FreeBSD 9.2,
+you may instead use `sysrc nad_enable=NO` to disable the service.
+
+Additionally if you wish to override the default options, you may add
+them to rc.conf as `nad_flags`. Starting with FreeBSD 9.2, you may
+instead use `sysrc nad_flags="<flags>"` to set additional options.
 
 OpenBSD
 ---
-    # gmake install
+    # PREFIX=/usr/local gmake install
 
 Optionally, to build the default plugins:
 
-    # gmake install-openbsd
+    # PREFIX=/usr/local gmake install-openbsd
 
 Operations
 ===
