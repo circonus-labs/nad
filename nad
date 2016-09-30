@@ -795,12 +795,14 @@ function run_scripts(req, res, which) {
     // over http
     if (!which) {
         init_script(push_script, req, function(d, results, name) {
-            set[name] = results;
             req.nad_run_count--;
-            send_complete();  // only sends if all scripts are done
-            if (debugdir) {
-                dutil.write_debug_output(name, ["Returning push_receiver data", JSON.stringify(results)], debugdir, wipedebugdir);
+            if (results !== null) {
+                set[name] = results;
+                if (debugdir) {
+                    dutil.write_debug_output(name, ["Returning push_receiver data", JSON.stringify(results)], debugdir, wipedebugdir);
+                }
             }
+            send_complete();  // only sends if all scripts are done
         });
     }
 
