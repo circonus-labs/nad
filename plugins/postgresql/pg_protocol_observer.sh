@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 source /opt/circonus/etc/pg-po-conf.sh
 
