@@ -1,0 +1,31 @@
+{
+  "name": "circonus-nad-docker",
+  "version": "0.1.0",
+  "description": "expose docker events and container stats via NAD",
+  "private": true,
+  "bin": [
+    "stats.js",
+    "events.js"
+  ],
+  "keywords": [
+    "circonus",
+    "docker",
+    "nad",
+    "metrics",
+    "events",
+    "stats"
+  ],
+  "author": "matt maier (https://github.com/maier/)",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "docker-modem": "0.3.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maier/circonus-nad-plugins.git"
+  },
+  "bugs": {
+    "url": "https://github.com/maier/circonus-nad-plugins/issues"
+  },
+  "homepage": "https://github.com/maier/circonus-nad-plugins#readme"
+}

@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 // -*-Javascript-*-
+/* eslint-disable */
 'use strict';
 //
 // Toss executables (scripts too) in /etc/node-agent.d
@@ -501,7 +502,7 @@ function rescan_modules() {
 
 function init_script(d, req, cb) {
   if(d.running) {
-    cb(d, past_results[d.name]);
+    cb(d, past_results[d.name], d.name);
     return;
   }
 
@@ -794,13 +795,15 @@ function run_scripts(req, res, which) {
     // over http
     if (!which) {
         init_script(push_script, req, function(d, results, name) {
-            if (debugdir) {
-                dutil.write_debug_output(name, ["Returning push_receiver data", JSON.stringify(results)], debugdir, wipedebugdir);
+            req.nad_run_count--;
+            if (results !== null) {
+                set[name] = results;
+                if (debugdir) {
+                    dutil.write_debug_output(name, ["Returning push_receiver data", JSON.stringify(results)], debugdir, wipedebugdir);
+                }
             }
-            set[name] = results;
+            send_complete();  // only sends if all scripts are done
         });
-	      req.nad_run_count--;
-        send_complete();  // only sends if all scripts are done
     }
 
     send_complete(); // only sends if there were no scripts to run
@@ -824,7 +827,7 @@ function handler(req, res) {
   // a callback on the 'end' event) and then send back the result
   req.addListener('end', function() {
     var m, path = url.parse(this.url).pathname;
-    var body = Buffer.concat(bodyChunks).toString();  
+    var body = Buffer.concat(bodyChunks).toString();
 
     // request for meta-info about the scripts
     if(/^\/inventory/.test(path)) {
@@ -858,7 +861,7 @@ function handler(req, res) {
         if (debugdir) {
             dutil.write_debug_output(m[1], ["Receiving push_receiver data", body], debugdir, wipedebugdir);
         }
-        push_script.obj.some_data(m[1], body); 
+        push_script.obj.some_data(m[1], body);
         res.writeHead(200, "OK", { 'Content-Type': 'text/plan' });
         res.end();
         return;
