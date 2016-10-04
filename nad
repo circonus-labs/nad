@@ -797,7 +797,9 @@ function run_scripts(req, res, which) {
         init_script(push_script, req, function(d, results, name) {
             req.nad_run_count--;
             if (results !== null) {
-                set[name] = results;
+                for (const group in results) {
+                    set[group] = results[group];
+                }
                 if (debugdir) {
                     dutil.write_debug_output(name, ["Returning push_receiver data", JSON.stringify(results)], debugdir, wipedebugdir);
                 }
