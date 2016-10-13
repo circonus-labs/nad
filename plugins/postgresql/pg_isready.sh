@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 source /opt/circonus/etc/pg-conf.sh
 
 which pg_isready >/dev/null 2>&1 || exit 1
