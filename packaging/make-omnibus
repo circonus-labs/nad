@@ -4,6 +4,9 @@
 
 set -e
 
+# force permissive umask (for asset creation default permissions)
+umask 0022
+
 PATH=$PATH:/opt/omni/bin
 PREFIX=/opt/circonus
 NAD_REPO="https://github.com/circonus-labs/nad.git"
@@ -193,6 +196,18 @@ build_nad() {
     echo "Building nad"
     pushd $BUILDDIR/nad > /dev/null
     make DESTDIR=$INSTALLDIR PREFIX=$PREFIX RUNSTATE_USER=`id -u` $INSTALL_TARGET
+    popd > /dev/null
+
+    echo "Removing plugins not related to Linux $OS"
+    pushd "${INSTALLDIR}/${PREFIX}/etc/node-agent.d" > /dev/null
+    # list of plugins not applicable to Linux
+    plugin_list="illumos freebsd openbsd smartos windows pf"
+    for plugin in $plugin_list; do
+        [[ -d $plugin ]] && {
+            echo "Removing $plugin plugin(s)"
+            rm -rf $plugin
+        }
+    done
     popd > /dev/null
 }
 

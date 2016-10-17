@@ -2,6 +2,10 @@
 %define		rrelease	1
 %define		_prefix		/opt/circonus
 
+# perl is optional* not required
+# rpmbuild autoreq will include it by default because of scripts with perl shebang
+%define __requires_exclude perl
+
 Name:		nad-omnibus
 Version:	%{rversion}
 Release:	%{rrelease}%{?dist}
@@ -37,7 +41,7 @@ if [ $1 = 0 ]; then
 fi
 
 %files
-%defattr(644, root, root, 755)
+%defattr(-, root, root, 755)
 /etc/init.d/nad
 /etc/sysconfig/nad
 %{_prefix}/embedded
