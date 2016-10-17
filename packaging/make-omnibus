@@ -204,8 +204,8 @@ build_nad() {
     plugin_list="illumos freebsd openbsd smartos windows pf"
     for plugin in $plugin_list; do
         [[ -d $plugin ]] && {
-                echo "Removing $plugin plugin(s)"
-                rm -rf $plugin
+            echo "Removing $plugin plugin(s)"
+            rm -rf $plugin
         }
     done
     popd > /dev/null
