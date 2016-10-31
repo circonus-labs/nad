@@ -9,8 +9,8 @@
 // or:
 //    <name><whitespace><type><whitespace><value>
 //
-// The first indicates the value is present an null
-// the second indicates the valus is present and specific
+// The first indicates the value is present and null
+// the second indicates the value is present and specific
 //
 
 // require //////////////////////////////////////////////////////////////
@@ -41,11 +41,11 @@ var ext = /(?:\.([^.]+))?$/;
 var past_results = {};
 
 // a data structure representing all scripts (aka plugins/native
-// plugins.)  Each value in the objcect contains an object that
+// plugins.)  Each value in the object contains an object that
 // has properties relating to the script.
 var scripts = {};
 
-// a collection incating which scripts that have been run once
+// a collection indicating which scripts that have been run once
 // already
 var scripts_once = {};
 
@@ -609,7 +609,7 @@ function run_script(d, cb, req, args, instance) {
     cmd.kill();
   };
 
-  // create a function that can handle output from the procss we
+  // create a function that can handle output from the process we
   // just created.  This will be called from the code below whenever
   // we reach the end of the process output, or a blank line is found in
   // the output
