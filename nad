@@ -281,7 +281,7 @@ for(var i=2; i<process.argv.length; i++) {
       break;
     }
 
-    // should we verify using a certifcate authority the
+    // should we verify using a certificate authority the
     // SSL certificate presented?
     case "-v": verify = true; break;
 
@@ -717,7 +717,7 @@ function run_script(d, cb, req, args, instance) {
 
       // discard this line from the buffer we're using between
       // "data" callbacks and move onto processing the next one
-      // if there is (or kep it for next callback if there isn't)
+      // if there is (or keep it for next callback if there isn't)
       proc_data.data = proc_data.data.substring(offset+1);
     }
   });
@@ -758,7 +758,7 @@ function run_scripts(req, res, which) {
     res.end();
   };
 
-  // if they asked for a paricular script and it didn't exist
+  // if they asked for a particular script and it didn't exist
   // then just send a 404
   if(which && !(which in scripts)) {
     res.writeHead(404);
