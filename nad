@@ -9,8 +9,8 @@
 // or:
 //    <name><whitespace><type><whitespace><value>
 //
-// The first indicates the value is present an null
-// the second indicates the valus is present and specific
+// The first indicates the value is present and null
+// the second indicates the value is present and specific
 //
 
 // require //////////////////////////////////////////////////////////////
@@ -41,11 +41,11 @@ var ext = /(?:\.([^.]+))?$/;
 var past_results = {};
 
 // a data structure representing all scripts (aka plugins/native
-// plugins.)  Each value in the objcect contains an object that
+// plugins.)  Each value in the object contains an object that
 // has properties relating to the script.
 var scripts = {};
 
-// a collection incating which scripts that have been run once
+// a collection indicating which scripts that have been run once
 // already
 var scripts_once = {};
 
@@ -281,7 +281,7 @@ for(var i=2; i<process.argv.length; i++) {
       break;
     }
 
-    // should we verify using a certifcate authority the
+    // should we verify using a certificate authority the
     // SSL certificate presented?
     case "-v": verify = true; break;
 
@@ -609,7 +609,7 @@ function run_script(d, cb, req, args, instance) {
     cmd.kill();
   };
 
-  // create a function that can handle output from the procss we
+  // create a function that can handle output from the process we
   // just created.  This will be called from the code below whenever
   // we reach the end of the process output, or a blank line is found in
   // the output
@@ -717,7 +717,7 @@ function run_script(d, cb, req, args, instance) {
 
       // discard this line from the buffer we're using between
       // "data" callbacks and move onto processing the next one
-      // if there is (or kep it for next callback if there isn't)
+      // if there is (or keep it for next callback if there isn't)
       proc_data.data = proc_data.data.substring(offset+1);
     }
   });
@@ -758,7 +758,7 @@ function run_scripts(req, res, which) {
     res.end();
   };
 
-  // if they asked for a paricular script and it didn't exist
+  // if they asked for a particular script and it didn't exist
   // then just send a 404
   if(which && !(which in scripts)) {
     res.writeHead(404);
