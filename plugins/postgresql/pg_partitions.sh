@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
-plugin_dir=$(dirname $(realpath ${BASH_SOURCE[0]}))
+plugin_dir=$(dirname $(readlink -e ${BASH_SOURCE[0]}))
 pgfuncs="${plugin_dir}/pg_functions.sh"
-[[ -f $pgfuncs ]] && source $pgfuncs
+[[ -f $pgfuncs ]] || { echo "Unable to find pg functions ${pgfuncs}"; exit 1; }
+source $pgfuncs
 [[ ${pg_functions:-0} -eq 0 ]] && { echo "Invalid plugin configuration."; exit 1; }
 
 IFS=','

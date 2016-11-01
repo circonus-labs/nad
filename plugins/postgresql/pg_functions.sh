@@ -18,7 +18,7 @@ fi
 : ${PGDATABASE:=postgres}
 : ${PGPASS:=}
 : ${PGPORT:=5432}
-[[ -n ${PGPASS:-} ]] && export PGPASSWORD="$PGPASS"
+[[ -n ${PGPASS:-} && -z ${PGPASSWORD:-} ]] && export PGPASSWORD="$PGPASS"
 
 pg_functions=1
 
