@@ -222,3 +222,15 @@ name of the graph that will be created in Circonus, with the hostname
 prepended to it.  Under the names, the structure is identical to the 
 documentation for the Circonus graph API, any values added will be passed to 
 the API as is.
+
+Man
+---
+
+Further documentation can be found in the nad manpage: `man nad`.
+
+If nad is not installed, you can render the manpage locally with:
+```
+groff -mmandoc -Tascii nad.8 | less
+```
+
+A copy is also avaliable on the [wiki](https://github.com/circonus-labs/nad/wiki/manpage).
