@@ -16,17 +16,28 @@ community. Just submit a pull request against this repository.
 
 - Full support for [histogram metrics](https://www.circonus.com/understanding-data-with-histograms/).
 
-- multiple data submission paradigms
-  - push. nad submits data to Circonus via HTTP/PUT
-  - pull. nad exposes and HTTP endpoint (default: http://localhost:2069), and Circonus collects metrics from there.
-  - [reverse pull](https://www.circonus.com/pully-mcpushface/). nad initiates a TCP connection with Circonus. Circonus uses that connection to request data as needed.
+- Support for Circonus real-time (1s) dashboards and graphing.
 
-  With pull and reverse pull you will be able to use the Circonus
-  real-time (1s) graphing features.
+- multiple data submission paradigms
+  - pull. nad exposes and JSON/HTTP endpoint (default:
+    http://localhost:2069), and Circonus collects metrics from there.
+
+  - [reverse pull](https://www.circonus.com/pully-mcpushface/). nad
+    initiates a TCP connection with Circonus. Circonus uses that
+    connection to request data as needed. This allows nad to operate
+    behind a NAT.
 
 - nad can automatically configure itself with Circonus via a few command line options.
 
 ## Installation
+
+### C:OSI
+
+The easiest way to install nad is via the Circonus one-step-installer (C:OSI).
+This will allow you to install and configure nad with a shell one-liner.
+See <https://github.com/circonus-labs/circonus-one-step-install> for details.
+
+### Packages
 
 For convenience we provide nad packages for selected platforms under
 [omnibus packages](http://updates.circonus.net/node-agent/packages/ "nad omnibus packages"). At the time of this writing these are:
