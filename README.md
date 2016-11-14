@@ -32,9 +32,9 @@ community. Just submit a pull request against this repository.
 
 ## Installation
 
-### C:OSI
+### COSI
 
-The easiest way to install nad is via the Circonus one-step-installer (C:OSI).
+The easiest way to install nad is via the Circonus one-step-installer (COSI).
 This will allow you to install and configure nad with a shell one-liner.
 See <https://github.com/circonus-labs/circonus-one-step-install> for details.
 
