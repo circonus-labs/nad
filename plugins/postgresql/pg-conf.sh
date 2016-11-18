@@ -23,6 +23,12 @@
 ## The user to run pg_stat queries as.
 # PGUSER="postgres"
 
+## The password for the PGUSER
+# PGPASS=""
+
+## The port that postgres is listening on, on this host
+# PGPORT=5432
+
 ## The database to use when querying database specific info like pg_statio_user_tables for cache hits.
 ## usually this would be set to the database you want to monitor.
 # PGDATABASE="postgres"
@@ -30,3 +36,5 @@
 ## The postgresql plugin requires that `psql` and `pg_isready` is in the exec PATH, so add here 
 ## if they are not already
 # PATH=$PATH:/path/to/psql
+
+

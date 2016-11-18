@@ -1,18 +1,20 @@
-#!/bin/bash
-source /opt/circonus/etc/pg-conf.sh
+#!/usr/bin/env bash
 
-which psql >/dev/null 2>&1 || exit 1
-PGUSER="${PGUSER:="postgres"}"
-PGDATABASE="${PGDATABASE:="postgres"}"
+plugin_dir=$(dirname $(readlink -e ${BASH_SOURCE[0]}))
+pgfuncs="${plugin_dir}/pg_functions.sh"
+[[ -f $pgfuncs ]] || { echo "Unable to find pg functions ${pgfuncs}"; exit 1; }
+source $pgfuncs
+[[ ${pg_functions:-0} -eq 0 ]] && { echo "Invalid plugin configuration."; exit 1; }
 
-LAG=$(psql -U "$PGUSER" -F, -Atc "SELECT application_name, pg_xlog_location_diff(pg_current_xlog_insert_location(), flush_location) AS lag_bytes FROM pg_stat_replication" $PGDATABASE)
+LINEBREAKS=$'\n\b'
+
+LAG=$($PSQL -U $PGUSER -d $PGDATABASE -p $PGPORT -w -F, -Atc "SELECT application_name, pg_xlog_location_diff(pg_current_xlog_insert_location(), flush_location) AS lag_bytes FROM pg_stat_replication")
 
 for a in $LAG; do
     IFS=','
-    DATA=( `echo "$a"` )
-	echo -e "application_name\ts\t${DATA[0]}"
-	echo -e "lag\tL\t${DATA[1]}"
+    DATA=( $a )
+	print_str "application_name" ${DATA[0]}
+    print_uint "lag" ${DATA[1]}
 done
-       
 
-
+# END

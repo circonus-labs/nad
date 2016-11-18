@@ -1,17 +1,19 @@
-#!/bin/bash
-source /opt/circonus/etc/pg-conf.sh
+#!/usr/bin/env bash
 
-which psql >/dev/null 2>&1 || exit 1
-PGUSER="${PGUSER:="postgres"}"
-PGDATABASE="${PGDATABASE:="postgres"}"
-OLDIFS=$IFS
+plugin_dir=$(dirname $(readlink -e ${BASH_SOURCE[0]}))
+pgfuncs="${plugin_dir}/pg_functions.sh"
+[[ -f $pgfuncs ]] || { echo "Unable to find pg functions ${pgfuncs}"; exit 1; }
+source $pgfuncs
+[[ ${pg_functions:-0} -eq 0 ]] && { echo "Invalid plugin configuration."; exit 1; }
+
 LINEBREAKS=$'\n\b'
 
-DB_LIST=$(psql -U "$PGUSER" -F, -Atc "select datname,pg_database_size(datname) from pg_database;" $PGDATABASE)
+DB_LIST=$($PSQL -U $PGUSER -d $PGDATABASE -p $PGPORT -w -F, -Atc "select datname,pg_database_size(datname) from pg_database;")
 
 for db in $DB_LIST; do
-   IFS=','
-  DATA=( `echo "${db}"` )
-  echo -e "${DATA[0]}\tL\t${DATA[1]}"
+    IFS=','
+    DATA=( $db )
+    print_uint ${DATA[0]} ${DATA[1]}
 done
 
+# END
