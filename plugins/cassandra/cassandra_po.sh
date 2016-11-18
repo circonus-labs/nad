@@ -9,9 +9,8 @@ if [[ ! -x $po ]]; then
         [[ $? -eq 0 ]] || { echo 'Unable to location protocol_observer binary'; exit 1; }
 fi
 
-IFACE="${IFACE:="auto"}"
-NADURL="${NADURL:="http://localhost:2609"}"
-
+: ${IFACE:=auto}
+: ${NADURL:=http://localhost:2609}
 NADURL=${NADURL%/}
 
 # if protocol_observer is already running, exit
@@ -21,4 +20,6 @@ if [[ -n "$popid" ]]; then
            exit 0
 fi
 
-sudo $po -wire cassandra_cql -submissionurl ${NADURL}/write/cassandra_protocol_observer &
+sudo $po -wire cassandra_cql -iface $IFACE -submissionurl ${NADURL}/write/cassandra_protocol_observer &
+
+# END
