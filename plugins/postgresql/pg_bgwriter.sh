@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-plugin_dir=$(dirname $(readlink -e ${BASH_SOURCE[0]}))
+plugin_dir=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 pgfuncs="${plugin_dir}/pg_functions.sh"
 [[ -f $pgfuncs ]] || { echo "Unable to find pg functions ${pgfuncs}"; exit 1; }
 source $pgfuncs
