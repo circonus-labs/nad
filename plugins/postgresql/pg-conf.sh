@@ -33,8 +33,6 @@
 ## usually this would be set to the database you want to monitor.
 # PGDATABASE="postgres"
 
-## The postgresql plugin requires that `psql` and `pg_isready` is in the exec PATH, so add here 
+## The postgresql plugin requires that `psql` and `pg_isready` is in the exec PATH, so add here
 ## if they are not already
 # PATH=$PATH:/path/to/psql
-
-
