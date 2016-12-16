@@ -14,8 +14,8 @@ if [[ $UID -ne 0 ]]; then
     [[ $? -ne 0 ]] && { echo "Error checking sudo access for $UID"; exit 1; }
 fi
 
-poconf="/opt/circonus/etc/pg-po-conf.sh"
-[[ -f $poconf ]] && source $poconf
+po_conf=/opt/circonus/etc/pg_po_conf.sh
+[[ -s $po_conf ]] && source $po_conf
 
 # default location
 po=/opt/circonus/bin/protocol_observer
