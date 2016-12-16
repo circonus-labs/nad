@@ -25,10 +25,11 @@ if [[ ! -x $po ]]; then
     [[ $? -eq 0 ]] || {
         >&2 echo 'Unable to location protocol_observer binary'
         exit 1
-	}
+    }
 fi
 
-source /opt/circonus/etc/cass-po-conf.sh
+po_conf=/opt/circonus/etc/cassandra_po_conf.sh
+[[ -s $po_conf ]] && source $po_conf
 
 : ${IFACE:=auto}
 : ${NADURL:=http://localhost:2609}
