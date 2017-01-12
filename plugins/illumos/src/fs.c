@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
         libzfs_handle_t *zfsh = libzfs_init();
         zfs_handle_t *handle = zfs_path_to_zhandle(zfsh, (char *)mnt.mnt_mountp, ZFS_TYPE_FILESYSTEM);
         if(handle) {
-          char source[ZFS_MAXNAMELEN];
+          char source[ZFS_MAXPROPLEN];
           zprop_source_t srctype;
           int rv;
 #define ZFS_PULL_N_PRINT(prop, name, T, F, expr) do { \
