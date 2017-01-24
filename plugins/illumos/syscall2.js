@@ -93,8 +93,7 @@ module.exports = class Syscall {
             if ({}.hasOwnProperty.call(cfg, 'execname')) {
                 execName = cfg.execname;
             }
-        }
-        catch (err) {
+        } catch (err) {
             console.error(err);
         }
 
@@ -102,8 +101,7 @@ module.exports = class Syscall {
 
         if (execName === null) {
             script = 'syscall:::entry{self->start=timestamp;}syscall:::return/self->start/{@l[strjoin(probefunc,"`latency_us")] = llquantize((timestamp-self->start)/1000, 10, 0, 6, 100); self->start = 0;}'; // eslint-disable-line max-len
-        }
-        else {
+        } else {
             script = `syscall:::entry/execname=="${execName}"/{self->start=timestamp;}syscall:::return/self->start/{@l[strjoin(strjoin(execname,"\`"),strjoin(probefunc,"\`latency_us"))] = llquantize((timestamp-self->start)/1000, 10, 0, 6, 100); self->start = 0;}`; // eslint-disable-line max-len
         }
 
@@ -120,7 +118,7 @@ module.exports = class Syscall {
     run(details, cb, req, args, instance) { // eslint-disable-line max-params
         let samples = DEFAULT_SAMPLES;
 
-        if (req) {
+        if (req && {}.hasOwnProperty.call(req, 'headers') && {}.hasOwnProperty.call(req.headers, 'x-reconnoiter-period')) {
             samples = Math.floor(req.headers['x-reconnoiter-period'] / MILLISECOND);
         }
 

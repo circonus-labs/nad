@@ -85,7 +85,7 @@ module.exports = class FQ {
     run(details, cb, req, args, instance) { // eslint-disable-line max-params
         let samples = DEFAULT_SAMPLES;
 
-        if (req) {
+        if (req && {}.hasOwnProperty.call(req, 'headers') && {}.hasOwnProperty.call(req.headers, 'x-reconnoiter-period')) {
             samples = Math.floor(req.headers['x-reconnoiter-period'] / MILLISECOND);
         }
 
