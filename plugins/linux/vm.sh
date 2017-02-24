@@ -60,18 +60,18 @@ END {
 
     for (key in list) {
         if (key != "") {
-            printf("meminfo`%s\tL\t%d\n", key, list[key])
+            printf("meminfo`%s\tL\t%.0f\n", key, list[key])
         }
     }
 
-    printf("memory`total\tL\t%d\n", memTotal)
-    printf("memory`used\tL\t%d\n", memUsed)
-    printf("memory`free\tL\t%d\n", memFreeTotal)
+    printf("memory`total\tL\t%.0f\n", memTotal)
+    printf("memory`used\tL\t%.0f\n", memUsed)
+    printf("memory`free\tL\t%.0f\n", memFreeTotal)
     printf("memory`percent_used\tL\t%.02f\n", memUsedPct)
     printf("memory`percent_free\tL\t%.02f\n", memFreePct)
-    printf("swap`total\tL\t%d\n", swapTotal)
-    printf("swap`used\tL\t%d\n", swapUsed)
-    printf("swap`free\tL\t%d\n", swapFreeTotal)
+    printf("swap`total\tL\t%.0f\n", swapTotal)
+    printf("swap`used\tL\t%.0f\n", swapUsed)
+    printf("swap`free\tL\t%.0f\n", swapFreeTotal)
     printf("swap`percent_used\tL\t%.02f\n", swapUsedPct)
     printf("swap`percent_free\tL\t%.02f\n", swapFreePct)
 }' < $PROCFILE
@@ -91,4 +91,3 @@ let PG_MINFAULTS=$PG_FAULTS-$PG_MAJFAULTS
 print_vm info page_fault $PG_FAULTS
 print_vm info page_fault\`minor $PG_MINFAULTS
 print_vm info page_fault\`major $PG_MAJFAULTS
-
