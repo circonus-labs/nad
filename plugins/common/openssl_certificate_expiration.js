@@ -1,5 +1,4 @@
-const   fs      = require('fs'),
-        path    = require('path'),
+const   path    = require('path'),
         spawn   = require('child_process').spawnSync;
 
 var certexpire = function(){};
