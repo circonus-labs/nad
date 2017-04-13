@@ -140,7 +140,6 @@ function start_http_servers() {
 
         for (const server of settings.ssl.listen) {
             log.debug({ server }, 'starting SSL server');
-
             try {
                 https.createServer(settings.ssl.creds, handler).listen(server.port, server.address);
                 log.info({ server }, 'listening');
@@ -184,12 +183,6 @@ function start_reverse() {
             resolve('reverse connector not enabled, skipping');
             return;
         }
-
-        // NOTE: if reverse is enabled, have it call start_statsd
-        //       after it finishes initializing to ensure that the
-        //       statsd module has a host_check_id. reverse will
-        //       update settings if it has to 'search' for
-        //       a check and one is found.
 
         log.debug('loading reverse connector');
         try {
