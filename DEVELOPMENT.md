@@ -29,6 +29,11 @@ v6.10.1
 v3.18.0
 ```
 
+**Development tools used**
+
+1. eslint -- `npm install -g eslint`
+1. remark -- `npm install -g remark-cli remark-man`
+
 # Core
 
 1. Fork the [NAD repository on github](https://github.com/circonus-labs/nad)
