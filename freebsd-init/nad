@@ -7,29 +7,23 @@
 . /etc/rc.subr
 
 name=nad
-rcvar=nad_enable
-command="@@PREFIX@@/sbin/nad"
-command_interpreter="node"
-start_precmd="nad_precmd"
-start_cmd="nad_start"
-
-load_rc_config $name
-: ${nad_enable:="yes"}
-: ${nad_flags:="-c @@CONF@@"}
-
-nad_precmd()
-{
-    rc_flags="${nad_flags}"
-}
+rcvar="${name}_enable"
+pidfile="@@PID_FILE@@"
+start_cmd="${name}_start"
+stop_cmd="${name}_stop"
 
 nad_start()
 {
-    PATH="@@PREFIX@@/embedded/bin:@@PREFIX@@/sbin:$PATH"
-    NODE_PATH="@@PREFIX@@/lib/node_modules"
-    export PATH NODE_PATH
-
     echo "Starting ${name}."
-    daemon -f -u nobody @@PREFIX@@/sbin/nad $rc_flags
+    export PATH="$PATH:/usr/local/bin:/usr/local/sbin"
+    @@SBIN@@/nad --daemon --pid_file $pidfile @@SYSLOG@@
 }
 
+nad_stop()
+{
+    echo "Stopping ${name}."
+    kill $(cat $pidfile)
+}
+
+load_rc_config $name
 run_rc_command "$1"

@@ -1,0 +1,13 @@
+[Unit]
+Description=Circonus Node Agent Daemon
+Documentation=http://github.com/circonus-labs/nad
+After=network.target
+
+[Service]
+Type=forking
+PIDFile=@@PID_FILE@@
+ExecStart=@@SBIN@@/nad --daemon --pid_file @@PID_FILE@@
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

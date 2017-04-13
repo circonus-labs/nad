@@ -129,7 +129,7 @@
         "no-process-env": "error",
         "no-process-exit": "error",
         "no-restricted-modules": "off",
-        "no-sync": "error", // disable this for command line tools
+        "no-sync": "off", // disable this for command line tools
         // style
         "array-bracket-spacing": ["error", "always"],
         "block-spacing": ["error", "always"],

@@ -2,12 +2,32 @@
 
 . /lib/svc/share/smf_include.sh
 
-LISTEN_ADDRESS=$1
+function startup
+{
+    if smf_is_nonglobalzone; then
+    	@@SBIN@@/nad --daemon --pid_file @@PID_FILE@@
+    else
+    	/bin/ppriv -e -s EI+dtrace_kernel @@SBIN@@/nad --daemon --pid_file @@PID_FILE@@
+    fi
+}
 
-if smf_is_nonglobalzone; then
-	@@PREFIX@@/sbin/nad -c @@CONF@@ -p $LISTEN_ADDRESS -u 60001
-else
-	/bin/ppriv -e -s EI+dtrace_kernel @@PREFIX@@/sbin/nad -c @@CONF@@ -p $LISTEN_ADDRESS -u 60001
-fi
+function shutdown
+{
+    if [[ -f @@PID_FILE@@ ]]; then
+        kill `cat @@PID_FILE@@`
+    else
+        echo "Missing PID file @@PID_FILE@@" >&2
+        exit $SMF_EXIT_ERR_FATAL
+    fi
+}
+
+case $1 in
+    start) startup ;;
+    stop) shutdown ;;
+    *)
+        echo "Usage: $0 {start | stop}" >&2
+        exit $SMF_EXIT_ERR_FATAL
+        ;;
+esac
 
 exit $SMF_EXIT_OK

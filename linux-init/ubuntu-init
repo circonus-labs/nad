@@ -18,26 +18,16 @@ set -e
 
 # /etc/init.d/nad: start and stop nad
 
-DAEMON="@@PREFIX@@/sbin/nad"
-NAD_OPTS=''
-NAD_DEFAULTS_FILE=/etc/default/nad
-NAD_PID_FILE=/var/run/nad.pid
+DAEMON="@@SBIN@@/nad"
+NAD_PID_FILE="@@PID_FILE@@"
 
 test -x $DAEMON || exit 0
 
 . /lib/lsb/init-functions
 
-if [ -s $NAD_DEFAULTS_FILE ]; then
-    . $NAD_DEFAULTS_FILE
-fi
-
-export PATH="@@PREFIX@@/embedded/bin:@@PREFIX@@/bin:/opt/omni/bin:$PATH"
-export NODE_PATH="@@PREFIX@@/lib/node_modules"
-
 nad_start() {
-    if start-stop-daemon --start --quiet --background \
-        --pidfile $NAD_PID_FILE --make-pidfile \
-        --chuid nobody --exec $DAEMON -- $NAD_OPTS
+    if start-stop-daemon --start --quiet --pidfile $NAD_PID_FILE \
+        --exec $DAEMON -- --daemon --pid_file @@PID_FILE@@
     then
         rc=0
         sleep 1

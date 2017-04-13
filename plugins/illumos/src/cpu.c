@@ -1,4 +1,4 @@
-#include <kstat.h>  
+#include <kstat.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <strings.h>
@@ -8,21 +8,21 @@
 #define CSSUM(name) sum.cpu_sysinfo.name += cpu.cpu_sysinfo.name
 
 int main(int argc, char **argv) {
-  kstat_ctl_t   *kc;  
-  kstat_t       *ksp;  
-  kstat_io_t     kio;  
+  kstat_ctl_t   *kc;
+  kstat_t       *ksp;
+  kstat_io_t     kio;
   kstat_named_t *knp;
   int ncpus = 0;
   long scale;
   cpu_stat_t sum;
   cpu_stat_t cpu;
- 
+
   /* scale for clock frequency */
   scale = sysconf(_SC_CLK_TCK)/100;
-  memset(&sum, 0, sizeof(sum)); 
-  kc = kstat_open();  
+  memset(&sum, 0, sizeof(sum));
+  kc = kstat_open();
   ksp = kstat_lookup(kc, "cpu_stat", -1, NULL);
-  for (; ksp != NULL; ksp = ksp->ks_next) { 
+  for (; ksp != NULL; ksp = ksp->ks_next) {
     if(!strcmp(ksp->ks_module, "cpu_stat")) {
       ncpus++;
       kstat_read(kc,ksp,&cpu);
@@ -58,4 +58,6 @@ int main(int argc, char **argv) {
   printf("%s\tL\t%s\n", "intr`soft", "[[null]]");
   printf("%s\tL\t%llu\n", "context_switch", (sum.cpu_sysinfo.inv_swtch + sum.cpu_sysinfo.pswitch));
   printf("%s\tL\t%llu\n", "syscall", sum.cpu_sysinfo.syscall);
-}  
+
+  return 0;
+}

@@ -1,0 +1,70 @@
+.TH "NAD" "8" "March 2017" "" ""
+.SH "NAME"
+\fBnad\fR - Node Agent Daemon
+.SH "SYNOPSIS"
+.P
+\fBnad \[lB]options\[rB]\fR
+.SH "DESCRIPTION"
+.P
+The node agent daemon (NAD) provides a simple mechanism to expose systems and application metrics to external onlookers. It inventories all executable programs/scripts in the \fIplugin directory\fR and executes them upon external request (via http or https) and returns the results in JSON format.
+.P
+Full documentation is available online in the NAD github repository - \fI\(lahttps://github.com/circonus-labs/nad\(ra\fR.
+.SH "OPTIONS"
+.P
+.RS 2
+.nf
+  -h, --help                      output usage information
+  -V, --version                   output the version number
+  --plugin-dir <path>             Plugin directory \[lB]/opt/circonus/etc/node-agent.d\[rB]
+  -p, --listen <ip|port|ip:port>  Listening IP address and port \[lB]2609\[rB]
+  -r, --reverse                   Use reverse connection to broker \[lB]false\[rB]
+  --cid <cid>                     Check bundle id for reverse connection \[lB]\[rB]
+  --broker-ca <file>              CA file for broker reverse connection and statsd \[lB]\[rB]
+  --api-key <key>                 Circonus API Token key \[lB]\[rB]
+  --api-app <app>                 Circonus API Token app \[lB]nad\[rB]
+  --api-url <url>                 Circonus API URL \[lB]https://api.circonus.com/v2/\[rB]
+  --api-ca <file>                 CA file for API URL \[lB]\[rB]
+  --hostname <host>               Hostname self-configure to use in check and graph names \[lB]centos7\[rB]
+  --brokerid <id>                 Broker ID for self-configure to use for creating check \[lB]\[rB]
+  --configfile <file>             File in plugin-dir for self-configure \[lB]\[rB]
+  --target <target>               Target host \[lB]centos7\[rB] -- see Target below
+  --ssl-listen <ip|port|ip:port>  SSL listening IP address and port \[lB]\[rB]
+  --ssl-cert <file>               SSL certificate PEM file, required for SSL \[lB]<plugin_dir>/na.crt\[rB]
+  --ssl-key <file>                SSL certificate key PEM file, required for SSL \[lB]<plugin_dir>/na.key\[rB]
+  --ssl-ca <file>                 SSL CA certificate PEM file, required for SSL w/verify \[lB]<plugin_dir>/na.ca\[rB]
+  --ssl-verify                    Enable SSL verification
+  --no-statsd                     Disable builtin StatsD interface
+  --statsd-config <file>          Config file for builtin StatsD interface \[lB]\[rB]
+  -u, --uid <id>                  User id to drop privileges to on start \[lB]\[rB]
+  --log-level <level>             Log level (trace|debug|info|warn|error|fatal) \[lB]info\[rB]
+  -d, --debug                     Enable debug logging (verbose) \[lB]false\[rB]
+  -t, --trace                     Enable trace logging (very verbose) \[lB]false\[rB]
+  --no-watch                      Disable automatic watches of plugin directory, script files, config files. Send SIGHUP to rescan plugins. \[lB]true\[rB]
+  --debugdir                      Create debug files for each plugin and write to this directory \[lB]\[rB]
+  --wipedebugdir                  Wipe debug directory clean before each write \[lB]false\[rB]
+  -i, --inventory                 Offline inventory
+  -c <path>                       DEPRECATED use --plugin-dir
+  -p <spec>                       DEPRECATED use --listen
+  -s <spec>                       DEPRECATED use --ssl-listen
+  -v                              DEPRECATED use --ssl-verify
+  --authtoken <token>             DEPRECATED use --api-key
+  --apihost <host>                DEPRECATED use --api-url
+  --apiport <port>                DEPRECATED --api-url
+  --apipath <path>                DEPRECATED --api-url
+  --apiprotocol <proto>           DEPRECATED --api-url
+  --apiverbose                    DEPRECATED NOP, see --debug
+  --sslcert <file>                DEPRECATED use --ssl-cert
+  --sslkey <file>                 DEPRECATED use --ssl-key
+  --sslca <file>                  DEPRECATED use --ssl-ca
+  --cafile <file>                 DEPRECATED use --broker-ca
+.fi
+.RE
+.SH "BUGS"
+.P
+\fI\(lahttps://github.com/circonus-labs/nad/issues\(ra\fR
+.SH "AUTHOR"
+.P
+Circonus, Inc. \fI\(lasupport@circonus.com\(ra\fR
+.SH "COPYRIGHT"
+.P
+Copyright \[co] 2017, Circonus, Inc.

@@ -7,13 +7,23 @@ set -e
 # force permissive umask (for asset creation default permissions)
 umask 0022
 
+# allow for local overrides which are not comitted in the repository
+[[ -f ./omnibus.conf ]] && source ./omnibus.conf
+
+: ${NAD_REPO:="https://github.com/circonus-labs/nad.git"}
+: ${NAD_BRANCH:="master"}
+: ${PREFIX:=/opt/circonus}
+: ${BUILDDIR:="/tmp/nad-omnibus-build"}
+: ${INSTALLDIR:="/tmp/nad-omnibus-install"}
+: ${PUBLISHDIR:="/mnt/node-agent"}
+
 PATH=$PATH:/opt/omni/bin
-PREFIX=/opt/circonus
-NAD_REPO="https://github.com/circonus-labs/nad.git"
-BUILDDIR="/tmp/nad-omnibus-build"
-INSTALLDIR="/tmp/nad-omnibus-install"
-PUBLISHDIR="/mnt/node-agent"
-NODE_VERSION="4.4.5"
+NODE_VERSION="v6.10.2"
+# extract actual node version to use from common place
+if [[ -f ../.node_version ]]; then
+    NODE_VERSION=$(head -1 ../.node_version)
+fi
+
 # CentOS 5/6 wget is unable to verify nodejs cert
 # ERROR: certificate common name `*.nodejs.org' doesn't match requested host name `nodejs.org'.
 # To connect to nodejs.org insecurely, use `--no-check-certificate'.
@@ -35,6 +45,7 @@ if [[ -f /etc/redhat-release ]]; then
     relver=$(sed -e 's/.*release \(.\).*/\1/' /etc/redhat-release)
     case "$relver" in
         5)
+            echo "DEPRECATED -- CentOS 5 end-of-life 3/31/2017"
             OS="rhel5"
             WGET_OPTS="--no-check-certificate"
             export GIT_SSL_NO_VERIFY=true
@@ -58,6 +69,7 @@ elif [[ -f /etc/lsb-release ]]; then
     [[ "$PLATFORM" == "x86_64" ]] && PLATFORM="amd64"
     case "$relver" in
         12.04)
+            echo "DEPRECATED -- Ubuntu 12.04 (precise) end-of-life 4/2017"
             OS="ubuntu.12.04"
             fpm="/var/lib/gems/1.8/gems/fpm-0.4.29/bin/fpm"
             ;;
@@ -116,7 +128,7 @@ build_nodejs() {
     echo "Building node"
     pushd $BUILDDIR/node-$NODE_VERSION > /dev/null
     make clean || make distclean
-    ./configure --prefix=$PREFIX/embedded
+    ./configure --prefix=$PREFIX
     make -j $MAKE_JOBS
     make DESTDIR=$INSTALLDIR install
     popd > /dev/null
@@ -126,22 +138,26 @@ install_binary_nodejs() {
     local node_binary_arch
     local node_binary_tgz
     local node_binary_url
-    local node_dest_dir="${INSTALLDIR}/${PREFIX}/embedded"
+    local node_dest_dir="${INSTALLDIR}/${PREFIX}"
 
     [[ "$PLATFORM" == "i386" ]] && node_binary_arch="x86"
     [[ "$PLATFORM" == "x86_64" || "$PLATFORM" == "amd64" ]] && node_binary_arch="x64"
-    node_binary_tgz="node-v${NODE_VERSION}-linux-${node_binary_arch}.tar.gz"
-    node_binary_url="https://nodejs.org/dist/v${NODE_VERSION}/${node_binary_tgz}"
+    node_binary_tgz="node-${NODE_VERSION}-linux-${node_binary_arch}.tar.gz"
+    node_binary_url="https://nodejs.org/dist/${NODE_VERSION}/${node_binary_tgz}"
 
-    echo "Checking for NodeJS v${NODE_VERSION} ${PLATFORM} binary archive"
+    echo "Checking for NodeJS ${NODE_VERSION} ${PLATFORM} binary archive"
     pushd $BUILDDIR > /dev/null
     if [[ ! -f $node_binary_tgz ]]; then
-        echo "--- node binary archive not found, downloading."
-        wget $WGET_OPTS $node_binary_url
+        if [[ -d /vagrant && -f /vagrant/$node_binary_tgz ]]; then
+            cp /vagrant/$node_binary_tgz .
+        else
+            echo "--- node binary archive not found, downloading."
+            wget $WGET_OPTS $node_binary_url
+        fi
     fi
     echo "--- extracting binary archive"
     mkdir -pv $node_dest_dir
-    tar zxf $node_binary_tgz -C $node_dest_dir --strip-components=1
+    tar -zxf $node_binary_tgz -C $node_dest_dir --strip-components=1
     popd > /dev/null
 }
 
@@ -163,8 +179,10 @@ nad_src() {
 
     if [[ -d $BUILDDIR/nad/.git ]]; then
         pushd $BUILDDIR/nad > /dev/null
-        echo "--- checkout exists, pulling latest revision"
+        echo "--- clone exists, pulling latest revision"
         set +e
+        git checkout $NAD_BRANCH
+        [[ $? -eq 0 ]] || { echo "Error checking out ${NAD_BRANCH}"; exit 1; }
         git pull
         force_clone=$?
         [[ $force_clone -ne 0 ]] && echo "--- 'git pull' exited with code:$force_clone"
@@ -179,20 +197,44 @@ nad_src() {
             rm -rf nad
         }
         echo "--- cloning from $NAD_REPO"
+        set +e
         git clone $NAD_REPO
+        [[ $? -eq 0 ]] || { echo "Error cloning ${NAD_REPO}"; exit 1; }
+        cd nad
+        git checkout $NAD_BRANCH
+        [[ $? -eq 0 ]] || { echo "Error checking out ${NAD_BRANCH}"; exit 1; }
+        set -e
         popd > /dev/null
     fi
 
     pushd $BUILDDIR/nad > /dev/null
-    # Looks like: 2013-07-23 11:23:43 -0700
+
+    # # Looks like: 2013-07-23 11:23:43 -0700
     NAD_VERSION=$(git log -1  --format=format:%ad --date=iso)
-    # Normalize to UTC
-    # This requires GNU date-- maybe there's a better way
+    # # Normalize to UTC
+    # # This requires GNU date-- maybe there's a better way
     TSTAMP=$(date -d "$NAD_VERSION" -u +%Y%m%dT%H%M%SZ)
+
+    # possibly a better way, but, requires a modern version of git like 2.7 (released 1/2016...)
+    # probably not until 2030 when centos/ubuntu start packaging git 2.7.0...
+    #
+    # Set TZ to UTC, tell git to format the date using
+    # 'local' timezone with specified format string
+    # e.g.
+    # given:
+    #   git log -1 --format=format:%ad
+    #   Fri Feb 24 14:25:05 2017 -0500
+    # output is:
+    #   TZ=UTC git log -1 --format=format:%ad --date=format-local:%Y%m%dT%H%M%SZ
+    #   20170224T192505Z
+    #TSTAMP=$(TZ=UTC git log -1 --format=format:%ad --date=format-local:%Y%m%dT%H%M%SZ)
+
     popd > /dev/null
 }
 
 build_nad() {
+    local node_dest_dir="${INSTALLDIR}/${PREFIX}"
+
     echo "Building nad"
     pushd $BUILDDIR/nad > /dev/null
     make DESTDIR=$INSTALLDIR PREFIX=$PREFIX RUNSTATE_USER=`id -u` $INSTALL_TARGET
@@ -209,6 +251,14 @@ build_nad() {
         }
     done
     popd > /dev/null
+
+    # tar/compress the unused nodejs parts -- deliver in package
+    # docs, include files (for binary npm modules), share (man, systemtap), npm (for installing additional modules)
+    mkdir ${node_dest_dir}/nodejs
+    tar --remove-files -zcf ${node_dest_dir}/nodejs/docs.tgz ${node_dest_dir}/CHANGELOG.md ${node_dest_dir}/README.md ${node_dest_dir}/LICENSE
+    tar --remove-files -zcf ${node_dest_dir}/nodejs/include.tgz ${node_dest_dir}/include
+    tar --remove-files -zcf ${node_dest_dir}/nodejs/share.tgz ${node_dest_dir}/share
+    tar --remove-files -zcf ${node_dest_dir}/nodejs/npm.tgz ${node_dest_dir}/bin/npm ${node_dest_dir}/lib/node_modules/npm
 }
 
 make_package() {
@@ -235,6 +285,7 @@ make_package() {
             --deb-user root --deb-group root \
             --after-install $BUILDDIR/nad/packaging/ubuntu-postinstall.sh \
             --after-remove $BUILDDIR/nad/packaging/ubuntu-postremove.sh \
+            --config-files $PREFIX/etc/nad.conf \
             $(cd $INSTALLDIR; find . -not -type d | sed -e 's#^\./##')
         cp $deb_file $PUBLISHDIR/packages/
     else

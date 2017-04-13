@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
     PTIME(m);
     PTIME(a);
     PTIME(c);
-    printf("hardlinks\tL\t%d\n", sb.st_nlink);
+    printf("hardlinks\tL\t%lu\n", (unsigned long)sb.st_nlink);
     printf("size\tL\t%llu\n", (unsigned long long)sb.st_size);
     printf("permissions\ts\t%04o\n", 0xfff & sb.st_mode);
     printf("type\ts\t%c\n",
