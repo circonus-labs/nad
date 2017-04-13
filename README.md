@@ -5,6 +5,7 @@
     * [Automated](#automated-install) *recommended*
     * [Manual](#manual-install)
     * [Source](#source-install)
+    * [Updating](#install-update)
 * [Running NAD](#running)
     * [Command line](#command-line)
     * [As a service](#as-a-service)
@@ -75,6 +76,22 @@ At the time of this writing, these are:
 * rpm packages - CentOS: EL6, EL7
 
 An up-to-date list of currently supported platforms is available from [COSI](https://onestep.circonus.com/) (list returned in JSON).
+
+## <a href="install-update">Updating</a>
+
+For RPM or DEB based installs, go to [updates.circonus.net](http://updates.circonus.net/node-agent/packages/) and retrieve most recent package.
+
+```sh
+curl -O http://updates.circonus.net/node-agent/packages/<name of rpm file>
+rpm -Uvh <name of rpm file>
+```
+
+```sh
+curl -O http://updates.circonus.net/node-agent/packages/<name of deb file>
+dpkg -i <name of deb file>
+```
+
+For `pkg` based systems (e.g. OmniOS) run `pkg update field/nad`.
 
 ## Source Install
 
