@@ -77,7 +77,7 @@ At the time of this writing, these are:
 
 An up-to-date list of currently supported platforms is available from [COSI](https://onestep.circonus.com/) (list returned in JSON).
 
-## <a href="install-update">Updating</a>
+## <a name="install-update">Updating</a>
 
 For RPM or DEB based installs, go to [updates.circonus.net](http://updates.circonus.net/node-agent/packages/) and retrieve most recent package.
 
