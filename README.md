@@ -5,7 +5,7 @@
     * [Automated](#automated-install) *recommended*
     * [Manual](#manual-install)
     * [Source](#source-install)
-    * [Updating](#install-update)
+    * [Updating](#updating)
 * [Running NAD](#running)
     * [Command line](#command-line)
     * [As a service](#as-a-service)
@@ -77,7 +77,7 @@ At the time of this writing, these are:
 
 An up-to-date list of currently supported platforms is available from [COSI](https://onestep.circonus.com/) (list returned in JSON).
 
-## <a name="install-update">Updating</a>
+## Updating
 
 For RPM or DEB based installs, go to [updates.circonus.net](http://updates.circonus.net/node-agent/packages/) and retrieve most recent package.
 
