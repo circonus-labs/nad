@@ -95,7 +95,7 @@ $
 
 ## Building a custom omnibus package
 
-The `packaging/make-omnibus` shell script is used to build the omnibus packages. The build can be customized by copying `example-omnibus.conf` to `omnibus.conf` and setting the applicable variables. `make-omnibus` will clone its own copy of the repository so, ensure changes are committed and pushed to the fork represented in `NAD_REPO`.
+The `packaging/make-omnibus` shell script is used to build the omnibus packages (.rpm and .deb). The build can be customized by copying `example-omnibus.conf` to `omnibus.conf` and setting the applicable variables. `make-omnibus` will clone its own copy of the repository so, ensure changes are committed and pushed to the fork represented in `NAD_REPO`.
 
 1. Clone fork
 1. Copy `packaging/example-omnibus.conf` to `packaging/omnibus.conf` and customize
@@ -108,7 +108,7 @@ The `packaging/make-omnibus` shell script is used to build the omnibus packages.
 
 ## Testing
 
-* Live testing can be performed by developing on host and running `make install` in guest VM.
+* Live testing can be performed by developing on host and running `make install` or `make install-<type>` (where type is one of `rhel`, `ubuntu`, `illumos`, etc.) in guest VM.
 * Run NAD in the foreground with debugging. `/opt/circonus/sbin/nad --debug`
 * Leverage `curl` to simulate requests. `curl 'http://127.0.0.1:2609/'`
 * If working on an executable plugin, ensure the plugin works from the command line first.
