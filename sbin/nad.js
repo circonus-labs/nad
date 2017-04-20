@@ -1,10 +1,7 @@
-#!/usr/bin/env node
-// -*-Javascript-*-
+'use strict';
 
 /* eslint-disable no-process-exit */
 /* eslint-disable global-require */
-
-'use strict';
 
 // core modules
 const http = require('http');
@@ -35,7 +32,7 @@ if (settings.is_windows) {
     } catch (err) {
         const msg = 'unable to load circwmi module';
 
-        log.fatal({ err }, msg);
+        log.fatal({ err: err.message }, msg);
         console.error(settings.pfx_error, msg, err);
         process.exit(1);
     }
@@ -132,7 +129,7 @@ function start_http_servers() {
                 http.createServer(handler).listen(server.port, server.address);
                 log.info({ server }, 'listening');
             } catch (err) {
-                log.fatal({ server, err }, 'failed to start server');
+                log.fatal({ server, err: err.message }, 'failed to start server');
                 reject(err);
                 return;
             }
@@ -144,7 +141,7 @@ function start_http_servers() {
                 https.createServer(settings.ssl.creds, handler).listen(server.port, server.address);
                 log.info({ server }, 'listening');
             } catch (err) {
-                log.fatal({ server, err }, 'failed to start SSL server');
+                log.fatal({ server, err: err.message }, 'failed to start SSL server');
                 reject(err);
                 return;
             }
