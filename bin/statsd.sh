@@ -5,6 +5,8 @@
 #
 # Alexander Fortin <alexander.fortin@gmail.com>
 #
+# from: https://github.com/etsy/statsd/blob/master/examples/statsd-client.sh
+#
 host="${STATSD_HOST:-127.0.0.1}"
 port="${STATSD_PORT:-8125}"
 
