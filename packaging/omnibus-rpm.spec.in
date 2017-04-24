@@ -1,6 +1,6 @@
 %define		rversion	@@RPMVER@@
 %define		rrelease	1
-%define		_prefix		/opt/circonus
+%define		_prefix		/opt/circonus/nad
 
 # perl is *optional* not required
 # rpmbuild autoreq will include it by default because of scripts with perl shebang

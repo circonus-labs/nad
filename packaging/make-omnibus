@@ -12,17 +12,17 @@ umask 0022
 
 : ${NAD_REPO:="https://github.com/circonus-labs/nad.git"}
 : ${NAD_BRANCH:="master"}
-: ${PREFIX:=/opt/circonus}
+: ${PREFIX:=/opt/circonus/nad}
 : ${BUILDDIR:="/tmp/nad-omnibus-build"}
 : ${INSTALLDIR:="/tmp/nad-omnibus-install"}
 : ${PUBLISHDIR:="/mnt/node-agent"}
 
 PATH=$PATH:/opt/omni/bin
+
+# set a default node version
 NODE_VERSION="v6.10.2"
-# extract actual node version to use from common place
-if [[ -f ../.node_version ]]; then
-    NODE_VERSION=$(head -1 ../.node_version)
-fi
+# extract actual node version from common config, if it exists
+[[ -f ../.node_version ]] && NODE_VERSION=$(head -1 ../.node_version)
 
 # CentOS 5/6 wget is unable to verify nodejs cert
 # ERROR: certificate common name `*.nodejs.org' doesn't match requested host name `nodejs.org'.
