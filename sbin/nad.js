@@ -1,3 +1,7 @@
+// Copyright 2016 Circonus, Inc. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 'use strict';
 
 /* eslint-disable global-require */
@@ -36,6 +40,11 @@ if (settings.is_windows) {
         process.exit(1);
     }
 }
+
+// ############################################################################
+//
+// handlers for http/https server requests
+//
 
 /**
  * handle_invalid_request responds to invalid requests
@@ -107,7 +116,6 @@ function handle_get(req, res) {
     handle_invalid_request(req, res);
 }
 
-
 /**
  * handle_put_post processes PUT and POST requests
  * @arg {Object} req request object
@@ -178,127 +186,10 @@ function handler(req, res) {
     });
 }
 
-/**
- * start_http_servers starts the main nad process http servers
- * @returns {Object} promise
- */
-function start_http_servers() {
-    return new Promise((resolve, reject) => {
-        if (settings.listen.length === 0) {
-            resolve('no http servers configured, skipping');
-        }
-
-        for (const server of settings.listen) {
-            log.debug({ server }, 'starting server');
-            try {
-                http.createServer(handler).listen(server.port, server.address);
-                log.info({ server }, 'listening');
-            } catch (err) {
-                log.fatal({
-                    err: err.message,
-                    server
-                }, 'failed to start server');
-                reject(err);
-
-                return;
-            }
-        }
-
-        resolve('http servers started');
-    });
-}
-
-/**
- * start_https_servers starts the main nad process http servers
- * @returns {Object} promise
- */
-function start_https_servers() {
-    return new Promise((resolve, reject) => {
-        if (settings.ssl.listen.length === 0) {
-            resolve('no https servers configured, skipping');
-        }
-
-        for (const server of settings.ssl.listen) {
-            log.debug({ server }, 'starting SSL server');
-            try {
-                https.
-                    createServer(settings.ssl.creds, handler).
-                    listen(server.port, server.address);
-                log.info({ server }, 'listening');
-            } catch (err) {
-                log.fatal({
-                    err: err.message,
-                    server
-                }, 'failed to start SSL server');
-                reject(err);
-
-                return;
-            }
-        }
-
-        resolve('https servers started');
-    });
-}
-
-/**
- * start_statsd starts the nad-statsd listener initialization
- * @returns {Object} promise
- */
-function start_statsd() {
-    return new Promise((resolve, reject) => {
-        if (!settings.statsd.enabled) {
-            resolve('statsd not enabled, skipping');
-
-            return;
-        }
-
-        log.debug('loading statsd listener');
-        try {
-            statsd = require(path.join(nad.lib_dir, 'statsd'));
-            statsd.start();
-        } catch (err) {
-            log.fatal({ err: err.message }, 'unable to load statsd listener');
-            reject(err);
-
-            return;
-        }
-
-        resolve('statsd listener loaded');
-    });
-}
-
-/**
- * start_reverse starts the reverse connection initialization
- * @returns {Object} promise
- */
-function start_reverse() {
-    return new Promise((resolve, reject) => {
-        if (!settings.reverse.enabled) {
-            resolve('reverse connector not enabled, skipping');
-
-            return;
-        }
-
-        log.debug('loading reverse connector');
-        try {
-            reverse = require(path.join(nad.lib_dir, 'reverse'));
-        } catch (err) {
-            log.fatal({ err: err.message }, 'unable to load reverse connection module');
-            reject(err);
-
-            return;
-        }
-
-        reverse().
-            then(() => {
-                resolve('reverse connector loaded');
-            }).
-            catch((err) => {
-                log.fatal({ err: err.message }, 'unable to set up reverse connection');
-                reject(err);
-            });
-    });
-}
+// ############################################################################
+//
+// Bootstrap functions
+//
 
 /**
  * load_push_receiver loads and starts the push_receiver module
@@ -329,7 +220,171 @@ function load_push_receiver() {
 
             return;
         }
-        resolve('push receiver handler loaded');
+
+        log.info('push receiver handler loaded');
+        resolve();
+    });
+}
+
+/**
+ * initialize_plugin_manager initializes the plugin manager after the push
+ * receiver is loaded and starts the initial scan for plugins
+ * @returns {Object} promise
+ */
+function initialize_plugin_manager() {
+    plugins = new Plugins.Manager(push_receiver);
+
+    return plugins.scan();
+}
+
+/**
+ * install_signal_handler sets up a siginal handler
+ * @returns {Object} promise (resolved)
+ */
+function install_signal_handler() {
+    log.info('installing SIGHUP handler for plugin rescans');
+    process.on('SIGHUP', () => {
+        log.info('SIGHUP received, re-scanning plugins');
+        plugins.scan().
+            catch((err) => {
+                log.error({ err: err.message }, 'SIGHUP plugin scan, ignoring');
+            });
+    });
+
+    return Promise.resolve();
+}
+
+/**
+ * start_http_servers starts the main nad process http servers
+ * @returns {Object} promise
+ */
+function start_http_servers() {
+    return new Promise((resolve, reject) => {
+        if (settings.listen.length === 0) {
+            log.warn('no http servers configured, skipping');
+            resolve();
+
+            return;
+        }
+
+        for (const server of settings.listen) {
+            log.debug({ server }, 'starting server');
+            try {
+                http.createServer(handler).listen(server.port, server.address);
+                log.info({ server }, 'listening');
+            } catch (err) {
+                log.fatal({
+                    err: err.message,
+                    server
+                }, 'failed to start server');
+                reject(err);
+
+                return;
+            }
+        }
+
+        log.info('http servers started');
+        resolve();
+    });
+}
+
+/**
+ * start_https_servers starts the main nad process http servers
+ * @returns {Object} promise
+ */
+function start_https_servers() {
+    return new Promise((resolve, reject) => {
+        if (settings.ssl.listen.length === 0) {
+            log.warn('no https servers configured, skipping');
+            resolve();
+
+            return;
+        }
+
+        for (const server of settings.ssl.listen) {
+            log.debug({ server }, 'starting SSL server');
+            try {
+                https.
+                    createServer(settings.ssl.creds, handler).
+                    listen(server.port, server.address);
+                log.info({ server }, 'listening');
+            } catch (err) {
+                log.fatal({
+                    err: err.message,
+                    server
+                }, 'failed to start SSL server');
+                reject(err);
+
+                return;
+            }
+        }
+
+        log.info('https servers started');
+        resolve();
+    });
+}
+
+/**
+ * start_reverse starts the reverse connection initialization
+ * @returns {Object} promise
+ */
+function start_reverse() {
+    return new Promise((resolve, reject) => {
+        if (!settings.reverse.enabled) {
+            log.warn('reverse connector not enabled, skipping');
+            resolve();
+
+            return;
+        }
+
+        log.debug('loading reverse connector');
+        try {
+            reverse = require(path.join(nad.lib_dir, 'reverse'));
+        } catch (err) {
+            log.fatal({ err: err.message }, 'unable to load reverse connection module');
+            reject(err);
+
+            return;
+        }
+
+        reverse().
+            then(() => {
+                log.info('reverse connector loaded');
+                resolve();
+            }).
+            catch((err) => {
+                log.fatal({ err: err.message }, 'unable to set up reverse connection');
+                reject(err);
+            });
+    });
+}
+
+/**
+ * start_statsd starts the nad-statsd listener initialization
+ * @returns {Object} promise
+ */
+function start_statsd() {
+    return new Promise((resolve, reject) => {
+        if (!settings.statsd.enabled) {
+            log.warn('statsd not enabled, skipping');
+            resolve();
+
+            return;
+        }
+
+        log.debug('loading statsd listener');
+        try {
+            statsd = require(path.join(nad.lib_dir, 'statsd'));
+            statsd.start();
+        } catch (err) {
+            log.fatal({ err: err.message }, 'unable to load statsd listener');
+            reject(err);
+
+            return;
+        }
+
+        log.info('statsd listener loaded');
+        resolve();
     });
 }
 
@@ -353,14 +408,16 @@ function drop_privileges() {
         // if not running as root, don't drop privileges.
         // implies nad was started as the intended user.
         if (process.getuid() !== 0) {
-            resolve('not running as root, skipping drop privileges');
+            log.warn('not running as root, skipping drop privileges');
+            resolve();
 
             return;
         }
 
         // if user to drop to is root, ignore...
         if ((/^(root|0)$/i).test(settings.drop_uid)) {
-            resolve('alrady running as root, skipping drop privileges');
+            log.warn('alrady running as root, skipping drop privileges');
+            resolve();
 
             return;
         }
@@ -387,74 +444,28 @@ function drop_privileges() {
             reject(err);
         }
 
-        resolve(`running as ${settings.drop_uid}:${settings.drop_gid}`);
+        log.info(`running as ${settings.drop_uid}:${settings.drop_gid}`);
+        resolve();
     });
 }
-
-/**
- * bootstrap sequentially starts the various components of the nad process
- * @returns {Object} promise to start statsd
- */
-function bootstrap() {
-    return new Promise((resolve, reject) => {
-        load_push_receiver().
-            then((msg) => {
-                log.info(msg);
-                plugins = new Plugins.Manager(push_receiver);
-
-                return plugins.scan();
-            }).
-            then(() => {
-                log.info('installing SIGHUP handler to trigger plugin rescan');
-                process.on('SIGHUP', () => {
-                    log.info('SIGHUP received, re-scanning plugins');
-                    plugins.scan().
-                        catch((err) => {
-                            log.error({ err: err.message }, 'SIGHUP plugin scan, ignoring');
-                        });
-                });
-            }).
-            then(() => {
-                return start_http_servers();
-            }).
-            then((msg) => {
-                log.info(msg);
-
-                return start_https_servers();
-            }).
-            then((msg) => {
-                log.info(msg);
-
-                return start_reverse();
-            }).
-            then((msg) => {
-                log.info(msg);
-
-                return start_statsd();
-            }).
-            then((msg) => {
-                log.info(msg);
-
-                return drop_privileges();
-            }).
-            then(() => {
-                resolve('NAD bootstrap complete');
-            }).
-            catch((err) => {
-                reject(err);
-            });
-    });
-}
-
 
 //
 // Start the NAD process
 //
-bootstrap().
-    then((msg) => {
-        log.info(msg);
+// sequenced startup procedure
+load_push_receiver().
+    then(initialize_plugin_manager).
+    then(install_signal_handler).
+    then(start_http_servers).
+    then(start_https_servers).
+    then(start_reverse).
+    then(start_statsd).
+    then(drop_privileges).
+    then(() => {
+        log.info('NAD bootstrap complete');
     }).
     catch((err) => {
+        log.fatal({ err: err.message }, 'starting NAD process');
         console.error(settings.pfx_error, 'starting NAD process', err);
         process.exit(1);
     });
