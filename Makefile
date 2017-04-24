@@ -1,5 +1,5 @@
 DESTDIR?=
-PREFIX?=/opt/circonus
+PREFIX?=/opt/circonus/nad
 MAN=$(PREFIX)/man/man8
 SBIN=$(PREFIX)/sbin
 BIN=$(PREFIX)/bin
@@ -67,7 +67,7 @@ install-plugins:	install-dirs
 	rsync -a plugins/ $(DESTDIR)$(CONF)/
 
 install-modules:
-	PATH="$(PATH):$(DESTDIR)$(PREFIX)/bin" npm install --no-progress
+	PATH="$(PATH):$(DESTDIR)$(PREFIX)/bin" npm install --production --no-progress
 	rsync -a node_modules/ $(DESTDIR)$(MODULES)/
 	rsync -a lib/* $(DESTDIR)$(NAD_LIB)/
 
