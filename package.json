@@ -19,7 +19,14 @@
     "pino": "4.2.4",
     "thirty-two": "1.0.2"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@maier/eslint-config-base": "0.1.0",
+    "@maier/eslint-config-node": "0.1.0",
+    "@maier/eslint-config-node-cmd": "0.1.0",
+    "eslint": "3.19.0",
+    "remark-cli": "3.0.0",
+    "remark-man": "5.0.0"
+  },
   "scripts": {
     "lint": "eslint --cache nad lib/*",
     "md2man": "remark man/nad.md --use man --output man/nad.8"
