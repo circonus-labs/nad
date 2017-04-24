@@ -5,6 +5,7 @@ module.exports = {
         '@maier/node'
     ],
     rules: {
-        // ...additional project specific rules
+        'no-underscore-dangle': 'off',
+        'prefer-destructuring': 'off'
     }
 };
