@@ -18,6 +18,7 @@ module.exports = {
                 ignoreRegExpLiterals   : true
             }
         ],
+        'no-plusplus': 'off',
         'no-underscore-dangle': 'off',
         'prefer-destructuring': 'off'
     }
