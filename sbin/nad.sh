@@ -7,11 +7,12 @@ set -o nounset
 set -o errexit
 set -o pipefail
 
-nad_dir="@@PREFIX@@"
+circonus_dir="@@PREFIX@@"
+nad_dir="@@APP_DIR@@"
 
-node_bin="${nad_dir}/bin/node"
+node_bin="${circonus_dir}/bin/node"
 nad_script="${nad_dir}/sbin/nad.js"
-lib_dir="${nad_dir}/lib/node_modules"
+lib_dir="${nad_dir}/node_modules"
 nad_conf="${nad_dir}/etc/nad.conf"
 log_dir=""
 
@@ -23,7 +24,7 @@ log_dir=""
 [[ -x $node_bin ]] || {
     node_bin=$(command -v node)
     [[ -x $node_bin ]] || {
-        echo "Unable to find node binary in path ${PATH}:${nad_dir}/bin"
+        echo "Unable to find node binary in path ${PATH}:${circonus_dir}/bin"
         exit 1
     }
 }
