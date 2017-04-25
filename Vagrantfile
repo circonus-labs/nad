@@ -42,10 +42,10 @@ Vagrant.configure('2') do |config|
                 echo "Fetching $node_tgz"
                 curl -sSL "https://nodejs.org/dist/#{node_ver}/${node_tgz}" -o /vagrant/$node_tgz
             }
-            [[ -x /opt/circonus/nad/bin/node ]] || {
+            [[ -x /opt/circonus/bin/node ]] || {
                 echo "Installing $node_tgz"
-                [[ -d /opt/circonus/nad ]] || mkdir -p /opt/circonus/nad
-                tar --strip-components=1 -zxf /vagrant/$node_tgz -C /opt/circonus/nad
+                [[ -d /opt/circonus ]] || mkdir -p /opt/circonus
+                tar --strip-components=1 -zxf /vagrant/$node_tgz -C /opt/circonus
             }
         SHELL
     end
@@ -70,10 +70,10 @@ Vagrant.configure('2') do |config|
                 echo "Fetching $node_tgz"
                 curl -sSL "https://nodejs.org/dist/#{node_ver}/${node_tgz}" -o /vagrant/$node_tgz
             }
-            [[ -x /opt/circonus/nad/bin/node ]] || {
+            [[ -x /opt/circonus/bin/node ]] || {
                 echo "Installing $node_tgz"
-                [[ -d /opt/circonus/nad ]] || mkdir -p /opt/circonus/nad
-                tar --strip-components=1 -zxf /vagrant/$node_tgz -C /opt/circonus/nad
+                [[ -d /opt/circonus ]] || mkdir -p /opt/circonus
+                tar --strip-components=1 -zxf /vagrant/$node_tgz -C /opt/circonus
             }
         SHELL
     end
@@ -101,10 +101,10 @@ Vagrant.configure('2') do |config|
                 echo "Fetching $node_tgz"
                 curl -sSL "https://nodejs.org/dist/#{node_ver}/${node_tgz}" -o /vagrant/$node_tgz
             }
-            [[ -x /opt/circonus/nad/bin/node ]] || {
+            [[ -x /opt/circonus/bin/node ]] || {
                 echo "Installing $node_tgz"
-                [[ -d /opt/circonus/nad ]] || mkdir -p /opt/circonus/nad
-                tar --strip-components=1 -zxf /vagrant/$node_tgz -C /opt/circonus/nad
+                [[ -d /opt/circonus ]] || mkdir -p /opt/circonus
+                tar --strip-components=1 -zxf /vagrant/$node_tgz -C /opt/circonus
             }
         SHELL
     end
@@ -132,10 +132,10 @@ Vagrant.configure('2') do |config|
                 echo "Fetching $node_tgz"
                 curl -sSL "https://nodejs.org/dist/#{node_ver}/${node_tgz}" -o /vagrant/$node_tgz
             }
-            [[ -x /opt/circonus/nad/bin/node ]] || {
+            [[ -x /opt/circonus/bin/node ]] || {
                 echo "Installing $node_tgz"
-                [[ -d /opt/circonus/nad ]] || mkdir -p /opt/circonus/nad
-                tar --strip-components=1 -zxf /vagrant/$node_tgz -C /opt/circonus/nad
+                [[ -d /opt/circonus ]] || mkdir -p /opt/circonus
+                tar --strip-components=1 -zxf /vagrant/$node_tgz -C /opt/circonus
             }
         SHELL
     end
