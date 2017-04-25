@@ -400,11 +400,6 @@ function drop_privileges() {
         //       2. permissions issues manifest when nad is run from
         //          the command line, not just when run as service
 
-        log.info({
-            gid : settings.drop_gid,
-            uid : settings.drop_uid
-        }, 'dropping privileges');
-
         // if not running as root, don't drop privileges.
         // implies nad was started as the intended user.
         if (process.getuid() !== 0) {
@@ -416,11 +411,16 @@ function drop_privileges() {
 
         // if user to drop to is root, ignore...
         if ((/^(root|0)$/i).test(settings.drop_uid)) {
-            log.warn('alrady running as root, skipping drop privileges');
+            log.warn('already running as root, skipping drop privileges');
             resolve();
 
             return;
         }
+
+        log.info({
+            gid : settings.drop_gid,
+            uid : settings.drop_uid
+        }, 'dropping privileges');
 
         try {
             process.initgroups(settings.drop_uid, settings.drop_gid);
