@@ -69,10 +69,10 @@ install-plugins:	install-dirs
 	rsync -a plugins/ $(DESTDIR)$(CONF)/
 
 install-modules:
+	rsync -a lib/* $(DESTDIR)$(NAD_LIB)
 	cp package.json $(DESTDIR)$(APP_DIR) && \
 		cd $(DESTDIR)$(APP_DIR) && \
 		PATH="$(PATH):$(DESTDIR)$(PREFIX)/bin" npm install --production --no-progress
-	rsync -a lib/* $(DESTDIR)$(NAD_LIB)
 
 install-illumos:	install
 	@# service manifest

@@ -12,7 +12,8 @@ umask 0022
 
 : ${NAD_REPO:="https://github.com/circonus-labs/nad.git"}
 : ${NAD_BRANCH:="master"}
-: ${PREFIX:=/opt/circonus/nad}
+: ${PREFIX:=/opt/circonus}
+: ${APP_DIR:=${PREFIX}/nad}
 : ${BUILDDIR:="/tmp/nad-omnibus-build"}
 : ${INSTALLDIR:="/tmp/nad-omnibus-install"}
 : ${PUBLISHDIR:="/mnt/node-agent"}
@@ -237,11 +238,11 @@ build_nad() {
 
     echo "Building nad"
     pushd $BUILDDIR/nad > /dev/null
-    make DESTDIR=$INSTALLDIR PREFIX=$PREFIX RUNSTATE_USER=`id -u` $INSTALL_TARGET
+    make DESTDIR=$INSTALLDIR PREFIX=$PREFIX $INSTALL_TARGET
     popd > /dev/null
 
     echo "Removing plugins not related to Linux $OS"
-    pushd "${INSTALLDIR}/${PREFIX}/etc/node-agent.d" > /dev/null
+    pushd "${INSTALLDIR}/${APP_DIR}/etc/node-agent.d" > /dev/null
     # list of plugins not applicable to Linux
     plugin_list="illumos freebsd openbsd smartos windows pf"
     for plugin in $plugin_list; do

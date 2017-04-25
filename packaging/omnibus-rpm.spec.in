@@ -1,6 +1,7 @@
 %define		rversion	@@RPMVER@@
 %define		rrelease	1
-%define		_prefix		/opt/circonus/nad
+%define		_prefix		/opt/circonus
+%define     app_dir     %{_prefix}/nad
 
 # perl is *optional* not required
 # rpmbuild autoreq will include it by default because of scripts with perl shebang
@@ -65,13 +66,15 @@ exit 0
 /etc/init.d/nad
 %endif
 /etc/logrotate.d/nad
-%{_prefix}/man
-%config(noreplace) %{_prefix}/etc/nad.conf
-%{_prefix}/etc/node-agent.d
+%config(noreplace) %{app_dir}/etc/nad.conf
+%{app_dir}/package.json
+%{app_dir}/man
+%{app_dir}/etc/node-agent.d
+%{app_dir}/bin/nad-log
+%{app_dir}/bin/statsd.sh
+%{app_dir}/sbin/nad
+%{app_dir}/sbin/nad.js
+%{app_dir}/node_modules
 %{_prefix}/bin/node
-%{_prefix}/bin/nad-log
-%{_prefix}/bin/statsd.sh
-%{_prefix}/sbin/nad
-%{_prefix}/sbin/nad.js
-%{_prefix}/lib/node_modules
+%{_prefix}/lib
 %{_prefix}/nodejs
