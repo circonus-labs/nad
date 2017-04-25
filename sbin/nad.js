@@ -26,7 +26,7 @@ let circwmi = null;         // dynamically load, if platform is windows
 let statsd = null;          // dynamically load, if enabled
 let reverse = null;         // dynamically load, if enabled
 
-log.info('initializing');
+log.info({ name: settings.app_name, version: settings.app_version }, 'initializing');
 
 if (settings.is_windows) {
     try {
