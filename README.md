@@ -140,13 +140,14 @@ In addition to the basic `install` target, there are OS-specific installation ta
 | `/opt/circonus/nad/bin`                      | nad utilities, if applicable                       |
 | `/opt/circonus/nad/etc`                      | configurations                                     |
 | `/opt/circonus/nad/etc/node-agent.d`         | plugin directory                                   |
-| `/opt/circonus/nad/lib/node_agent`           | nad library packages                               |
+| `/opt/circonus/nad/node_agent`               | nad module packages                                |
 | `/opt/circonus/nad/log`                      | nad log directory (if applicable)                  |
 | `/opt/circonus/nad/man`                      | nad man page                                       |
 | `/opt/circonus/nad/sbin`                     | nad daemon                                         |
 | **Core Files** ||
 | `/opt/circonus/nad/etc/nad.conf`             | main nad configuration (see [Options](#config))    |
 | `/opt/circonus/nad/sbin/nad`                 | nad startup script                                 |
+| `/opt/circonus/nad/sbin/nad.js`              | main nad process                                   |
 | **Miscellaneous Files** ||
 | `/opt/circonus/nad/bin/nad-log`              | nad log viewer script, if applicable               |
 | `/opt/circonus/nad/log/nad.log`              | nad log, if applicable                             |
