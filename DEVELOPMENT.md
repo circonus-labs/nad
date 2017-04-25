@@ -31,7 +31,7 @@ v3.18.0
 
 ## Basics
 
-If you plan to develop and contribute to NAD, fork the repository and clone your fork. If you want to build your own packages, you can simply clone the main repository.
+If you plan to develop and contribute to NAD, fork the repository and clone your fork. If you want to build your own packages, you do not necessarily _need_ to fork, simply clone the main repository.
 
 e.g. cloning the master repository:
 
@@ -103,23 +103,23 @@ The `packaging/make-omnibus` shell script is used to build the omnibus packages 
 
 ## Testing
 
-* Live testing can be performed by developing on host and running `make install` or `make install-<type>` (where type is one of `rhel`, `ubuntu`, `illumos`, etc.) in guest VM.
+* Live testing can be performed by developing on host and running `make install` or `make install-(rhel|ubuntu|illumos|etc.)` in the guest VM.
 * Run NAD in the foreground with debugging. `/opt/circonus/nad/sbin/nad --debug`
 * Leverage `curl` to simulate requests. `curl 'http://127.0.0.1:2609/'`
-* If working on an executable plugin, ensure the plugin works from the command line first.
+* If working on an executable plugin, ensure the plugin works from the command line first, then integrate the plugin with NAD.
 
 # Plugins
 
-NAD uses a *plugin* system for gathering metrics. NAD supports two primary types of plugins - **executable** and **native**. Each type of plugin produces output that NAD consumes and makes available to Circonus. NAD/Circonus support several *types* of metrics.
+NAD uses a *plugin* system for gathering metrics. NAD supports two primary types of plugins - **executable** and **native**. Each type of plugin produces output that NAD consumes and makes available to Circonus. NAD/Circonus support the following *types* of metrics:
 
 ## Metric types
 
-* `i` - a signed 32bit integer value,
-* `I` - an unsigned 32bit integer value,
-* `l` - a signed 64bit integer value,
-* `L` - an unsigned 64bit integer value,
-* `n` - a value to be represented as a double, or
-* `s` - the the value is a string.
+* `i` - a signed 32bit integer value
+* `I` - an unsigned 32bit integer value
+* `l` - a signed 64bit integer value
+* `L` - an unsigned 64bit integer value
+* `n` - a value to be represented as a double
+* `s` - the the value is a string
 
 
 ## Executable plugins
@@ -141,7 +141,7 @@ An executable can be a shell script, perl/python/ruby/etc. script, a compiled bi
 Example:
 
 ```json
-{ "my_metric": { "_type": "i", "_value": 10 }, "cherry\`pi": { "_type": "n", "_value": 3.14 } }
+{ "my_metric": { "_type": "i", "_value": 10 }, "cherry`pi": { "_type": "n", "_value": 3.14 } }
 ```
 
 ### Control Information
@@ -164,7 +164,7 @@ Continuous output is supported for long-running executables. After a set of metr
  1. Expose a `run()` method which will be passed five arguments.
      1. The plugin definition object
      1. A callback function
-     1. The incoming request which fired the plugin
+     1. The incoming request object that fired the plugin
      1. The plugin arguments (as an object), if there are any
      1. The plugin instance ID
  1. The `run()` method is responsible for calling the callback with three arguments
@@ -197,6 +197,6 @@ Example:
 
 ## Creating a new plugin
 
-1. Create a directory for plugin. `mkdir /opt/circonus/nad/etc/node-agent.d/my_plugin && cd /opt/circonus/nad/etc/node-agent.d/my_plugin`
-1. Write plugin, running from command line during development (for an executable)
-1. When ready to test plugin create symlink in parent directory `ln -s my_plugin.sh ..`
+1. Create a directory for the plugin - `mkdir /opt/circonus/nad/etc/node-agent.d/my_plugin && cd /opt/circonus/nad/etc/node-agent.d/my_plugin`
+1. Write the plugin - running from command line during development
+1. When ready to test the plugin - create symlink in parent directory `ln -s my_plugin.sh ..`
