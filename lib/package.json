@@ -1,0 +1,6 @@
+{
+	"name": "nad",
+	"version": "1.0.0",
+    "description": "NAD support module packages",
+	"private": true
+}
