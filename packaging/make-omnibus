@@ -210,25 +210,28 @@ nad_src() {
 
     pushd $BUILDDIR/nad > /dev/null
 
-    # # Looks like: 2013-07-23 11:23:43 -0700
-    NAD_VERSION=$(git log -1  --format=format:%ad --date=iso)
-    # # Normalize to UTC
-    # # This requires GNU date-- maybe there's a better way
-    TSTAMP=$(date -d "$NAD_VERSION" -u +%Y%m%dT%H%M%SZ)
-
-    # possibly a better way, but, requires a modern version of git like 2.7 (released 1/2016...)
-    # probably not until 2030 when centos/ubuntu start packaging git 2.7.0...
     #
-    # Set TZ to UTC, tell git to format the date using
-    # 'local' timezone with specified format string
-    # e.g.
-    # given:
-    #   git log -1 --format=format:%ad
-    #   Fri Feb 24 14:25:05 2017 -0500
-    # output is:
-    #   TZ=UTC git log -1 --format=format:%ad --date=format-local:%Y%m%dT%H%M%SZ
-    #   20170224T192505Z
-    #TSTAMP=$(TZ=UTC git log -1 --format=format:%ad --date=format-local:%Y%m%dT%H%M%SZ)
+    # !!! switch to semver pulled from package.json, see NAD_VER in build_nad
+    #
+    # # # Looks like: 2013-07-23 11:23:43 -0700
+    # NAD_VERSION=$(git log -1  --format=format:%ad --date=iso)
+    # # # Normalize to UTC
+    # # # This requires GNU date-- maybe there's a better way
+    # TSTAMP=$(date -d "$NAD_VERSION" -u +%Y%m%dT%H%M%SZ)
+    #
+    # # possibly a better way, but, requires a modern version of git like 2.7 (released 1/2016...)
+    # # probably not until 2030 when centos/ubuntu start packaging git 2.7.0...
+    # #
+    # # Set TZ to UTC, tell git to format the date using
+    # # 'local' timezone with specified format string
+    # # e.g.
+    # # given:
+    # #   git log -1 --format=format:%ad
+    # #   Fri Feb 24 14:25:05 2017 -0500
+    # # output is:
+    # #   TZ=UTC git log -1 --format=format:%ad --date=format-local:%Y%m%dT%H%M%SZ
+    # #   20170224T192505Z
+    # #TSTAMP=$(TZ=UTC git log -1 --format=format:%ad --date=format-local:%Y%m%dT%H%M%SZ)
 
     popd > /dev/null
 }
@@ -253,32 +256,47 @@ build_nad() {
     done
     popd > /dev/null
 
+    NAD_VER=$(${node_dest_dir}/bin/node -e "const pkg = require('${BUILDDIR}/nad/package.json'); console.log(pkg.version);")
+
     # tar/compress the unused nodejs parts -- deliver in package
-    # docs, include files (for binary npm modules), share (man, systemtap), npm (for installing additional modules)
-    mkdir ${node_dest_dir}/nodejs
-    tar --remove-files -zcf ${node_dest_dir}/nodejs/docs.tgz ${node_dest_dir}/CHANGELOG.md ${node_dest_dir}/README.md ${node_dest_dir}/LICENSE
-    tar --remove-files -zcf ${node_dest_dir}/nodejs/include.tgz ${node_dest_dir}/include
-    tar --remove-files -zcf ${node_dest_dir}/nodejs/share.tgz ${node_dest_dir}/share
-    tar --remove-files -zcf ${node_dest_dir}/nodejs/npm.tgz ${node_dest_dir}/bin/npm ${node_dest_dir}/lib/node_modules/npm
+    # 1. docs
+    # 2. include files (for binary npm modules)
+    # 3. share (man, systemtap)
+    # 4. npm (for installing additional modules)
+    echo "Compressing unused NodeJS assets"
+    pushd ${INSTALLDIR}/${PREFIX} > /dev/null
+    mkdir nodejs
+    echo "  Documentation"
+    tar --remove-files -zcf nodejs/docs.tgz CHANGELOG.md README.md LICENSE
+    echo "  Include files"
+    tar --remove-files -zcf nodejs/include.tgz include
+    echo "  Shared resources"
+    tar --remove-files -zcf nodejs/share.tgz share
+    echo "  NPM"
+    tar --remove-files -zcf nodejs/npm.tgz bin/npm lib/node_modules/npm
+    popd > /dev/null
 }
 
 make_package() {
+    echo
+    echo "Building package for NAD v$NAD_VER"
+    echo
     if [[ $OS =~ ^rhel ]]; then
         echo "Creating nad-omnibus RPM for $OS $PLATFORM"
-        sed -e "s#@@RPMVER@@#$TSTAMP#" omnibus-rpm.spec.in > omnibus-rpm.spec
+        sed -e "s#@@RPMVER@@#$NAD_VER#" omnibus-rpm.spec.in > omnibus-rpm.spec
         rpmbuild -bb omnibus-rpm.spec
-        cp ~/rpmbuild/RPMS/*/nad-omnibus-$TSTAMP-1.el*.*.rpm $PUBLISHDIR/packages/
+        cp ~/rpmbuild/RPMS/*/nad-omnibus-$NAD_VER-1.el*.*.rpm $PUBLISHDIR/packages/
         rm -f omnibus-rpm.spec
     elif [[ $OS =~ ^ubuntu ]]; then
         echo "Creating nad-omnibus DEB for $OS $PLATFORM"
-        deb_file="${BUILDDIR}/nad-omnibus-${TSTAMP}-1.${OS}_${PLATFORM}.deb"
+        deb_file="${BUILDDIR}/nad-omnibus-${NAD_VER}-1.${OS}_${PLATFORM}.deb"
 
         if [[ -f $deb_file ]]; then
             echo "Previously built at this version, removing file"
             rm -f $deb_file
         fi
 
-        $fpm -s dir -t deb -n nad-omnibus -v $TSTAMP --iteration 1 -C $INSTALLDIR \
+        $fpm -s dir -t deb -n nad-omnibus -v $NAD_VER --iteration 1 -C $INSTALLDIR \
             -p $deb_file --url "https://github.com/circonus-labs/nad" \
             --vendor "Circonus, Inc." --license "BSD" \
             --maintainer "Circonus Support <packaging@circonus.com>" \
@@ -291,7 +309,7 @@ make_package() {
         cp $deb_file $PUBLISHDIR/packages/
     else
         echo "Creating omnibus tarball"
-        ARCHIVE="$BUILDDIR/nad-omnibus-${TSTAMP}-${OS}-${PLATFORM}.tar"
+        ARCHIVE="$BUILDDIR/nad-omnibus-${NAD_VER}-${OS}-${PLATFORM}.tar"
         pushd $INSTALLDIR > /dev/null
         tar cf $ARCHIVE .
         gzip $ARCHIVE
