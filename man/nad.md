@@ -15,7 +15,7 @@ Full documentation is available online in the NAD github repository - https://gi
 ```
   -h, --help                      output usage information
   -V, --version                   output the version number
-  --plugin-dir <path>             Plugin directory [/opt/circonus/etc/node-agent.d]
+  --plugin-dir <path>             Plugin directory [/opt/circonus/nad/etc/node-agent.d]
   -p, --listen <ip|port|ip:port>  Listening IP address and port [2609]
   -r, --reverse                   Use reverse connection to broker [false]
   --cid <cid>                     Check bundle id for reverse connection []
@@ -29,9 +29,9 @@ Full documentation is available online in the NAD github repository - https://gi
   --configfile <file>             File in plugin-dir for self-configure []
   --target <target>               Target host [centos7] -- see Target below
   --ssl-listen <ip|port|ip:port>  SSL listening IP address and port []
-  --ssl-cert <file>               SSL certificate PEM file, required for SSL [<plugin_dir>/na.crt]
-  --ssl-key <file>                SSL certificate key PEM file, required for SSL [<plugin_dir>/na.key]
-  --ssl-ca <file>                 SSL CA certificate PEM file, required for SSL w/verify [<plugin_dir>/na.ca]
+  --ssl-cert <file>               SSL certificate PEM file, required for SSL [/opt/circonus/nad/etc/na.crt]
+  --ssl-key <file>                SSL certificate key PEM file, required for SSL [/opt/circonus/nad/etc/na.key]
+  --ssl-ca <file>                 SSL CA certificate PEM file, required for SSL w/verify [/opt/circonus/nad/etc/na.ca]
   --ssl-verify                    Enable SSL verification
   --no-statsd                     Disable builtin StatsD interface
   --statsd-config <file>          Config file for builtin StatsD interface []

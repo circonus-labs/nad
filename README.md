@@ -68,7 +68,7 @@ Benefits of using COSI:
 
 ## Manual Install
 
-For convenience and flexibility, pre-built packages are available for selected platforms from [updates.circonus.net](http://updates.circonus.net/node-agent/packages/). These are self-contained *omnibus* packages built for the target OS. Packages contain the correct version of NodeJS, binaries for platform-specific plugins, and applicable service configuration. These packages will install NAD in `/opt/circonus` and configure and start NAD as a service.
+For convenience and flexibility, pre-built packages are available for selected platforms from [updates.circonus.net](http://updates.circonus.net/node-agent/packages/). These are self-contained *omnibus* packages built for the target OS. Packages contain the correct version of NodeJS, binaries for platform-specific plugins, and applicable service configuration. These packages will install NAD in `/opt/circonus/nad` and configure and start NAD as a service.
 
 At the time of this writing, these are:
 
@@ -102,7 +102,7 @@ For `pkg` based systems (e.g. OmniOS) run `pkg update field/nad`.
 
 ### Basic `install` target
 
-A basic install from source installs NAD in `/opt/circonus`.
+A basic install from source installs NAD in `/opt/circonus/nad`.
 
 #### For CentOS/Ubuntu:
 
@@ -135,20 +135,21 @@ In addition to the basic `install` target, there are OS-specific installation ta
 | path                                         | description                                        |
 | -------------------------------------------- | -------------------------------------------------- |
 | **Core Directories** ||
-| `/opt/circonus`                              | default installation location                      |
-| `/opt/circonus/bin`                          | nad utilities, if applicable                       |
-| `/opt/circonus/etc`                          | configurations                                     |
-| `/opt/circonus/etc/node-agent.d`             | plugin directory                                   |
-| `/opt/circonus/lib/node_agent`               | nad library packages                               |
-| `/opt/circonus/log`                          | nad log directory (if applicable)                  |
-| `/opt/circonus/man`                          | nad man page                                       |
-| `/opt/circonus/sbin`                         | nad daemon                                         |
+| `/opt/circous`                               | base directory                                     |
+| `/opt/circonus/nad`                          | default installation location                      |
+| `/opt/circonus/nad/bin`                      | nad utilities, if applicable                       |
+| `/opt/circonus/nad/etc`                      | configurations                                     |
+| `/opt/circonus/nad/etc/node-agent.d`         | plugin directory                                   |
+| `/opt/circonus/nad/lib/node_agent`           | nad library packages                               |
+| `/opt/circonus/nad/log`                      | nad log directory (if applicable)                  |
+| `/opt/circonus/nad/man`                      | nad man page                                       |
+| `/opt/circonus/nad/sbin`                     | nad daemon                                         |
 | **Core Files** ||
-| `/opt/circonus/etc/nad.conf`                 | main nad configuration (see [Options](#config))    |
-| `/opt/circonus/sbin/nad`                     | nad startup script                                 |
+| `/opt/circonus/nad/etc/nad.conf`             | main nad configuration (see [Options](#config))    |
+| `/opt/circonus/nad/sbin/nad`                 | nad startup script                                 |
 | **Miscellaneous Files** ||
-| `/opt/circonus/bin/nad-log`                  | nad log viewer script, if applicable               |
-| `/opt/circonus/log/nad.log`                  | nad log, if applicable                             |
+| `/opt/circonus/nad/bin/nad-log`              | nad log viewer script, if applicable               |
+| `/opt/circonus/nad/log/nad.log`              | nad log, if applicable                             |
 | `/var/run/nad.pid`                           | running nad pid file, if applicable                |
 | `/lib/systemd/system/nad.service`            | systemd service configuration, if applicable       |
 | `/etc/init/nad.conf`                         | upstart service configuration, if applicable       |
@@ -160,7 +161,7 @@ In addition to the basic `install` target, there are OS-specific installation ta
 
 ## Command line
 
-`/opt/circonus/sbin/nad [options]`
+`/opt/circonus/nad/sbin/nad [options]`
 
 ## As a service
 
@@ -183,9 +184,9 @@ In addition to the basic `install` target, there are OS-specific installation ta
 * OpenBSD - manual service configuration/installation required
     > For example, add the following to your `/etc/rc.local`:
     >```sh
-    >if [ -x /opt/circonus/sbin/nad ]; then
+    >if [ -x /opt/circonus/nad/sbin/nad ]; then
     >    echo -n ' nad'
-    >    /opt/circonus/sbin/nad --daemon --syslog
+    >    /opt/circonus/nad/sbin/nad --daemon --syslog
     >fi
     >```
     > Will start NAD and redirect logging to syslog via the `logger` command. To redirect logging to a file or elsewhere, replace the `--syslog` option with redirection e.g. `> /tmp/my.log 2>&1`.
@@ -204,12 +205,12 @@ NAD exposes an HTTP endpoint, the default is to listen to TCP:2609 (e.g. `curl h
 
 # Options
 
-Options are configured in `/opt/circonus/etc/nad.conf`. Options can be set using their individual environment variables or added to a single `NAD_OPTS` variable (for backwards compatibility).
+Options are configured in `/opt/circonus/nad/etc/nad.conf`. Options can be set using their individual environment variables or added to a single `NAD_OPTS` variable (for backwards compatibility).
 
 | Option                    | Description |
 | ---                       | ---         |
 | **<a name="opt_general">General</a>** ||
-| `--plugin-dir <dir>`      | Plugin directory.<br />Default: `/opt/circonus/etc/node-agent.d`<br />`NAD_PLUGIN_DIR="<dir>"` |
+| `--plugin-dir <dir>`      | Plugin directory.<br />Default: `/opt/circonus/nad/etc/node-agent.d`<br />`NAD_PLUGIN_DIR="<dir>"` |
 | `--listen <spec>`         | Listening IP address and port. (`ip`\|`port`\|`ip:port`)<br />Default: 2609<br />`NAD_LISTEN="<spec>"` |
 | `--no-statsd`             | Disable built-in StatsD interface.<br />`NAD_STATSD="no"`|
 | `--statsd-config <file>`  | Configuration file for StatsD interface.<br />Default: none<br />`NAD_STATSD_CONFIG="<file>"` |
@@ -225,9 +226,9 @@ Options are configured in `/opt/circonus/etc/nad.conf`. Options can be set using
 | `--api-ca <file>`         | CA file for API URL.<br />Default: none<br />`NAD_API_CA="<file>"` |
 | **<a name="opt_ssl">SSL</a>**                  ||
 | `--ssl-listen <spec>`     | SSL listening IP address and port. (`ip`\|`port`\|`ip:port`)<br />Default: none<br />`NAD_SSL_LISTEN="<spec>"` |
-| `--ssl-cert <file>`       | SSL certificate PEM file, required for SSL.<br />Default: `/opt/circonus/etc/na.crt`<br />`NAD_SSL_CERT="<file>"` |
-| `--ssl-key <file>`        | SSL certificate key PEM file, required for SSL.<br />Default: `/opt/circonus/etc/na.key`<br />`NAD_SSL_KEY="<file>"` |
-| `--ssl-ca <file>`         | SSL CA certificate PEM file, required for SSL w/verify.<br />Default: `/opt/circonus/etc/na.ca`<br />`NAD_SSL_CA="<file>"` |
+| `--ssl-cert <file>`       | SSL certificate PEM file, required for SSL.<br />Default: `/opt/circonus/nad/etc/na.crt`<br />`NAD_SSL_CERT="<file>"` |
+| `--ssl-key <file>`        | SSL certificate key PEM file, required for SSL.<br />Default: `/opt/circonus/nad/etc/na.key`<br />`NAD_SSL_KEY="<file>"` |
+| `--ssl-ca <file>`         | SSL CA certificate PEM file, required for SSL w/verify.<br />Default: `/opt/circonus/nad/etc/na.ca`<br />`NAD_SSL_CA="<file>"` |
 | `--ssl-verify`            | Enable SSL verification.<br />Default: false<br />`NAD_SSL_VERIFY="yes"` |
 | **<a name="opt_misc">Miscellaneous</a>**        ||
 | `-u, --uid <id>`          | User id to drop privileges to on start.<br />Default: nobody<br />`NAD_UID="<id>"` |
@@ -315,7 +316,7 @@ Additionally, nad-statsd does *not* automatically generate derivative metrics fr
 
 ## <a name="statsd_config">Configuration</a>
 
-Place configuration in a file, e.g. `/opt/circonus/etc/statsd.json`. Use the NAD `--statsd-config` option to indicate where the configuration file is located. e.g. `nad --statsd-config=/opt/circonus/etc/statsd.json`.
+Place configuration in a file, e.g. `/opt/circonus/nad/etc/statsd.json`. Use the NAD `--statsd-config` option to indicate where the configuration file is located. e.g. `nad --statsd-config=/opt/circonus/nad/etc/statsd.json`.
 
 The default nad-statsd configuration is:
 
@@ -389,7 +390,7 @@ The `host_key` and `group_key` are metric name prefixes which determine the disp
 
 # Plugins
 
-NAD plugins are located in the plugin directory (default: `/opt/circonus/etc/node-agent.d`, configurable with `--plugin-dir` option). If the automated or manual install were used, platform specific plugins for the current OS are already built. If the source installation method was used - change to the appropriate directory for the current OS and run `make` or `gmake` to build the platform specific plugins for the OS. (e.g. `cd /opt/circonus/etc/node-agent.d/linux && make`)
+NAD plugins are located in the plugin directory (default: `/opt/circonus/nad/etc/node-agent.d`, configurable with `--plugin-dir` option). If the automated or manual install were used, platform specific plugins for the current OS are already built. If the source installation method was used - change to the appropriate directory for the current OS and run `make` or `gmake` to build the platform specific plugins for the OS. (e.g. `cd /opt/circonus/nad/etc/node-agent.d/linux && make`)
 
 ## <a name="plugin_enable">Enabling</a>
 
@@ -398,7 +399,7 @@ When NAD starts it scans the plugin directory for plugins to enable. Rudimentary
 To enable a plugin, create a symlink in the plugin directory. For example:
 
 ```sh
-cd /opt/circonus/etc/node-agent.d  # change to plugin directory
+cd /opt/circonus/nad/etc/node-agent.d  # change to plugin directory
 ln -s linux/vm.sh .                # create symlink
 ```
 
@@ -409,7 +410,7 @@ The plugin will be automatically found and loaded if file watching is enabled (t
 To disable a plugin, delete the symlink in the plugin directory. For example:
 
 ```sh
-cd /opt/circonus/etc/node-agent.d  # change to plugin directory
+cd /opt/circonus/nad/etc/node-agent.d  # change to plugin directory
 rm vm.sh                           # delete symlink
 ```
 

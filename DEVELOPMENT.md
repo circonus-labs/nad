@@ -29,10 +29,17 @@ v6.10.1
 v3.18.0
 ```
 
-**Development tools used**
+## Basics
 
-1. eslint -- `npm install -g eslint`
-1. remark -- `npm install -g remark-cli remark-man`
+If you plan to develop and contribute to NAD, fork the repository and clone your fork. If you want to build your own packages, you can simply clone the main repository.
+
+e.g. cloning the master repository:
+
+```sh
+git clone https://github.com/circonus-labs/nad
+cd nad
+npm install
+```
 
 # Core
 
@@ -41,7 +48,7 @@ v3.18.0
 1. `vagrant up <target_os>` where `<target_os>` is the desired OS from the list above
 1. `vagrant ssh <target_os>`
 1. `cd /vagrant && make install`
-1. `/opt/circonus/nad`
+1. `/opt/circonus/nad/sbin/nad`
 1. In another terminal, `vagrant ssh <target_os> -c 'curl http://127.0.0.1:2609/'`
 
 For example:
@@ -53,49 +60,37 @@ $ vagrant ssh c7
 [vagrant@centos7 ~]$ cd /vagrant
 [vagrant@centos7 vagrant]$ sudo make install
 --snip--
-[vagrant@centos7 vagrant]$ /opt/circonus/sbin/nad
-{"pid":14533,"hostname":"centos7","name":"nad","level":30,"time":1490798765547,"msg":"initializing","module":"main","v":1}
-{"pid":14533,"hostname":"centos7","name":"nad","level":30,"time":1490798765553,"msg":"push receiver handler loaded","module":"main","v":1}
-{"pid":14533,"hostname":"centos7","name":"nad","level":30,"time":1490798765556,"msg":"scanning for plugins","dir":"/opt/circonus/etc/node-agent.d","module":"plugins","submodule":"scanner","v":1}
-{"pid":14533,"hostname":"centos7","name":"nad","level":40,"time":1490798765559,"msg":"ignoring, invalid name format","file":"cassandra","module":"plugins","submodule":"scanner","v":1}
-{"pid":14533,"hostname":"centos7","name":"nad","level":40,"time":1490798765559,"msg":"ignoring, invalid name format","file":"ceph","module":"plugins","submodule":"scanner","v":1}
-{"pid":14533,"hostname":"centos7","name":"nad","level":40,"time":1490798765559,"msg":"ignoring, invalid name format","file":"circonus-inside","module":"plugins","submodule":"scanner","v":1}
-{"pid":14533,"hostname":"centos7","name":"nad","level":40,"time":1490798765559,"msg":"ignoring, invalid name format","file":"common","module":"plugins","submodule":"scanner","v":1}
-{"pid":14533,"hostname":"centos7","name":"nad","level":40,"time":1490798765559,"msg":"ignoring, invalid name format","file":"docker","module":"plugins","submodule":"scanner","v":1}
-{"pid":14533,"hostname":"centos7","name":"nad","level":40,"time":1490798765559,"msg":"ignoring, invalid name format","file":"freebsd","module":"plugins","submodule":"scanner","v":1}
-{"pid":14533,"hostname":"centos7","name":"nad","level":40,"time":1490798765559,"msg":"ignoring, invalid name format","file":"haproxy","module":"plugins","submodule":"scanner","v":1}
-{"pid":14533,"hostname":"centos7","name":"nad","level":40,"time":1490798765559,"msg":"ignoring, invalid name format","file":"illumos","module":"plugins","submodule":"scanner","v":1}
-{"pid":14533,"hostname":"centos7","name":"nad","level":40,"time":1490798765559,"msg":"ignoring, invalid name format","file":"linux","module":"plugins","submodule":"scanner","v":1}
-{"pid":14533,"hostname":"centos7","name":"nad","level":40,"time":1490798765559,"msg":"ignoring, invalid name format","file":"mysql","module":"plugins","submodule":"scanner","v":1}
-{"pid":14533,"hostname":"centos7","name":"nad","level":40,"time":1490798765559,"msg":"ignoring, invalid name format","file":"ohai","module":"plugins","submodule":"scanner","v":1}
-{"pid":14533,"hostname":"centos7","name":"nad","level":40,"time":1490798765559,"msg":"ignoring, invalid name format","file":"openbsd","module":"plugins","submodule":"scanner","v":1}
-{"pid":14533,"hostname":"centos7","name":"nad","level":40,"time":1490798765559,"msg":"ignoring, invalid name format","file":"pf","module":"plugins","submodule":"scanner","v":1}
-{"pid":14533,"hostname":"centos7","name":"nad","level":40,"time":1490798765559,"msg":"ignoring, invalid name format","file":"postgresql","module":"plugins","submodule":"scanner","v":1}
-{"pid":14533,"hostname":"centos7","name":"nad","level":40,"time":1490798765559,"msg":"ignoring, invalid name format","file":"smartos","module":"plugins","submodule":"scanner","v":1}
-{"pid":14533,"hostname":"centos7","name":"nad","level":40,"time":1490798765559,"msg":"ignoring, invalid name format","file":"windows","module":"plugins","submodule":"scanner","v":1}
-{"pid":14533,"hostname":"centos7","name":"nad","level":30,"time":1490798765561,"msg":"installing SIGHUP handler to trigger plugin rescan","module":"main","v":1}
-{"pid":14533,"hostname":"centos7","name":"nad","level":30,"time":1490798765564,"msg":"listening","server":{"port":2609,"address":null},"module":"main","v":1}
-{"pid":14533,"hostname":"centos7","name":"nad","level":30,"time":1490798765564,"msg":"http servers started","module":"main","v":1}
-{"pid":14533,"hostname":"centos7","name":"nad","level":30,"time":1490798765564,"msg":"reverse connector not enabled, skipping","module":"main","v":1}
-{"pid":14533,"hostname":"centos7","name":"nad","level":30,"time":1490798765594,"msg":"initialized, no check id supplied","enabled":false,"module":"nad-statsd","submodule":"circonus","submodule":"trap","type":"group","v":1}
-{"pid":14533,"hostname":"centos7","name":"nad","level":30,"time":1490798765595,"msg":"initialized","enabled":true,"module":"nad-statsd","submodule":"circonus","submodule":"trap","type":"host","v":1}
-{"pid":14533,"hostname":"centos7","name":"nad","level":30,"time":1490798765595,"msg":"statsd listener loaded","module":"main","v":1}
-{"pid":14533,"hostname":"centos7","name":"nad","level":30,"time":1490798765595,"msg":"started","enabled":true,"module":"nad-statsd","submodule":"circonus","v":1}
-{"pid":14533,"hostname":"centos7","name":"nad","level":30,"time":1490798765595,"msg":"NAD bootstrap complete","module":"main","v":1}
-{"pid":14533,"hostname":"centos7","name":"nad","level":30,"time":1490798765598,"msg":"listener up","module":"nad-statsd","v":1}
-{"pid":14533,"hostname":"centos7","name":"nad","level":30,"time":1490798813888,"msg":"responding with metrics","est_metrics":17,"module":"plugins","v":1}
+[vagrant@centos7 ~]$  /opt/circonus/nad/sbin/nad
+{"pid":3171,"hostname":"centos7","name":"nad","level":30,"time":1493138697222,"msg":"initializing","module":"main","name":"nad","version":"2.0.0","v":1}
+{"pid":3171,"hostname":"centos7","name":"nad","level":30,"time":1493138697226,"msg":"push receiver handler loaded","module":"main","v":1}
+{"pid":3171,"hostname":"centos7","name":"nad","level":30,"time":1493138697231,"msg":"plugin scan start","module":"plugins","submodule":"scanner","dir":"/opt/circonus/nad/etc/node-agent.d","v":1}
+{"pid":3171,"hostname":"centos7","name":"nad","level":30,"time":1493138697234,"msg":"plugin scan complete","module":"plugins","submodule":"scanner","active_plugins":0,"v":1}
+{"pid":3171,"hostname":"centos7","name":"nad","level":30,"time":1493138697234,"msg":"installing SIGHUP handler for plugin rescans","module":"main","v":1}
+{"pid":3171,"hostname":"centos7","name":"nad","level":30,"time":1493138697237,"msg":"listening","module":"main","server":{"address":null,"port":2609},"v":1}
+{"pid":3171,"hostname":"centos7","name":"nad","level":30,"time":1493138697237,"msg":"http servers started","module":"main","v":1}
+{"pid":3171,"hostname":"centos7","name":"nad","level":40,"time":1493138697238,"msg":"no https servers configured, skipping","module":"main","v":1}
+{"pid":3171,"hostname":"centos7","name":"nad","level":40,"time":1493138697238,"msg":"reverse connector not enabled, skipping","module":"main","v":1}
+{"pid":3171,"hostname":"centos7","name":"nad","level":30,"time":1493138697272,"msg":"initialized, no check id supplied","module":"nad-statsd","submodule":"circonus","submodule":"trap","type":"group","enabled":false,"v":1}
+{"pid":3171,"hostname":"centos7","name":"nad","level":30,"time":1493138697272,"msg":"statsd listener loaded","module":"main","v":1}
+{"pid":3171,"hostname":"centos7","name":"nad","level":30,"time":1493138697272,"msg":"initialized","module":"nad-statsd","submodule":"circonus","submodule":"trap","type":"host","enabled":true,"v":1}
+{"pid":3171,"hostname":"centos7","name":"nad","level":30,"time":1493138697272,"msg":"dropping privileges","module":"main","gid":"nobody","uid":"nobody","v":1}
+{"pid":3171,"hostname":"centos7","name":"nad","level":40,"time":1493138697272,"msg":"not running as root, skipping drop privileges","module":"main","v":1}
+{"pid":3171,"hostname":"centos7","name":"nad","level":30,"time":1493138697273,"msg":"started","module":"nad-statsd","submodule":"circonus","enabled":true,"v":1}
+{"pid":3171,"hostname":"centos7","name":"nad","level":30,"time":1493138697276,"msg":"listener up","module":"nad-statsd","v":1}
+{"pid":3171,"hostname":"centos7","name":"nad","level":30,"time":1493138697276,"msg":"NAD bootstrap complete","module":"main","v":1}
+{"pid":3171,"hostname":"centos7","name":"nad","level":30,"time":1493138723829,"msg":"responding with metrics","module":"plugins","est_metrics":17,"v":1}
 ```
 
 Term 2:
 ```sh
-$ vagrant ssh c7 -c 'curl http://127.0.0.1:2609/'
-{"nad":{"memory":{"rss":24186880,"heapTotal":11571200,"heapUsed":8670448,"external":19324},"uptime":305.852,"cpu":{"user":375930,"system":33867}},"statsd":{"open_req_count":{"_type":"n","_value":[0,0,0,0,0,0]},"open_handle_count":{"_type":"n","_value":[5,5,5,5,5,5]},"uptime_seconds":{"_type":"n","_value":[250.175,260.174,270.174,280.176,290.175,300.174]},"bad_lines_seen":{"_type":"n","_value":[0,0,0,0,0,0]},"packets_received":{"_type":"n","_value":[0,0,0,0,0,0]},"metrics_received":{"_type":"n","_value":[0,0,0,0,0,0]},"last_packet_seen":{"_type":"n","_value":[1490798765.544,1490798765.544,1490798765.544,1490798765.544,1490798765.544,1490798765.544]},"timestamp_lag_ms":{"_type":"n","_value":[1,-2,1,1,0,-2]},"host_last_flush":{"_type":"n","_value":[1490799005,1490799015,1490799025,1490799035,1490799045,1490799055]},"host_last_exception":{"_type":"n","_value":[0,0,0,0,0,0]},"host_flush_time_ms":{"_type":"n","_value":[2,2,2,2,3,6]},"host_flush_length_bytes":{"_type":"n","_value":[663,662,663,662,662,662]},"calculation_time_ms":{"_type":"n","_value":[0.094398,0.112727,0.092069,0.093844,0.094848,0.112577]},"host_num_stats":{"_type":"n","_value":[14,14,14,14,14,14]}}}Connection to 127.0.0.1 closed.
+$ vagrant ssh c7 -c 'curl 127.0.0.1:2609'
+{"nad":{"memory":{"rss":26202112,"heapTotal":13668352,"heapUsed":8703872,"external":138886},"uptime":26.771,"cpu":{"user":258921,"system":26636}},"statsd":{"open_req_count":{"_type":"n","_value":[0,0]},"open_handle_count":{"_type":"n","_value":[5,5]},"uptime_seconds":{"_type":"n","_value":[10.221,20.169]},"bad_lines_seen":{"_type":"n","_value":[0,0]},"last_packet_seen":{"_type":"n","_value":[1493138697.218,1493138697.218]},"metrics_received":{"_type":"n","_value":[0,0]},"packets_received":{"_type":"n","_value":[0,0]},"host_last_flush":{"_type":"n","_value":[0,1493138707]},"host_last_exception":{"_type":"n","_value":[0,0]},"host_flush_time_ms":{"_type":"n","_value":[0,19]},"host_flush_length_bytes":{"_type":"n","_value":[0,606]},"calculation_time_ms":{"_type":"n","_value":[1.315842,0.796727]},"host_num_stats":{"_type":"n","_value":[13,14]},"timestamp_lag_ms":{"_type":"n","_value":[-52]}}}Connection to 127.0.0.1 closed.
 $
 ```
 
 ## Building a custom omnibus package
 
-The `packaging/make-omnibus` shell script is used to build the omnibus packages (.rpm and .deb). The build can be customized by copying `example-omnibus.conf` to `omnibus.conf` and setting the applicable variables. `make-omnibus` will clone its own copy of the repository so, ensure changes are committed and pushed to the fork represented in `NAD_REPO`.
+The `packaging/make-omnibus` shell script is used to build the omnibus packages (.rpm, .deb, or .tar.gz). The build can be customized by copying `example-omnibus.conf` to `omnibus.conf` and setting the applicable variables. `make-omnibus` will clone its own copy of the repository so, ensure any changes are committed and pushed to the fork represented in `NAD_REPO`.
 
 1. Clone fork
 1. Copy `packaging/example-omnibus.conf` to `packaging/omnibus.conf` and customize
@@ -109,7 +104,7 @@ The `packaging/make-omnibus` shell script is used to build the omnibus packages 
 ## Testing
 
 * Live testing can be performed by developing on host and running `make install` or `make install-<type>` (where type is one of `rhel`, `ubuntu`, `illumos`, etc.) in guest VM.
-* Run NAD in the foreground with debugging. `/opt/circonus/sbin/nad --debug`
+* Run NAD in the foreground with debugging. `/opt/circonus/nad/sbin/nad --debug`
 * Leverage `curl` to simulate requests. `curl 'http://127.0.0.1:2609/'`
 * If working on an executable plugin, ensure the plugin works from the command line first.
 
@@ -202,6 +197,6 @@ Example:
 
 ## Creating a new plugin
 
-1. Create a directory for plugin. `mkdir /opt/circonus/etc/node-agent.d/my_plugin && cd /opt/circonus/etc/node-agent.d/my_plugin`
+1. Create a directory for plugin. `mkdir /opt/circonus/nad/etc/node-agent.d/my_plugin && cd /opt/circonus/nad/etc/node-agent.d/my_plugin`
 1. Write plugin, running from command line during development (for an executable)
 1. When ready to test plugin create symlink in parent directory `ln -s my_plugin.sh ..`
