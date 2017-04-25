@@ -28,7 +28,7 @@
     "remark-man": "5.0.0"
   },
   "scripts": {
-    "lint": "eslint --cache nad lib/*",
+    "lint": "eslint --cache sbin/nad.js lib/**/*.js",
     "md2man": "remark man/nad.md --use man --output man/nad.8"
   },
   "repository": {
