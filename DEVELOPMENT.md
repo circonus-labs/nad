@@ -23,10 +23,10 @@ Development host environment (at the time of this writing):
 $  echo $(system_profiler SPSoftwareDataType | grep 'System Version' | cut -d ':' -f 2) ;\
    vagrant -v ; vboxmanage --version ; node -v ; eslint -v
 macOS 10.12.4 (16E195)
-Vagrant 1.9.2
-5.1.18r114002
-v6.10.1
-v3.18.0
+Vagrant 1.9.4
+5.1.20r114629
+v6.10.2
+v3.19.0
 ```
 
 ## Basics
