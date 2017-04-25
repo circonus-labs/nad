@@ -1,15 +1,28 @@
-'use strict';
+// Copyright 2016 Circonus, Inc. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
 
-/* eslint-env node, es6 */
-/* eslint-disable no-magic-numbers */
+'use strict';
 
 const Docker = require('docker-modem');
 
 module.exports = class Stats {
+
+    /**
+     * creates new instance
+     * @arg {Object} opts docker options
+     */
     constructor(opts) {
         this.docker = new Docker(opts);
     }
 
+    /**
+     * getStats fetches metrics from docker
+     * @arg {Function} cb callback
+     * @returns {Undefined} nothing
+     *
+     * cb called with err|null, metrics(object)
+     */
     getStats(cb) {
         const self = this;
         const metrics = {};
@@ -17,11 +30,13 @@ module.exports = class Stats {
         this._getContainers((err, containers) => {
             if (err) {
                 cb(err);
+
                 return;
             }
 
             if (containers.length === 0) {
                 cb(new Error('No Docker containers running.'));
+
                 return;
             }
 
@@ -29,13 +44,13 @@ module.exports = class Stats {
                 const container = containers[i];
 
                 const opts = {
-                    path: `/containers/${container.Id}/stats?`,
-                    method: 'GET',
-                    options: { stream: false },
-                    statusCodes: {
-                        200: true,
-                        404: 'no such container',
-                        500: 'server error'
+                    method      : 'GET',
+                    options     : { stream: false },
+                    path        : `/containers/${container.Id}/stats?`,
+                    statusCodes : {
+                        200 : true,
+                        404 : 'no such container',
+                        500 : 'server error'
                     }
                 };
 
@@ -55,6 +70,7 @@ module.exports = class Stats {
                 self.docker.dial(opts, (err2, stats) => {
                     if (err2) {
                         cb(err2);
+
                         return;
                     }
 
@@ -101,24 +117,33 @@ module.exports = class Stats {
         });
     }
 
+    /**
+     * _getContainers returns list of containers from docker
+     * @arg {Function} cb callback
+     * @returns {Undefined} nothing
+     *
+     * cb called with err|null, containers(array)
+     */
     _getContainers(cb) {
         const opts = {
-            path: '/containers/json?',
-            method: 'GET',
-            options: { status: 'running' },
-            statusCodes: {
-                200: true,
-                400: 'bad parameter',
-                500: 'server error'
+            method      : 'GET',
+            options     : { status: 'running' },
+            path        : '/containers/json?',
+            statusCodes : {
+                200 : true,
+                400 : 'bad parameter',
+                500 : 'server error'
             }
         };
 
         this.docker.dial(opts, (err, data) => {
             if (err) {
                 cb(err);
+
                 return;
             }
             cb(null, data);
         });
     }
+
 };
