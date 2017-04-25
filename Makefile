@@ -1,12 +1,13 @@
 DESTDIR?=
-PREFIX?=/opt/circonus/nad
-MAN=$(PREFIX)/man/man8
-SBIN=$(PREFIX)/sbin
-BIN=$(PREFIX)/bin
-LOG=$(PREFIX)/log
-ETC=$(PREFIX)/etc
-CONF=$(PREFIX)/etc/node-agent.d
-MODULES=$(PREFIX)/lib/node_modules
+PREFIX?=/opt/circonus
+APP_DIR=$(PREFIX)/nad
+MAN=$(APP_DIR)/man/man8
+SBIN=$(APP_DIR)/sbin
+BIN=$(APP_DIR)/bin
+LOG=$(APP_DIR)/log
+ETC=$(APP_DIR)/etc
+CONF=$(APP_DIR)/etc/node-agent.d
+MODULES=$(APP_DIR)/node_modules
 NAD_LIB=$(MODULES)/nad
 RUNSTATE_DIR=/var/run
 RUNSTATE_FILE=$(RUNSTATE_DIR)/nad.pid
@@ -47,6 +48,7 @@ install-nad:	install-dirs
 	@# main nad scripts
 	/bin/sed \
 		-e "s#@@PREFIX@@#$(PREFIX)#g" \
+		-e "s#@@APP_DIR@@#$(APP_DIR)#g" \
 		-e "s#@@PID_FILE@@#$(RUNSTATE_FILE)#g" \
 		sbin/nad.sh > sbin/nad.sh.out
 	./install-sh -c -m 0644 sbin/nad.js $(DESTDIR)$(SBIN)/nad.js
@@ -67,15 +69,16 @@ install-plugins:	install-dirs
 	rsync -a plugins/ $(DESTDIR)$(CONF)/
 
 install-modules:
-	PATH="$(PATH):$(DESTDIR)$(PREFIX)/bin" npm install --production --no-progress
-	rsync -a node_modules/ $(DESTDIR)$(MODULES)/
-	rsync -a lib/* $(DESTDIR)$(NAD_LIB)/
+	cp package.json $(DESTDIR)$(APP_DIR) && \
+		cd $(DESTDIR)$(APP_DIR) && \
+		PATH="$(PATH):$(DESTDIR)$(PREFIX)/bin" npm install --production --no-progress
+	rsync -a lib/* $(DESTDIR)$(NAD_LIB)
 
 install-illumos:	install
 	@# service manifest
 	mkdir -p $(DESTDIR)$(MANIFEST_DIR)
 	/bin/sed \
-		-e "s#@@PREFIX@@#$(PREFIX)#g" \
+		-e "s#@@PREFIX@@#$(APP_DIR)#g" \
 		-e "s#@@METHOD_DIR@@#$(METHOD_DIR)#g" \
 		smf/nad.xml > smf/nad.xml.out
 	./install-sh -c -m 0644 smf/nad.xml.out $(DESTDIR)$(MANIFEST_DIR)/nad.xml
@@ -153,7 +156,6 @@ install-freebsd:	install
 	for f in plugins/freebsd/*.sh ; do \
 		filename=`echo "$${f}" | /usr/bin/sed -e 's#plugins/##'`; \
 		/usr/bin/sed \
-			-e "s#@@PREFIX@@#${PREFIX}#g" \
 			-e "s#@@CONF@@#${CONF}#g" \
 			$${f} > "${DESTDIR}${CONF}/$${filename}"; \
 	done
