@@ -317,7 +317,7 @@ Additionally, nad-statsd does *not* automatically generate derivative metrics fr
 
 ## <a name="statsd_config">Configuration</a>
 
-Place configuration in a file, e.g. `/opt/circonus/nad/etc/statsd.json`. Use the NAD `--statsd-config` option to indicate where the configuration file is located. e.g. `nad --statsd-config=/opt/circonus/nad/etc/statsd.json`.
+Place configuration options in a file, the default is `/opt/circonus/nad/etc/statsd.json`. If configuration saved to a different location, use either the NAD `--statsd-config` command line option or set `NAD_STATSD_CONFIG` in `nad.conf` or environment to indicate where the configuration file is located. e.g. `nad --statsd-config=/etc/project_configs/nad_statsd.json`.
 
 The default nad-statsd configuration is:
 
