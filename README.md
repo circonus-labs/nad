@@ -363,18 +363,17 @@ The `host_key` and `group_key` are metric name prefixes which determine the disp
 
 | metric name | host_key  | group_key | disposition |
 | ---         | ---      | ---      | ---         |
-|||                                 | all to host |
 | `foo`       | `null`   | `null`   | all metrics go to host |
-|||                                 | default to group |
+|||                                 | **group** default |
 | `host.foo`  | `host.`  | `null`   | `foo` goes to host |
-| `foo`       | `host.`  | `null`   | metrics not prefixed with `host.` go to group |
-|||                                 | default to host |
+| `blah`      | `host.`  | `null`   | metrics not prefixed with `host.` go to group |
+|||                                 | **host** default |
 | `group.foo` | `null`   | `group.` | `foo` goes to group |
-| `foo`       | `null`   | `group.` | metrics not prefixed with `group.` go to host |
-|||                                 | **explicit** no default |
+| `bar.yadda` | `null`   | `group.` | metrics not prefixed with `group.` go to host |
+|||                                 | **explicit**, no default |
 | `host.foo`  | `host.`  | `group.` | `foo` goes to host |
 | `group.foo` | `host.`  | `group.` | `foo` goes to group |
-| `foo`       | `host.`  | `group.` | all other metrics are ignored |
+| `drop_me`   | `host.`  | `group.` | all other metrics are ignored |
 
 > Note: If a group check is not enabled, all metrics destined for *group* will be ignored.
 
