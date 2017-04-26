@@ -332,7 +332,7 @@ The default nad-statsd configuration is:
     ],
     flush_interval: 10000,
     group_check_id: null,
-    group_key: null,
+    group_key: 'group.',
     group_counter_op: 'sum',
     group_gauge_op: 'average',
     group_set_op: 'sum',
