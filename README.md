@@ -363,18 +363,18 @@ The `host_key` and `group_key` are metric name prefixes which determine the disp
 
 | metric name | host_key  | group_key | disposition |
 | ---         | ---      | ---      | ---         |
-| *Default* ||||
+|||                                 | all to host |
 | `foo`       | `null`   | `null`   | all metrics go to host |
-| **Group** ||||
+|||                                 | default to group |
 | `host.foo`  | `host.`  | `null`   | `foo` goes to host |
-| `foo`       | `host.`  | `null`   | `foo` goes to group |
-| **Host** ||||
+| `foo`       | `host.`  | `null`   | metrics not prefixed with `host.` go to group |
+|||                                 | default to host |
 | `group.foo` | `null`   | `group.` | `foo` goes to group |
-| `foo`       | `null`   | `group.` | `foo` goes to host |
-| **Explicit** ||||
+| `foo`       | `null`   | `group.` | metrics not prefixed with `group.` go to host |
+|||                                 | **explicit** no default |
 | `host.foo`  | `host.`  | `group.` | `foo` goes to host |
 | `group.foo` | `host.`  | `group.` | `foo` goes to group |
-| `foo`       | `host.`  | `group.` | ignored |
+| `foo`       | `host.`  | `group.` | all other metrics are ignored |
 
 > Note: If a group check is not enabled, all metrics destined for *group* will be ignored.
 
