@@ -102,7 +102,7 @@ install-linux:	install
 		linux-init/logrotate > linux-init/logrotate.out
 	./install-sh -c -m 0644 linux-init/logrotate.out $(DESTDIR)/etc/logrotate.d/nad
 	/bin/sed \
-		-e "s#@@BIN@@#$(BIN)#g" \
+		-e "s#@@PREFIX@@#$(PREFIX)#g" \
 		-e "s#@@MODULES@@#$(MODULES)#g" \
 		-e "s#@@LOG@@#$(LOG)#g" \
 		bin/nad-log.sh > bin/nad-log.out
