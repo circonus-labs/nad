@@ -355,7 +355,7 @@ The default nad-statsd configuration is:
 
 ## <a name="statsd_group">Group metrics</a>
 
-The nad-statsd module can bifurcate metrics - sending some metrics to NAD (host) and some to a group check (intended to be used by multiple hosts - e.g. a group of web servers). If the `--group` parameter is provided to COSI when the system is registered, it will create a group check (or use the existing group check if one has already been created from another system registration with the same `--group`). Any additional systems which use the same `--group` parameter when COSI registers them will also send group metrics to the same group check. This allows application metrics to go to either the host, the group, or both - providing more flexibility in viewing, aggregating and analytics. If an HTTPTrap group check is manually created using the UI, set  `group_check_id` in the nad-statsd configuration file. Additionally, if an HTTPTrap check is created manually it **must** have *asynchronous* set to **disabled**, in the Advanced Configuration section, in order for metrics submitted by systems in the group to be handled correctly.
+The nad-statsd module can bifurcate metrics - sending some metrics to NAD (host) and some to a group check (intended to be used by multiple hosts - e.g. a group of web servers). If the `--group` parameter is provided to COSI when the system is registered, it will create a group check (or use the existing group check if one has already been created from another system registration with the same `--group`). Additional systems which use the same `--group` parameter when COSI registers them will also send group metrics to the same group check. This allows application metrics to go to either the host, the group, or both - providing more flexibility in viewing, aggregating and analytics. If an HTTPTrap group check is manually created using the UI, set  `group_check_id` in the nad-statsd configuration file. Additionally, if an HTTPTrap check is created manually it **must** have *asynchronous* set to **disabled**, in the Advanced Configuration section, in order for metrics submitted by systems in the group to be handled correctly.
 
 ### `host_key` and `group_key`
 
@@ -375,7 +375,7 @@ The `host_key` and `group_key` are metric name prefixes which determine the disp
 | `group.foo` | `host.`  | `group.` | `foo` goes to group |
 | `drop_me`   | `host.`  | `group.` | all other metrics are ignored |
 
-> Note: If a group check is not enabled, all metrics destined for *group* will be ignored.
+> Note: If a group check is not enabled and a `group_key` is configured -- all metrics destined for *group*, prefixed with the `group_key`, will be ignored.
 
 ### how group metrics are handled
 
