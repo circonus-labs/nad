@@ -364,10 +364,10 @@ The `host_key` and `group_key` are metric name prefixes which determine the disp
 | metric name | host_key  | group_key | disposition |
 | ---         | ---      | ---      | ---         |
 | `foo`       | `null`   | `null`   | all metrics go to host |
-| *default*   ||                    | preference **group** |
+|||                                 | preference **group** |
 | `host.foo`  | `host.`  | `null`   | `foo` goes to host |
 | `blah`      | `host.`  | `null`   | metrics not prefixed with `host.` go to group |
-|||                                 | preference **host** |
+| **DEFAULT** ||                    | preference **host** |
 | `group.foo` | `null`   | `group.` | `foo` goes to group |
 | `bar.yadda` | `null`   | `group.` | metrics not prefixed with `group.` go to host |
 |||                                 | **explicit** only |
