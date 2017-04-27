@@ -304,7 +304,7 @@ make_package() {
             --deb-user root --deb-group root \
             --after-install $BUILDDIR/nad/packaging/ubuntu-postinstall.sh \
             --after-remove $BUILDDIR/nad/packaging/ubuntu-postremove.sh \
-            --config-files $PREFIX/etc/nad.conf \
+            --config-files $APP_DIR/etc/nad.conf \
             $(cd $INSTALLDIR; find . -not -type d | sed -e 's#^\./##')
         cp $deb_file $PUBLISHDIR/packages/
     else
