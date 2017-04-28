@@ -428,9 +428,8 @@ function drop_privileges() {
         } catch (err) {
             log.warn({
                 err : err.message,
-                gid : settings.drop_gid,
-                uid : settings.drop_uid
-            }, 'ignoring, setting group privileges');
+                gid : settings.drop_gid
+            }, 'unable to set group, ignoring');
         }
 
         try {
@@ -438,13 +437,12 @@ function drop_privileges() {
         } catch (err) {
             log.fatal({
                 err : err.message,
-                gid : settings.drop_gid,
                 uid : settings.drop_uid
-            }, 'failed to drop privileges');
+            }, 'failed to drop user privileges');
             reject(err);
         }
 
-        log.info(`running as ${settings.drop_uid}:${settings.drop_gid}`);
+        log.info(`running as uid:${settings.drop_uid}`);
         resolve();
     });
 }
