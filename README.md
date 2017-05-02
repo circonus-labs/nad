@@ -181,7 +181,7 @@ In addition to the basic `install` target, there are OS-specific installation ta
 * FreeBSD
     * Configuration: `/etc/rc.d/nad`
     * Enable: add `nad_enable="YES"` to `/etc/rc.conf`
-    * Start: `service start nad`
+    * Start: `service nad start`
 * OpenBSD - manual service configuration/installation required
     > For example, add the following to your `/etc/rc.local`:
     >```sh
