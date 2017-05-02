@@ -130,10 +130,11 @@ function handle_put_post(req, res, body_chunks) {
         return;
     }
 
-    const body = Buffer.concat(body_chunks).toString();
     const matches = (/^\/write\/(.+)$/).exec(req.url_info.pathname);
 
     if (matches) {
+        const body = Buffer.concat(body_chunks).toString();
+
         push_receiver.
             native_obj.
             store_incoming_data(matches[1], body);
