@@ -78,6 +78,34 @@ Vagrant.configure('2') do |config|
         SHELL
     end
 
+    config.vm.define 'c63', autostart: false do |c63|
+        c63.vm.box = 'maier/centos-6.3-x86_64'
+        c63.vm.provider 'virtualbox' do |vb|
+            vb.name = 'c63'
+        end
+        c63.vm.network 'private_network', ip: '192.168.100.200'
+        c63.vm.provision 'shell', inline: <<-SHELL
+            echo "#{cosi_site_ip} cosi-site" >> /etc/hosts
+            yum -q -e 0 makecache fast
+            echo "Installing needed packages for 'make install' and 'make install-rhel'"
+            yum -q install -y rsync gcc make
+            echo "Installing needed packages for 'packaging/make-omnibus'"
+            yum -q install -y git wget rpm-build redhat-rpm-config
+            mkdir -p /mnt/node-agent/packages
+            chown -R vagrant:vagrant /mnt/node-agent
+            # node_tgz="node-#{node_ver}-linux-x64.tar.gz"
+            # [[ -f /vagrant/${node_tgz} ]] || {
+            #     echo "Fetching $node_tgz"
+            #     curl -sSL "https://nodejs.org/dist/#{node_ver}/${node_tgz}" -o /vagrant/$node_tgz
+            # }
+            # [[ -x /opt/circonus/bin/node ]] || {
+            #     echo "Installing $node_tgz"
+            #     [[ -d /opt/circonus ]] || mkdir -p /opt/circonus
+            #     tar --strip-components=1 -zxf /vagrant/$node_tgz -C /opt/circonus
+            # }
+        SHELL
+    end
+
     config.vm.define 'u16', autostart: false do |u16|
         u16.vm.box = 'maier/ubuntu-16.04-x86_64'
         # prevent 'mesg: ttyname failed: Inappropriate ioctl for device' errors
