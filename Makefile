@@ -70,7 +70,7 @@ install-modules:
 	rsync -a lib/* $(DESTDIR)$(NAD_LIB)
 	cp package.json $(DESTDIR)$(APP_DIR) && \
 		cd $(DESTDIR)$(APP_DIR) && \
-		PATH="$(PATH):$(DESTDIR)$(PREFIX)/bin" npm install --production --no-progress
+		PATH="$(PATH):$(DESTDIR)$(PREFIX)/bin" PREFIX= npm install --production --no-progress
 
 install-illumos:	install
 	@# service manifest
