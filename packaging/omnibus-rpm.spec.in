@@ -1,15 +1,16 @@
 %define		rversion	@@RPMVER@@
 %define		rrelease	1
 %define		_prefix		/opt/circonus
+%define     app_dir     %{_prefix}/nad
 
-# perl is optional* not required
+# perl is *optional* not required
 # rpmbuild autoreq will include it by default because of scripts with perl shebang
 %define __requires_exclude perl
 
 Name:		nad-omnibus
 Version:	%{rversion}
 Release:	%{rrelease}%{?dist}
-Summary:	A very thin, simply managed host agent written in Node.js
+Summary:	Circonus Node Agent
 Prefix:		%{_prefix}
 Group:		Applications/System
 License:	BSD
@@ -21,7 +22,7 @@ BuildRequires:	rsync
 Conflicts:	circonus-field-nad, circonus-nodejs
 
 %description
-A very thin, simply managed host agent written in Node.js
+NAD is a portable, extensible, lightweight metric collection agent. It is the recommended way to collect system metrics for the [Circonus](https://circonus.com/) monitoring platform.
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -31,21 +32,49 @@ rsync -a /tmp/nad-omnibus-install/ $RPM_BUILD_ROOT/
 rm -rf $RPM_BUILD_ROOT
 
 %post
-/sbin/chkconfig --add nad
-/sbin/service nad restart >/dev/null 2>&1
+if [ -f /lib/systemd/system/nad.service ]; then
+    /bin/systemctl enable nad
+    /bin/systemctl start nad >/dev/null 2>&1
+elif [ -f /etc/init/nad.conf ]; then
+    /sbin/initctl reload-configuration
+elif [ -f /etc/init.d/nad ]; then
+    /sbin/chkconfig --add nad
+    /sbin/service nad start >/dev/null 2>&1
+fi
 
 %preun
 if [ $1 = 0 ]; then
-  /sbin/chkconfig --del nad
-  /sbin/service nad stop >/dev/null 2>&1
+    if [ -f /lib/systemd/system/nad.service ]; then
+        /bin/systemctl disable nad
+        /bin/systemctl stop nad >/dev/null 2>&1
+    elif [ -f /etc/init/nad.conf ]; then
+        /sbin/initctl stop nad
+    elif [ -f /etc/init.d/nad ]; then
+        /sbin/chkconfig --del nad
+        /sbin/service nad stop >/dev/null 2>&1
+    fi
 fi
+exit 0
 
 %files
 %defattr(-, root, root, 755)
+%if 0%{?el7}
+/lib/systemd/system/nad.service
+%endif
+%if 0%{?el6}
+### -upstart disabled- /etc/init/nad.conf
 /etc/init.d/nad
-/etc/sysconfig/nad
-%{_prefix}/embedded
-%{_prefix}/man
-%{_prefix}/etc/node-agent.d
-%{_prefix}/lib/node_modules
-%{_prefix}/sbin/nad
+%endif
+/etc/logrotate.d/nad
+%config(noreplace) %{app_dir}/etc/nad.conf
+%{app_dir}/package.json
+%{app_dir}/man
+%{app_dir}/etc/node-agent.d
+%{app_dir}/bin/nad-log
+%{app_dir}/bin/statsd.sh
+%{app_dir}/sbin/nad
+%{app_dir}/sbin/nad.js
+%{app_dir}/node_modules
+%{_prefix}/bin/node
+%{_prefix}/lib
+%{_prefix}/nodejs

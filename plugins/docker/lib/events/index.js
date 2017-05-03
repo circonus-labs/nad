@@ -1,16 +1,29 @@
-'use strict';
+// Copyright 2016 Circonus, Inc. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
 
-/* eslint-env node, es6 */
-/* eslint-disable no-magic-numbers */
+'use strict';
 
 const Docker = require('docker-modem');
 
 module.exports = class DockerDaemonEvents {
+
+    /**
+     * creates new instance
+     * @arg {Object} opts docker options
+     */
     constructor(opts) {
         this.docker = new Docker(opts);
         this.lastCheck = null;
     }
 
+    /**
+     * getEvents fetches metrics from docker
+     * @arg {Function} cb callback
+     * @returns {Undefined} nothing
+     *
+     * cb called with err|null, metrics(object)
+     */
     getEvents(cb) {
         const self = this;
         const tm = Math.floor(Date.now() / 1000);
@@ -20,24 +33,25 @@ module.exports = class DockerDaemonEvents {
         }
 
         const opts = {
-            path: '/events?',
-            method: 'GET',
-            options: {
-                since: tm - (tm - this.lastCheck),
-                until: tm/* ,
+            method  : 'GET',
+            options : {
+                since : tm - (tm - this.lastCheck),
+                until : tm/* ,
                 filters: {
                     type: [ "container", "image" ]
                 }*/
             },
-            statusCodes: {
-                200: true,
-                500: 'server error'
+            path        : '/events?',
+            statusCodes : {
+                200 : true,
+                500 : 'server error'
             }
         };
 
         this.docker.dial(opts, (err, data) => {
             if (err) {
                 cb(err);
+
                 return;
             }
 
@@ -55,6 +69,7 @@ module.exports = class DockerDaemonEvents {
                     });
             } catch (err2) {
                 cb(err2);
+
                 return;
             }
 
@@ -70,7 +85,7 @@ module.exports = class DockerDaemonEvents {
                 currEvents[metricName] += 1;
             }
             cb(null, currEvents);
-            return;
         });
     }
+
 };

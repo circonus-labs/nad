@@ -1,15 +1,20 @@
-aggcpu.elf
-cpu.elf
-disk.elf
-fs.elf
-zpoolio.elf
-boot_time.elf
-loadavg.elf
-user_logins.elf
-file_stat.elf
-*~
-freebsd-init/nad.out
-linux-init/*.out
+# osx
+.DS_Store
+
+# temporary files
+*.out
 packaging/omnibus-rpm.spec
-smf/circonus-nad.out
-smf/nad.xml.out
+# platform specific 
+node_modules/
+*.elf
+
+# vagrant/editor files
+node-*.tar.[gx]z
+.eslintcache
+.vscode/
+*~
+
+# custom local packaging configuration
+packaging/omnibus.conf
+# notes/todo
+TODO.md

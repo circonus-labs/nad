@@ -1,5 +1,6 @@
-/* eslint-env node, es6 */
-/* eslint-disable no-magic-numbers */
+// Copyright 2016 Circonus, Inc. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
 
 'use strict';
 
@@ -77,6 +78,10 @@ const MILLISECOND = 1000;
 let singleton = null;
 
 module.exports = class Syscall {
+
+    /**
+     * creates new instance
+     */
     constructor() {
         if (singleton !== null) {
             return singleton;
@@ -115,7 +120,16 @@ module.exports = class Syscall {
         return singleton;
     }
 
-    run(details, cb, req, args, instance) { // eslint-disable-line max-params
+    /**
+     * called by nad to run the plugin
+     * @arg {Object} plugin definition
+     * @arg {Function} cb callback
+     * @arg {Object} req http request object
+     * @arg {Object} args instance arguments
+     * @arg {String} instance id
+     * @returns {Undefined} nothing
+     */
+    run(plugin, cb, req, args, instance) { // eslint-disable-line max-params, no-unused-vars
         let samples = DEFAULT_SAMPLES;
 
         if (req && {}.hasOwnProperty.call(req, 'headers') && {}.hasOwnProperty.call(req.headers, 'x-reconnoiter-period')) {
@@ -124,8 +138,8 @@ module.exports = class Syscall {
 
         const metrics = this.dtrace.flush(samples);
 
-        cb(details, metrics, instance); // eslint-disable-line callback-return
-        details.running = false; // eslint-disable-line no-param-reassign
-
+        plugin.running = false; // eslint-disable-line no-param-reassign
+        cb(plugin, metrics, instance);
     }
+
 };

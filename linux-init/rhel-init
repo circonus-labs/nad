@@ -1,9 +1,9 @@
 #!/bin/bash
 #
-# nad        Startup script for Circonus node agent daemon
+# nad        Startup script for Circonus Node Agent Daemon
 #
 # chkconfig: - 98 02
-# description: Circonus node agent daemon
+# description: Circonus Node Agent Daemon
 # processname: nad
 #
 ### BEGIN INIT INFO
@@ -12,8 +12,9 @@
 # Required-Stop:     $local_fs
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: A very thin, simply managed host agent written in Node.js
-# Description:       The node-agent daemon provides a simple mechanism to expose
+# Short-Description: Circonus Node Agent Daemon
+# Description:       A very thin, simply managed host agent written in Node.js
+#                    The node-agent daemon provides a simple mechanism to expose
 #                    systems and application metrics to external onlookers.
 #                    It inventories all executable programs in its config directory
 #                    and executes them upon external request, returning results
@@ -23,92 +24,73 @@
 # Source function library.
 . /etc/rc.d/init.d/functions
 
-prog="Circonus node agent daemon"
-NAD="@@PREFIX@@/sbin/nad"
-NAD_OPTS=''
-NAD_DEFAULTS_FILE=/etc/sysconfig/nad
-NAD_PIDFILE=/var/run/nad
-RETVAL=0
-STOP_TIMEOUT=${STOP_TIMEOUT-60}
-
-if [ -s $NAD_DEFAULTS_FILE ]; then
-	. $NAD_DEFAULTS_FILE
-fi
-
-export PATH="@@PREFIX@@/embedded/bin:@@PREFIX@@/bin:/opt/omni/bin:$PATH"
-export NODE_PATH="@@PREFIX@@/lib/node_modules"
+prog="Circonus Node Agent Daemon"
+NAD="@@SBIN@@/nad"
+NAD_PIDFILE="@@PID_FILE@@"
 
 run_app() {
-        runuser -p -s /bin/bash -c "nohup $NAD $NAD_OPTS >/dev/null 2>&1 &" nobody
-	RETVAL=$?
-	if [[ "$RETVAL" == "0" ]]; then
-		pid=$(pgrep -f $NAD)
-		EC=$?
-		if [[ $EC -ne 0 || -z "$pid" ]]; then
-		    echo "$NAD appeared to start but, may have crashed."
-		    failure
-		else
-		    echo $pid > $NAD_PIDFILE
-		    success
-		fi
-	else
-		failure
-	fi
-	return $RETVAL
+    $NAD --daemon --pid_file $NAD_PIDFILE
+    RETVAL=$?
+    if [[ $RETVAL -eq 0 ]]; then
+        success
+    else
+        failure
+    fi
+    return $RETVAL
 }
 
 start() {
-        echo -n $"Starting $prog: "
-	__pids_var_run nad $NAD_PIDFILE
-	RETVAL=$?
-	if [[ "$RETVAL" == "3" ]]; then
-		# Not running, so start
-		run_app
-		RETVAL=$?
-	elif [[ "$RETVAL" == "1" ]]; then
-		# Stale pidfile
-		rm $NAD_PIDFILE 
-		run_app
-		RETVAL=$?
-	else
-		# Already running
-		success
-		RETVAL=0
-	fi
-        echo
-        return $RETVAL
+    echo -n $"Starting $prog: "
+    RETVAL=3
+    [[ -f $NAD_PIDFILE ]] && { __pids_var_run nad $NAD_PIDFILE; RETVAL=$?; }
+    if [[ "$RETVAL" == "3" ]]; then
+        # Not running, so start
+        run_app
+        RETVAL=$?
+    elif [[ "$RETVAL" == "1" ]]; then
+        # Stale pidfile
+        rm $NAD_PIDFILE
+        run_app
+        RETVAL=$?
+    else
+        # Already running
+        success
+        RETVAL=0
+    fi
+    echo
+    return $RETVAL
 }
 
 stop() {
-	echo -n $"Stopping $prog: "
-	killproc -p $NAD_PIDFILE
-	RETVAL=$?
-	echo
-	return $RETVAL
+    echo -n $"Stopping $prog: "
+    killproc -p $NAD_PIDFILE
+    RETVAL=$?
+    echo
+    return $RETVAL
 }
 
 # See how we were called.
 case "$1" in
-  start)
-	start
-	;;
-  stop)
-	stop
-	;;
-  status)
-	status -p $NAD_PIDFILE $NAD
-	RETVAL=$?
-	;;
-  reload|force-reload)
-	echo "Reloading Circonus node agent daemon: not needed, as there is no config file."
-	;;
-  restart)
-	stop
-	start
-	;;
-  *)
-	echo $"Usage: $0 {start|stop|reload|force-reload|status|restart}"
-	RETVAL=2
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    status)
+        status -p $NAD_PIDFILE $NAD
+        RETVAL=$?
+        ;;
+    reload|force-reload)
+        echo "Reloading Circonus node agent daemon: not needed, as there is no config file."
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|reload|force-reload|status|restart}"
+        RETVAL=2
 esac
 
 exit $RETVAL

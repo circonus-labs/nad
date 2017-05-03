@@ -1,0 +1,8 @@
+description "Circonus Node Agent"
+author "circonus <support@circonus.com>"
+
+start on (local-filesystems and stopped networking)
+stop on shutdown
+
+expect daemon
+exec @@SBIN@@/nad --daemon --pid_file @@PID_FILE@@

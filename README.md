@@ -1,62 +1,110 @@
-# nad
+# NAD - Node Agent Daemon
 
-nad is a portable, extensible, lightweight metric collection
-agent. It is the recommended way to collect system metrics
-for the [Circonus](Circonus.com) monitoring platform.
+* [Overview](#overview)
+* [Installation](#installation)
+    * [Automated](#automated-install) *recommended*
+    * [Manual](#manual-install)
+    * [Source](#source-install)
+    * [Updating](#updating)
+* [Running NAD](#running)
+    * [Command line](#command-line)
+    * [As a service](#as-a-service)
+    * [NAD HTTP interface](#interface)
+* [Configuration options](#options)
+    * [General](#opt_general)
+    * [Reverse](#opt_reverse)
+    * [API](#opt_api)
+    * [SSL](#opt_ssl)
+    * [Miscellaneous](#opt_misc)
+* [StatsD](#statsd)
+    * [Configuration](#statsd_config)
+    * [Group metrics](#statsd_group)
+* [Plugins](#plugins)
+    * [Enable](#plugin_enable)
+    * [Disable](#plugin_disable)
+    * [Verify](#plugin_verify)
+    * [Creating custom plugins](DEVELOPMENT.md#plugins)
+* [NAD Development](DEVELOPMENT.md)
 
-nad comes with a [rich set of plugins](https://github.com/circonus-labs/nad/tree/master/plugins) which collect:
-- System metrics on Linux, Solaris, FreeBSD and OpenBSD
-- Application metrics for [MySQL](https://www.mysql.com), [PostgreSQL](https://www.postgresql.org/), [HAProxy](http://www.haproxy.org), [Cassandra](http://cassandra.apache.org/) and more
+---
 
-Further applications can be easily added using a simple but powerful
-plugin system. We welcome further contributions by the
-community. Just submit a pull request against this repository.
+## Overview
 
-### Unique Features
+NAD is a portable, extensible, lightweight metric collection agent. It is the recommended way to collect system metrics for the [Circonus](https://circonus.com/) monitoring platform.
 
-- Full support for [histogram metrics](https://www.circonus.com/understanding-data-with-histograms/).
+NAD comes with a [rich set of plugins](plugins/) which collect:
 
-- Support for Circonus real-time (1s) dashboards and graphing.
+* System metrics on [Linux](plugins/linux), [Illumos](plugins/illumos) (Solaris), [FreeBSD](plugins/freebsd) and [OpenBSD](plugins/openbsd)
+* Application metrics for [MySQL](https://www.mysql.com), [PostgreSQL](https://www.postgresql.org/), [HAProxy](http://www.haproxy.org), [Cassandra](http://cassandra.apache.org/) and more
 
-- Multiple data submission paradigms:
+Further, applications can be easily added using a simple but powerful plugin system. We welcome further contributions by the community. Just submit a pull request against this repository.
 
-  - pull - nad exposes and JSON/HTTP endpoint (default:http://localhost:2609),
-    and Circonus collects metrics from there.
+NAD Features:
 
-  - [reverse pull](https://www.circonus.com/pully-mcpushface/) - nad
-    initiates a TCP connection with Circonus. Circonus uses that
-    connection to request data as needed. This allows nad to operate
-    behind a NAT.
+* Simple HTTP interface for metric collection
+* Metrics exposed in easy to parse JSON format
+* Supports SSL for securing HTTP interface
+* Full support for [histogram metrics](https://www.circonus.com/understanding-data-with-histograms/)
+* Support for Circonus real-time (1s) dashboards and graphing
+* Provides local StatsD interface for application metric submission
+* Multiple data submission paradigms:
+    * pull - Circonus collects metrics using HTTP interface
+    * [reverse](https://www.circonus.com/pully-mcpushface/) - Function behind NAT. NAD initiates secure TCP connection, Circonus uses connection to collect metrics
+* [Self-configure](self-config/) with Circonus via the command line with a user-provided JSON configuration file
 
-- nad can automatically configure itself with Circonus via a few command line options.
+# Installation
 
-## Installation
+## Automated Install
 
-### COSI
+The easiest, and recommended, method to install NAD for Linux and Illumos based systems is via the Circonus one-step Installer (COSI). See the [COSI documentation](https://github.com/circonus-labs/circonus-one-step-install) for details.
 
-The easiest way to install nad is via the Circonus one-step-installer (COSI).
-This will allow you to install and configure nad with a shell one-liner.
-See <https://github.com/circonus-labs/circonus-one-step-install> for details.
+Benefits of using COSI:
 
-### Packages
+* one command install (fully automated, install NAD, create checks, graphs, worksheets and dashboards)
+* or download the install script and customize to your needs
+* customizable templates for checks, graphs, dashboards and worksheets
+* supports automation via orchestration systems (e.g. ansible, puppet, shell scripts, etc.)
+* cosi-site can be installed and run locally for complete control
 
-For convenience, we provide nad packages for selected platforms under
-[omnibus packages](http://updates.circonus.net/node-agent/packages/ "nad omnibus packages").
+## Manual Install
+
+For convenience and flexibility, pre-built packages are available for selected platforms from [updates.circonus.net](http://updates.circonus.net/node-agent/packages/). These are self-contained *omnibus* packages built for the target OS. Packages contain the correct version of NodeJS, binaries for platform-specific plugins, and applicable service configuration. These packages will install NAD in `/opt/circonus/nad` and configure and start NAD as a service.
+
 At the time of this writing, these are:
 
-* Ubuntu: 12.04, 14.04, 16.04
-* RedHat: EL5, EL6, EL7
+* deb packages - Ubuntu: 14.04, 16.04
+* rpm packages - CentOS: EL6, EL7
 
-These are self-contained packages that come with a private copy of Node.js
-and will automatically install and start the nad service.
+An up-to-date list of currently supported platforms is available from [COSI](https://onestep.circonus.com/) (list returned in JSON).
 
-### Manual Installation
+## Updating
 
-Node.js v4.0.0 or later must be installed and available as `node` on
-the PATH.
+For RPM or DEB based installs, go to [updates.circonus.net](http://updates.circonus.net/node-agent/packages/) and retrieve most recent package.
 
-You will need a basic development environment (compiler, GNU make,
-etc.) in order to build the default plugins.
+```sh
+curl -O http://updates.circonus.net/node-agent/packages/<name of rpm file>
+rpm -Uvh <name of rpm file>
+```
+
+```sh
+curl -O http://updates.circonus.net/node-agent/packages/<name of deb file>
+dpkg -i <name of deb file>
+```
+
+For `pkg` based systems (e.g. OmniOS) run `pkg update field/nad`.
+
+## Source Install
+
+### Build requirements
+
+* NodeJS v4.4.5+ must be installed, `node` and `npm` available in the PATH.
+* A basic development environment (compiler, GNU make, etc.) in order to build certain plugins. For OmniOS/FreeBSD/etc. you must install and use `gmake`.
+
+### Basic `install` target
+
+A basic install from source installs NAD in `/opt/circonus/nad`.
+
+#### For CentOS/Ubuntu:
 
 ```
 git clone https://github.com/circonus-labs/nad.git
@@ -64,219 +112,326 @@ cd nad
 sudo make install
 ```
 
-This will build a default set of plugins and install nad related files
-under `/opt/circonus`. You can then execute nad with:
+#### For Illumos/FreeBSD/OpenBSD:
 
 ```
-NODE_PATH=/opt/circonus/lib/node_modules /opt/circonus/sbin/nad
+git clone https://github.com/circonus-labs/nad.git
+cd nad
+sudo gmake install
 ```
 
-There are daemon install targets for some operating systems, which enable
-all the default checks and install init scripts and default configuration
-helper files. For more details, see below.
-
-### OS Specific Installation Notes
-
-* On Ubuntu 13.10 and later, the node binary has been renamed, so you
-  will also need the `nodejs-legacy` package.  See [these notes](https://github.com/joyent/node/wiki/Installing-Node.js-via-package-manager#ubuntu-mint-elementary-os
-"Ubuntu notes").
-
-  Optionally, to build the default plugins and install an init script:
-  ```
-  make install-ubuntu
-  ```
-
-* On RHEL/CentOS, optionally, to build the default plugins and install an
-  init script:
-  ```
-  make install-rhel
-  ```
-
-* On illumos (SmartOS, OmniOS, OpenIndiana, etc.), use `gmake` to build:
-  ```
-  gmake install
-  ```
-  Optionally, to build the default plugins and create an SMF manifest:
-  ```
-  gmake install-illumos
-  ```
-
-* On FreeBSD use:
-  ```
-  PREFIX=/usr/local gmake install
-  ```
-  Optionally, to build the default plugins and install an init script:
-  ```
-  PREFIX=/usr/local gmake install-freebsd
-  ```
-
-  The init script defaults to nad being enabled. If you wish to disable
-  nad, add `nad_enable="NO"` to `/etc/rc.conf`. Starting with FreeBSD 9.2,
-  you may instead use `sysrc nad_enable=NO` to disable the service.
-
-  Additionally, if you wish to override the default options, you may add
-  them to rc.conf as `nad_flags`. Starting with FreeBSD 9.2, you may
-  instead use `sysrc nad_flags="<flags>"` to set additional options.
-
-* On OpenBSD use:
-  ```
-  PREFIX=/usr/local gmake install
-  ```
-  Optionally, to build the default plugins:
-  ```
-  PREFIX=/usr/local gmake install-openbsd
-  ```
-
-## Plugins
-
-nad will run scripts from the config directory, only from that
-directory, and not subdirectories. The best practice is to write your
-scripts in subdirectories of the config dir and soft link to them to
-enable their execution.
-
-Some scripts distributed with nad need to be compiled (yes, they aren't
-actually scripts, they are ELF executables).  Since not all programs
-can be compiled on all platforms, you need to go build them as needed.
-There are makefiles from which to pick and choose.
-
-If you write a set of scripts/programs, you can describe them in a
-`.index.json` file and they will be reported on when you run `nad -i`.
-
-## Operations
-
-First, there are no config files for nad. You just run it and it works.
-It has a default directory out of which it executes scripts/executables.
-When you install it, all available plugins will be installed in
-subdirectories under the "config dir".  To enable a script, simply link
-it from the "config dir".
-
-The defaults are as follows:
-
-- config dir: `/opt/circonus/etc/node-agent.d/`, change using `-c` on the command line.
-- port: `2609`, this can be changed using `-p` on the command line.
-
-### Running
-
-On Solaris or illumos you can use smf.  First, node needs to be in your path,
-so you might need to edit the SMF manifest to alter the PATH. After install:
-
-    # svccfg import /var/svc/manifest/network/circonus/nad.xml
-
-On RHEL/CentOS, assuming you did `make install-rhel`:
-
-    # /sbin/chkconfig nad on && /etc/init.d/nad start
-
-On Ubuntu, assuming you did `make install-ubuntu`:
-
-    # /usr/sbin/update-rc.d nad defaults 98 02 && /etc/init.d/nad start
-
-On FreeBSD, assuming you did `make install-freebsd`:
-
-    # /etc/rc.d/nad start
-
-On OpenBSD, assuming you did `make install-openbsd`, add the following to your `/etc/rc.local`:
-
-    if [ -x /opt/circonus/sbin/nad ]; then
-        export NODE_PATH="/opt/circonus/lib/node_modules"
-        echo -n ' nad'; /opt/circonus/sbin/nad >/dev/null 2>&1 &
-    fi
-
-On other platforms, just run nad in the background. There is one required
-environment variable:
-
-   `# export NODE_PATH="/opt/circonus/lib/node_modules"`
-
-### Setup
-
-If you used one of the `install-<os>` options above, the default set of
-plugins is already enabled.  You may enable additional plugins and/or
-create your own custom plugins.  See the man page for details on creating
-and activating plugins.
-
-After which, you should be able to:
-
-    # curl http://localhost:2609/
-
-and see all the beautiful metrics.
-
-You can run a single plugin by name, like so:
-
-    # curl http://localhost:2609/run/name
-
-where "name" is the plugin name, minus any file extension.
-
-#### Why did we "make" in the config directory?
-
-You'll notice that some plugins require compilation, and you may ask "Why?"
-For example, on illumos, aggcpu.elf is a compiled binary
-(because calculating aggregate CPU info is expensive using "the UNIX way").
-The install will compile and link any plugins that need compiling and linking.
-
-#### What about SSL?
-
-
-nad supports SSL. Refer to the man page for more information.
-
-## Automatic Configuration with Circonus
-
-nad can automatically configure itself with Circonus via a few command
-line options.  When running in configuration mode, nad will create a check
-and graphs with Circonus, and then exit. It will not attempt to bind to any port,
-so is safe to use while running normally.
-
- * `--authtoken <UUID>`  This is the Circonus API auth token to use when talking with the API. This "activates" the configuration mode.
-
- * `--target <string>` This should be either the IP or hostname that the Circonus broker can talk to                   this host at.  Required.
-
- * `--hostname <string>` This is the hostname to use in the check and graph names. If not passed, nad will attempt to look it up via commands like /usr/bin/zonename
-
- * `--brokerid <integer>` The ID from Circonus for the broker on which you wish to configure the check.  Required.
-
- * `--configfile <string>` The path to the config file to use that defines the metrics and graphs to create in Circonus.  Look at config/illumos.json for an example.  Required.
-
- * `--debugdir <string>` Creates debug files for each script and write them to this directory. Optional.
-
- * `--wipedebugdir` Wipes debug files clean before each write. Optional.
-
-By default, nad talks to the main Circonus installation.  You can also
-configure nad to talk to a Circonus Inside install with the following
-config options:
-
- * `--apihost <string>` An alternative host to 'api.circonus.com'
-
- * `--apiport <integer> An alternative port to `443`
-
- * `--apiprotocol <stirng>` An alternative protocol to 'https' (i.e. 'http')
-
- * `--apipath <string>` An alternative base path for the API server
-
-### Config file
-
-The `--configfile` parameter defines which config file to use when setting up
-checks and graphs in Circonus.  There are two keys the nad looks for.
-
-The check key contains the definition that will be passed to the check bundle
-endpoint in the Cirocnus API.  You can set values like the period and timeout
-here, as well as config options (in the config key).  The metrics key defines
-which metrics we will collect and has 2 subkeys, numeric and text, which are
-simply lists of metric names.  When nad attempts to create the check, if it
-gets back a pre-existing check, then nad will update the check, adding the new
-metric names.
-
-The graphs key defines a collection of graphs to create.  Each subkey is the
-name of the graph that will be created in Circonus, with the hostname
-prepended to it.  Under the names, the structure is identical to the
-documentation for the Circonus graph API. Any values added will be passed to
-the API as is.
-
-## Man
-
-Further documentation can be found in the nad manpage: `man nad`.
-
-If nad is not installed, you can render the manpage locally with:
+### OS `install` targets
+
+In addition to the basic `install` target, there are OS-specific installation targets. Which will build certain plugins for the specific OS platform, enable default plugins, and install an OS-specific service configuration.
+
+* `make install-ubuntu`
+* `make install-rhel`
+* `gmake install-illumos`
+* `gmake install-freebsd`
+* `gmake install-openbsd`
+
+### Install files and directories
+
+| path                                         | description                                        |
+| -------------------------------------------- | -------------------------------------------------- |
+| **Core Directories** ||
+| `/opt/circous`                               | base directory                                     |
+| `/opt/circonus/nad`                          | default installation location                      |
+| `/opt/circonus/nad/bin`                      | nad utilities, if applicable                       |
+| `/opt/circonus/nad/etc`                      | configurations                                     |
+| `/opt/circonus/nad/etc/node-agent.d`         | plugin directory                                   |
+| `/opt/circonus/nad/node_agent`               | nad module packages                                |
+| `/opt/circonus/nad/log`                      | nad log directory (if applicable)                  |
+| `/opt/circonus/nad/man`                      | nad man page                                       |
+| `/opt/circonus/nad/sbin`                     | nad daemon                                         |
+| **Core Files** ||
+| `/opt/circonus/nad/etc/nad.conf`             | main nad configuration (see [Options](#config))    |
+| `/opt/circonus/nad/sbin/nad`                 | nad startup script                                 |
+| `/opt/circonus/nad/sbin/nad.js`              | main nad process                                   |
+| **Miscellaneous Files** ||
+| `/opt/circonus/nad/bin/nad-log`              | nad log viewer script, if applicable               |
+| `/opt/circonus/nad/log/nad.log`              | nad log, if applicable                             |
+| `/var/run/nad.pid`                           | running nad pid file, if applicable                |
+| `/lib/systemd/system/nad.service`            | systemd service configuration, if applicable       |
+| `/etc/init/nad.conf`                         | upstart service configuration, if applicable       |
+| `/var/svc/manifest/network/circonus/nad.xml` | smf service configuration, if applicable           |
+| `/var/svc/method/circonus-nad`               | smf method script, if applicable                   |
+| `/etc/rc.d/nad`                              | FreeBSD service configuration, if applicable       |
+
+# Running
+
+## Command line
+
+`/opt/circonus/nad/sbin/nad [options]`
+
+## As a service
+
+* Systemd based systems - CentOS 7.x and Ubuntu 16.04
+    * Configuration: `/lib/systemd/system/nad.service`
+    * Enable: `systemctl enable nad`
+    * Start: `systemctl start nad`
+* Upstart based systems - CentOS 6.x and Ubuntu 14.04
+    * Configuration: `/etc/init/nad.conf`
+    * Enable: presence of configuration
+    * Start: `initctl start nad`
+* SMF based systems - OmniOS/Illumos/etc.
+    * Configuration: `/var/svc/manifest/network/circonus/nad.xml`
+    * Enable: `svccfg import /var/svc/manifest/network/circonus/nad.xml`
+    * Start: `svcadm enable nad`
+* FreeBSD
+    * Configuration: `/etc/rc.d/nad`
+    * Enable: add `nad_enable="YES"` to `/etc/rc.conf`
+    * Start: `service nad start`
+* OpenBSD - manual service configuration/installation required
+    > For example, add the following to your `/etc/rc.local`:
+    >```sh
+    >if [ -x /opt/circonus/nad/sbin/nad ]; then
+    >    echo -n ' nad'
+    >    /opt/circonus/nad/sbin/nad --daemon --syslog
+    >fi
+    >```
+    > Will start NAD and redirect logging to syslog via the `logger` command. To redirect logging to a file or elsewhere, replace the `--syslog` option with redirection e.g. `> /tmp/my.log 2>&1`.
+
+## Interface
+
+NAD exposes an HTTP endpoint, the default is to listen to TCP:2609 (e.g. `curl http://127.0.0.1:2609/`). The output from all requests is JSON.
+
+| URI | description |
+| --- | --- |
+| `/` | run all plugins, consolidate output, return metrics. |
+| `/run` | run all plugins, consolidate output, return metrics. |
+| `/run/plugin` | run a single plugin and return metrics. `plugin` is file name minus extension.<br />e.g. the `vm.sh` plugin becomes `/run/vm` |
+| `/inventory` | return list of currently enabled and loaded plugins. |
+| `/inventory?full` | return list of currently enabled and loaded plugins with full details for each plugin. |
+
+# Options
+
+Options are configured in `/opt/circonus/nad/etc/nad.conf`. Options can be set using their individual environment variables or added to a single `NAD_OPTS` variable (for backwards compatibility).
+
+| Option                    | Description |
+| ---                       | ---         |
+| **<a name="opt_general">General</a>** ||
+| `--plugin-dir <dir>`      | Plugin directory.<br />Default: `/opt/circonus/nad/etc/node-agent.d`<br />`NAD_PLUGIN_DIR="<dir>"` |
+| `--listen <spec>`         | Listening IP address and port. (`ip`\|`port`\|`ip:port`)<br />Default: 2609<br />`NAD_LISTEN="<spec>"` |
+| `--no-statsd`             | Disable built-in StatsD interface.<br />`NAD_STATSD="no"`|
+| `--statsd-config <file>`  | Configuration file for StatsD interface.<br />Default: none<br />`NAD_STATSD_CONFIG="<file>"` |
+| **<a name="opt_reverse">Reverse</a>**              ||
+| `-r, --reverse`           | Use reverse connection to broker.<br />Default: false<br />`NAD_REVERSE="yes"` |
+| `--cid <cid>`             | Check bundle ID for reverse connection.<br />Default: from cosi<br />`NAD_REVERSE_CID="<cid>"` |
+| `--broker-ca <file>`      | CA file for broker reverse connection.<br />Default: fetch from API<br />`NAD_REVERSE_BROKER_CA="<file>"` |
+| `--target <target>`       | Target host -- see [Target](#target) below.<br />Default: `os.hostname()`<br />`NAD_REVERSE_TARGET="<target>"` |
+| **<a name="opt_api">API</a>**                  ||
+| `--api-key <key>`         | Circonus API Token key.<br />Default: none<br />`NAD_API_KEY="<key>"` |
+| `--api-app <app>`         | Circonus API Token app.<br />Default: nad<br />`NAD_API_APP="<app>"` |
+| `--api-url <url>`         | Circonus API URL.<br />Default: `https://api.circonus.com/v2/`<br />`NAD_API_URL="<url>"` |
+| `--api-ca <file>`         | CA file for API URL.<br />Default: none<br />`NAD_API_CA="<file>"` |
+| **<a name="opt_ssl">SSL</a>**                  ||
+| `--ssl-listen <spec>`     | SSL listening IP address and port. (`ip`\|`port`\|`ip:port`)<br />Default: none<br />`NAD_SSL_LISTEN="<spec>"` |
+| `--ssl-cert <file>`       | SSL certificate PEM file, required for SSL.<br />Default: `/opt/circonus/nad/etc/na.crt`<br />`NAD_SSL_CERT="<file>"` |
+| `--ssl-key <file>`        | SSL certificate key PEM file, required for SSL.<br />Default: `/opt/circonus/nad/etc/na.key`<br />`NAD_SSL_KEY="<file>"` |
+| `--ssl-ca <file>`         | SSL CA certificate PEM file, required for SSL w/verify.<br />Default: `/opt/circonus/nad/etc/na.ca`<br />`NAD_SSL_CA="<file>"` |
+| `--ssl-verify`            | Enable SSL verification.<br />Default: false<br />`NAD_SSL_VERIFY="yes"` |
+| **<a name="opt_misc">Miscellaneous</a>**        ||
+| `-u, --uid <id>`          | User id to drop privileges to on start.<br />Default: nobody<br />`NAD_UID="<id>"` |
+| `-g, --gid <id>`          | Group id to drop privileges to on start.<br />Default: nobody<br />`NAD_GID="<id>"` |
+| `--log-level <level>`     | Log level (trace, debug, info, warn, error, fatal).<br />Default: info<br />`NAD_LOG_LEVEL="<level>"` |
+| `-d, --debug`             | Enable debug logging (verbose).<br />Default: false |
+| `-t, --trace`             | Enable trace logging (very verbose).<br />Default: false |
+| `--no-watch`              | Disable automatic plugin-dir rescan on changes. Send `SIGHUP` to force rescan. |
+| `-h, --help`              | Output usage information and exit. |
+| `-V, --version`           | Output the version number and exit. |
+| `--debugdir`              | Create debug files for each plugin and write to this directory.<br />Default: none |
+| `--wipedebugdir`          | Wipe debug directory clean before each write.<br />Default: false |
+| `-i, --inventory`         | Offline inventory and exit. |
+| **Self-configure**       ||
+| `--hostname <host>`       | Hostname self-configure to use in check and graph names.<br />Default: `os.hostname()` |
+| `--brokerid <id>`         | Broker ID for self-configure to use for creating check.<br />Default: **required** |
+| `--configfile <file>`     | File in plugin-dir for self-configure.<br />Default: **required** |
+| **DEPRECATED**            | Obsolescence 1/2018 |
+| `-c <dir>`                | DEPRECATED use --plugin-dir |
+| `-p <spec>`               | DEPRECATED use --listen |
+| `-s <spec>`               | DEPRECATED use --ssl-listen |
+| `-v`                      | DEPRECATED use --ssl-verify |
+| `--authtoken <token>`     | DEPRECATED use --api-key |
+| `--apihost <host>`        | DEPRECATED use --api-url |
+| `--apiport <port>`        | DEPRECATED use --api-url |
+| `--apipath <path>`        | DEPRECATED use --api-url |
+| `--apiprotocol <proto>`   | DEPRECATED use --api-url |
+| `--apiverbose`            | DEPRECATED NOP, see --debug |
+| `--sslcert <file>`        | DEPRECATED use --ssl-cert |
+| `--sslkey <file>`         | DEPRECATED use --ssl-key |
+| `--sslca <file>`          | DEPRECATED use --ssl-ca |
+| `--cafile <file>`         | DEPRECATED use --broker-ca |
+
+## Target
+
+Is used by both Reverse and Self-configure.
+1. Reverse will use it to search for a check if a cid is not provided and cosi was not used to setup the host.
+1. Self-configure will use it to configure the check on the broker - it is the host (IP or FQDN) the broker will connect to in order to pull metrics.
+
+## Reverse mode
+
+Set up reverse connection for metric collection.
+
+If the host was registered with COSI then the only *required* parameter is `--reverse`, the rest of the information will be retrieved from the COSI configuration.
+
+If the host was *not* registered with COSI then a valid API Token Key must be supplied. If an explicit Check Bundle ID is supplied, NAD will use the check if it is still active. If no Check Bundle ID is supplied, NAD will search for a json:nad check where the check target matches the supplied (or default) `--target`.
+
+### Required:
+
+* `--reverse` flag signals nad to setup a reverse connection to the broker.
+* `--api-key` - optional if cosi configuration exists on host, otherwise, api key is required.
+
+### Optional:
+
+* `--cid` - will pull from cosi configuration, if available.
+* `--target` - to enable searching for a check (e.g. on a host not registered by cosi).
+
+## Self-configure
+
+**DEPRECATED** -- use of [COSI](https://github.com/circonus-labs/circonus-one-step-install) is recommended.
+
+Providing an API token key without the reverse flag will initiate a self-configuration attempt.
+
+### Required:
+
+* `--api-key`
+* `--target` - Note: environment variable `NAD_REVERSE_TARGET` is *not* used for self-configure, `--target` must be specified on command line.
+* `--brokerid`
+* `--configfile`
+
+### Optional:
+
+* `--hostname`
+
+# StatsD
+
+NAD-StatsD (nad-statsd) provides support for applications on the local system to send metrics using the [StatsD line  protocol](https://github.com/etsy/statsd) `<metricname>:<value>|<type>`. The core StatsD metric types (`c`, `g`, `s`, `ms`) are supported, as well as, additional types specific to Circonus.
+
+* `h` histogram, treated exactly the same as timing (`ms`) metrics.
+* `t` text metrics.
+
+Additionally, nad-statsd does *not* automatically generate derivative metrics from timings since they are represented as histograms in Circonus offering much more flexibility for analysis.
+
+> Note: nad-statsd uses a *push* method for submitting metrics to Circonus, as such, it is not fully compatible with real-time graphing (graphs will update as metrics are received rather than at the normal one second cadence).
+
+## <a name="statsd_config">Configuration</a>
+
+Place configuration options in a file, the default is `/opt/circonus/nad/etc/statsd.json`. If configuration saved to a different location, use either the NAD `--statsd-config` command line option or set `NAD_STATSD_CONFIG` in `nad.conf` or environment to indicate where the configuration file is located. e.g. `nad --statsd-config=/etc/project_configs/nad_statsd.json`.
+
+The default nad-statsd configuration is:
+
+```js
+{
+    servers: [
+        {
+            server: 'udp',
+            address: '127.0.0.1',
+            port: 8125
+        }
+    ],
+    flush_interval: 10000,
+    group_check_id: null,
+    group_key: 'group.',
+    group_counter_op: 'sum',
+    group_gauge_op: 'average',
+    group_set_op: 'sum',
+    host_key: null,
+    host_category: 'statsd',
+    send_process_stats: true    
+}
 ```
-groff -mmandoc -Tascii nad.8 | less
+
+* `servers` - array of objects - is the same as the StatsD servers list
+* `flush_interval` - milliseconds - is the same as the StatsD flushInterval
+* `group_check_id` - /^[0-9]+$/ - the ID (numeric portion of CID) for the group check, default is to retrieve from COSI installation
+* `group_key` - string - metrics prefixed with this key will be sent to the group check (if enabled)
+* `group_counter_op` - string - sum or average group counter metrics
+* `group_gauge_op` - string - sum or average group gauge metrics
+* `group_set_op` - string - sum or average group set metrics
+* `host_key` - string - metrics prefixed with this key will be sent to NAD. Show up in Circonus in the host check
+* `host_category` - string - the category to hold the host metrics e.g. with the default host_category of 'statsd', a metric named 'my_metric' would appear in Circonus as 'statsd\`my_metric'
+* `send_process_stats` - boolean - send nad-statsd module's processing statistics
+
+## <a name="statsd_group">Group metrics</a>
+
+The nad-statsd module can bifurcate metrics - sending some metrics to NAD (host) and some to a group check (intended to be used by multiple hosts - e.g. a group of web servers). If the `--group` parameter is provided to COSI when the system is registered, it will create a group check (or use the existing group check if one has already been created from another system registration with the same `--group`). Additional systems which use the same `--group` parameter when COSI registers them will also send group metrics to the same group check. This allows application metrics to go to either the host, the group, or both - providing more flexibility in viewing, aggregating and analytics. If an HTTPTrap group check is manually created using the UI, set  `group_check_id` in the nad-statsd configuration file. Additionally, if an HTTPTrap check is created manually it **must** have *asynchronous* set to **disabled**, in the Advanced Configuration section, in order for metrics submitted by systems in the group to be handled correctly.
+
+### `host_key` and `group_key`
+
+The `host_key` and `group_key` are metric name prefixes which determine the disposition of a given metric. The host and group key prefix is removed from the metric name when it is submitted to Circonus.
+
+| metric name | host_key  | group_key | disposition |
+| ---         | ---      | ---      | ---         |
+| `foo`       | `null`   | `null`   | all metrics go to host |
+|||                                 | preference **group** |
+| `host.foo`  | `host.`  | `null`   | `foo` goes to host |
+| `blah`      | `host.`  | `null`   | metrics not prefixed with `host.` go to group |
+| **DEFAULT** ||                    | preference **host** |
+| `group.foo` | `null`   | `group.` | `foo` goes to group |
+| `bar.yadda` | `null`   | `group.` | metrics not prefixed with `group.` go to host |
+|||                                 | **explicit** only |
+| `host.foo`  | `host.`  | `group.` | `foo` goes to host |
+| `group.foo` | `host.`  | `group.` | `foo` goes to group |
+| `drop_me`   | `host.`  | `group.` | all other metrics are ignored |
+
+> Note: If a group check is not enabled and a `group_key` is configured -- all metrics destined for *group*, prefixed with the `group_key`, will be ignored.
+
+### how group metrics are handled
+
+| type | default | option |
+| --- | --- | --- |
+| c | sum | `group_counter_op` ('sum' or 'average') |
+| g | average | `group_gauge_op` ('sum' or 'average') |
+| ms | n/a | all samples received are represented |
+| h | n/a | all samples received are represented |
+| s | sum | `group_set_op` ('sum' or 'average') |
+| t | n/a | note: with text metrics the last one received is used |
+
+# Plugins
+
+NAD plugins are located in the plugin directory (default: `/opt/circonus/nad/etc/node-agent.d`, configurable with `--plugin-dir` option). If the automated or manual install were used, platform specific plugins for the current OS are already built. If the source installation method was used - change to the appropriate directory for the current OS and run `make` or `gmake` to build the platform specific plugins for the OS. (e.g. `cd /opt/circonus/nad/etc/node-agent.d/linux && make`)
+
+## <a name="plugin_enable">Enabling</a>
+
+When NAD starts it scans the plugin directory for plugins to enable. Rudimentary filters are used to determine what is a plugin and what is not. e.g. entry is not a directory, entry has a name in the format `name.ext`, entry is executable, entry is not a configuration file (extension of `.json` or `.conf`), etc. It is recommended that plugins be stored in subdirectories of the plugin directory.  Subdirectories are not scanned, those plugins will not be loaded and enabled without an additional step.
+
+To enable a plugin, create a symlink in the plugin directory. For example:
+
+```sh
+cd /opt/circonus/nad/etc/node-agent.d  # change to plugin directory
+ln -s linux/vm.sh .                    # create symlink
 ```
 
-A copy is also available on the [wiki](https://github.com/circonus-labs/nad/wiki/manpage).
+The plugin will be automatically found and loaded if file watching is enabled (the default). If file watching is disabled (`--no-watch`), send a `SIGHUP` to the NAD process to trigger scanning for plugins.
 
+## <a name="plugin_disable">Disabling</a>
+
+To disable a plugin, delete the symlink in the plugin directory. For example:
+
+```sh
+cd /opt/circonus/nad/etc/node-agent.d  # change to plugin directory
+rm vm.sh                               # delete symlink
+```
+
+The plugin will automatically be purged from the loaded plugins if file watching is enabled (the default). If file watching is disabled (`--no-watch`), send a `SIGHUP` to the NAD process to trigger scanning for plugins.
+
+## <a name="plugin_verify">Verify</a>
+
+The output from a plugin can be verified/inspected at any time by making a request for that specific plugin:
+
+`curl http://localhost:2609/run/name`
+
+where `name` is the name of the plugin without the extension. NAD will respond with the metrics from that plugin in JSON format.
+
+## Inventory
+
+The currently loaded plugin inventory can be seen by making a request to the `inventory` endpoint.
+
+`curl http://localhost:2609/inventory`
+
+NAD will respond with a list of the currently loaded plugins. The `inventory` endpoint supports one argument, `?full`, which includes additional details on each plugin. The output of the inventory endpoint is JSON, enabling it to be used by orchestration and monitoring tooling.
+
+## Custom
+
+For information on creating custom plugins see the Plugin section of [DEVELOPMENT.md](DEVELOPMENT.md#plugins).
