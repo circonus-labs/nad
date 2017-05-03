@@ -267,13 +267,13 @@ build_nad() {
     pushd ${INSTALLDIR}/${PREFIX} > /dev/null
     mkdir nodejs
     echo "  Documentation"
-    tar --remove-files -zcf nodejs/docs.tgz CHANGELOG.md README.md LICENSE
+    tar zcf nodejs/docs.tgz CHANGELOG.md README.md LICENSE && rm -f CHANGELOG.md README.md LICENSE
     echo "  Include files"
-    tar --remove-files -zcf nodejs/include.tgz include
+    tar zcf nodejs/include.tgz include && rm -rf include
     echo "  Shared resources"
-    tar --remove-files -zcf nodejs/share.tgz share
+    tar zcf nodejs/share.tgz share && rm -rf share
     echo "  NPM"
-    tar --remove-files -zcf nodejs/npm.tgz bin/npm lib/node_modules/npm
+    tar zcf nodejs/npm.tgz bin/npm lib/node_modules/npm && rm -f bin/npm && rm -rf lib/node_modules/npm
     popd > /dev/null
 }
 
