@@ -113,10 +113,10 @@ else
 fi
 
 build_nodejs() {
-    local node_src_tgz="node-v${NODE_VERSION}.tar.gz"
-    local node_src_url="http://nodejs.org/dist/v${NODE_VERSION}/${node_src_tgz}"
+    local node_src_tgz="node-${NODE_VERSION}.tar.gz"
+    local node_src_url="http://nodejs.org/dist/${NODE_VERSION}/${node_src_tgz}"
 
-    echo "Checking for NodeJS v${NODE_VERSION} source archive"
+    echo "Checking for NodeJS ${NODE_VERSION} source archive"
     pushd $BUILDDIR > /dev/null
     if [[ ! -f $node_src_tgz ]]; then
         echo "--- node source archive not found, downloading."
@@ -163,7 +163,7 @@ install_binary_nodejs() {
 }
 
 install_nodejs() {
-    echo "Installing NodeJS v${NODE_VERSION}"
+    echo "Installing NodeJS ${NODE_VERSION}"
     if [[ $OS =~ ^rhel ]]; then
         install_binary_nodejs
     elif [[ $OS =~ ^ubuntu ]]; then
