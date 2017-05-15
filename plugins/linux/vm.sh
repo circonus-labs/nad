@@ -67,13 +67,13 @@ END {
     printf("memory`total\tL\t%.0f\n", memTotal)
     printf("memory`used\tL\t%.0f\n", memUsed)
     printf("memory`free\tL\t%.0f\n", memFreeTotal)
-    printf("memory`percent_used\tL\t%.02f\n", memUsedPct)
-    printf("memory`percent_free\tL\t%.02f\n", memFreePct)
+    printf("memory`percent_used\tn\t%.02f\n", memUsedPct)
+    printf("memory`percent_free\tn\t%.02f\n", memFreePct)
     printf("swap`total\tL\t%.0f\n", swapTotal)
     printf("swap`used\tL\t%.0f\n", swapUsed)
     printf("swap`free\tL\t%.0f\n", swapFreeTotal)
-    printf("swap`percent_used\tL\t%.02f\n", swapUsedPct)
-    printf("swap`percent_free\tL\t%.02f\n", swapFreePct)
+    printf("swap`percent_used\tn\t%.02f\n", swapUsedPct)
+    printf("swap`percent_free\tn\t%.02f\n", swapFreePct)
 }' < $PROCFILE
 
 
