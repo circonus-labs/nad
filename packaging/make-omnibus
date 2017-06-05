@@ -11,7 +11,7 @@ umask 0022
 [[ -f ./omnibus.conf ]] && source ./omnibus.conf
 
 : ${NAD_REPO:="https://github.com/circonus-labs/nad.git"}
-: ${NAD_BRANCH:="master"}
+: ${NAD_BRANCH:=""}
 : ${PREFIX:=/opt/circonus}
 : ${APP_DIR:=${PREFIX}/nad}
 : ${BUILDDIR:="/tmp/nad-omnibus-build"}
@@ -28,7 +28,7 @@ NODE_VERSION="v6.10.2"
 # CentOS 5/6 wget is unable to verify nodejs cert
 # ERROR: certificate common name `*.nodejs.org' doesn't match requested host name `nodejs.org'.
 # To connect to nodejs.org insecurely, use `--no-check-certificate'.
-WGET_OPTS=""
+WGET_OPTS="-q"
 
 if [[ ! -d $PUBLISHDIR ]]; then
     echo "Destination for package files ($PUBLISHDIR) does not exist; all is doomed."
@@ -48,12 +48,12 @@ if [[ -f /etc/redhat-release ]]; then
         5)
             echo "DEPRECATED -- CentOS 5 end-of-life 3/31/2017"
             OS="rhel5"
-            WGET_OPTS="--no-check-certificate"
+            WGET_OPTS+=" --no-check-certificate"
             export GIT_SSL_NO_VERIFY=true
             ;;
         6)
             OS="rhel6"
-            WGET_OPTS="--no-check-certificate"
+            WGET_OPTS+=" --no-check-certificate"
             ;;
         7)
             OS="rhel7"
@@ -174,45 +174,29 @@ install_nodejs() {
 }
 
 nad_src() {
-    local force_clone=1
+    echo "Fetching NAD source from github"
 
-    echo "Checking for nad source"
-
-    if [[ -d $BUILDDIR/nad/.git ]]; then
-        pushd $BUILDDIR/nad > /dev/null
-        echo "--- clone exists, pulling latest revision"
-        set +e
-        git checkout $NAD_BRANCH
-        [[ $? -eq 0 ]] || { echo "Error checking out ${NAD_BRANCH}"; exit 1; }
-        git pull
-        force_clone=$?
-        [[ $force_clone -ne 0 ]] && echo "--- 'git pull' exited with code:$force_clone"
-        set -e
-        popd > /dev/null
-    fi
-
-    if [[ $force_clone -ne 0 ]]; then
-        pushd $BUILDDIR > /dev/null
-        [[ -d nad ]] && {
-            echo "--- removing invalid nad directory"
-            rm -rf nad
-        }
-        echo "--- cloning from $NAD_REPO"
-        set +e
-        git clone $NAD_REPO
-        [[ $? -eq 0 ]] || { echo "Error cloning ${NAD_REPO}"; exit 1; }
+    pushd $BUILDDIR > /dev/null
+    [[ -d nad ]] && {
+        echo "--- removing old nad source directory"
+        rm -rf nad
+    }
+    echo "--- cloning from $NAD_REPO"
+    set +e
+    git clone $NAD_REPO
+    [[ $? -eq 0 ]] || { echo "--- error cloning ${NAD_REPO}"; exit 1; }
+    if [[ -n "$NAD_BRANCH" ]]; then
         cd nad
         git checkout $NAD_BRANCH
-        [[ $? -eq 0 ]] || { echo "Error checking out ${NAD_BRANCH}"; exit 1; }
-        set -e
-        popd > /dev/null
+        [[ $? -eq 0 ]] || { echo "--- error checking out ${NAD_BRANCH}"; exit 1; }
     fi
-
-    pushd $BUILDDIR/nad > /dev/null
+    set -e
+    popd > /dev/null
 
     #
     # !!! switch to semver pulled from package.json, see NAD_VER in build_nad
     #
+    # pushd $BUILDDIR/nad > /dev/null
     # # # Looks like: 2013-07-23 11:23:43 -0700
     # NAD_VERSION=$(git log -1  --format=format:%ad --date=iso)
     # # # Normalize to UTC
@@ -232,8 +216,7 @@ nad_src() {
     # #   TZ=UTC git log -1 --format=format:%ad --date=format-local:%Y%m%dT%H%M%SZ
     # #   20170224T192505Z
     # #TSTAMP=$(TZ=UTC git log -1 --format=format:%ad --date=format-local:%Y%m%dT%H%M%SZ)
-
-    popd > /dev/null
+    # popd > /dev/null
 }
 
 build_nad() {
