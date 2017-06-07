@@ -5,7 +5,13 @@
 
 # perl is *optional* not required
 # rpmbuild autoreq will include it by default because of scripts with perl shebang
+%if 0%{?el7}
 %define __requires_exclude perl
+%endif
+%if 0%{?el6}
+# rpmbuild on el6 is pre-4.9, does not understand __requires_exclude
+AutoReq: 0
+%endif
 
 Name:		nad-omnibus
 Version:	%{rversion}
