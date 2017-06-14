@@ -321,24 +321,24 @@ Place configuration options in a file, the default is `/opt/circonus/nad/etc/sta
 
 The default nad-statsd configuration is:
 
-```js
+```json
 {
-    servers: [
+    "servers": [
         {
-            server: 'udp',
-            address: '127.0.0.1',
-            port: 8125
+            "server": "udp",
+            "address": "127.0.0.1",
+            "port": 8125
         }
     ],
-    flush_interval: 10000,
-    group_check_id: null,
-    group_key: 'group.',
-    group_counter_op: 'sum',
-    group_gauge_op: 'average',
-    group_set_op: 'sum',
-    host_key: null,
-    host_category: 'statsd',
-    send_process_stats: true    
+    "flush_interval": 10000,
+    "group_check_id": null,
+    "group_key": "group.",
+    "group_counter_op": "sum",
+    "group_gauge_op": "average",
+    "group_set_op": "sum",
+    "host_key": null,
+    "host_category": "statsd",
+    "send_process_stats": true    
 }
 ```
 
