@@ -7,6 +7,7 @@
 from __future__ import print_function
 import argparse
 import json
+import sys
 from time import sleep
 #, strftime
 
@@ -106,7 +107,7 @@ def main():
     bpf.attach_kprobe(event="blk_account_io_completion", fn_name="trace_req_completion")
 
     # output
-    interval = 5
+    interval = 60
     dist = bpf.get_table("dist")
     while 1:
         try:
@@ -124,10 +125,12 @@ def main():
             if dsk not in metrics:
                 metrics[dsk] = {'_type': 'n', '_value': []}
 
-            metrics[dsk]['_value'].append('[%.2f]=%d' % (bkt, cnt))
+            metrics[dsk]['_value'].append('H[%.2f]=%d' % (bkt, cnt))
 
         if len(metrics) > 0:
             print(json.dumps(metrics), '\n')
+            sys.stdout.flush()
+
         dist.clear()
 
 if __name__ == "__main__":
