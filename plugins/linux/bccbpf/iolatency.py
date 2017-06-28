@@ -7,6 +7,7 @@
 from __future__ import print_function
 import argparse
 import json
+import sys
 from time import sleep
 #, strftime
 
@@ -124,10 +125,11 @@ def main():
             if dsk not in metrics:
                 metrics[dsk] = {'_type': 'n', '_value': []}
 
-            metrics[dsk]['_value'].append('[%.2f]=%d' % (bkt, cnt))
+            metrics[dsk]['_value'].append('H[%.2f]=%d' % (bkt, cnt))
 
         if len(metrics) > 0:
             print(json.dumps(metrics), '\n')
+            sys.stdout.flush()
         dist.clear()
 
 if __name__ == "__main__":
