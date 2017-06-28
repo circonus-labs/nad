@@ -107,7 +107,7 @@ def main():
     bpf.attach_kprobe(event="blk_account_io_completion", fn_name="trace_req_completion")
 
     # output
-    interval = 5
+    interval = 60
     dist = bpf.get_table("dist")
     while 1:
         try:
@@ -130,6 +130,7 @@ def main():
         if len(metrics) > 0:
             print(json.dumps(metrics), '\n')
             sys.stdout.flush()
+
         dist.clear()
 
 if __name__ == "__main__":
