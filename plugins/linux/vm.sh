@@ -87,6 +87,7 @@ while IFS=" " read NAME VAL
 do
     [[ "$NAME" = pgfault ]]    && PG_FAULTS="$VAL"
     [[ "$NAME" = pgmajfault ]] && PG_MAJFAULTS="$VAL"
+    [[ "$NAME" = pswp* ]]      && print_vm vmstat $NAME $VAL
 done < $PROCFILE
 
 let PG_MINFAULTS=$PG_FAULTS-$PG_MAJFAULTS
