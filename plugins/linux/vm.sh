@@ -83,9 +83,12 @@ PROCFILE="/proc/vmstat"
     exit 1
 }
 
-# pgfault is min+maj
-PG_FAULTS=$(grep ^pgfault $PROCFILE | $AWK '{ print $2 }')
-PG_MAJFAULTS=$(grep ^pgmajfault $PROCFILE | $AWK '{ print $2 }')
+while IFS=" " read NAME VAL
+do
+    [[ "$NAME" = pgfault ]]    && PG_FAULTS="$VAL"
+    [[ "$NAME" = pgmajfault ]] && PG_MAJFAULTS="$VAL"
+done < $PROCFILE
+
 let PG_MINFAULTS=$PG_FAULTS-$PG_MAJFAULTS
 
 print_vm info page_fault $PG_FAULTS
