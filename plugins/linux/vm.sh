@@ -44,15 +44,15 @@ END {
     memFreeTotal=(memFree + memBuffers + memCached)
 
     memUsed=memTotal - memFreeTotal
-    memFreePct=memFreeTotal / memTotal
-    memUsedPct=memUsed / memTotal
+    memFreePct=memFreeTotal / memTotal * 100
+    memUsedPct=memUsed / memTotal * 100
 
     swapTotal=list["SwapTotal"]
     swapFree=list["SwapFree"]
     swapUsed=swapTotal - swapFree
     if (swapTotal > 0) {
-        swapFreePct=swapFree / swapTotal
-        swapUsedPct=swapUsed / swapTotal
+        swapFreePct=swapFree / swapTotal * 100
+        swapUsedPct=swapUsed / swapTotal * 100
     } else {
         swapFreePct=0
         swapUsedPct=0
@@ -67,13 +67,17 @@ END {
     printf("memory`total\tL\t%.0f\n", memTotal)
     printf("memory`used\tL\t%.0f\n", memUsed)
     printf("memory`free\tL\t%.0f\n", memFreeTotal)
-    printf("memory`percent_used\tn\t%.02f\n", memUsedPct)
-    printf("memory`percent_free\tn\t%.02f\n", memFreePct)
+    printf("memory`percent_used\tn\t%.02f\n", memUsedPct / 100) # deprecated
+    printf("memory`percent_free\tn\t%.02f\n", memFreePct / 100) # deprecated
+    printf("memory`used_percent\tn\t%.02f\n", memUsedPct)
+    printf("memory`free_percent\tn\t%.02f\n", memFreePct)
     printf("swap`total\tL\t%.0f\n", swapTotal)
     printf("swap`used\tL\t%.0f\n", swapUsed)
     printf("swap`free\tL\t%.0f\n", swapFreeTotal)
-    printf("swap`percent_used\tn\t%.02f\n", swapUsedPct)
-    printf("swap`percent_free\tn\t%.02f\n", swapFreePct)
+    printf("swap`percent_used\tn\t%.02f\n", swapUsedPct / 100) # deprecated
+    printf("swap`percent_free\tn\t%.02f\n", swapFreePct / 100) # deprecated
+    printf("swap`used_percent\tn\t%.02f\n", swapUsedPct)
+    printf("swap`free_percent\tn\t%.02f\n", swapFreePct)
 }' < $PROCFILE
 
 
