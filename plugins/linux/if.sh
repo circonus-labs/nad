@@ -22,31 +22,31 @@ DEVICES=(
 
 for iface in "${DEVICES[@]}" ; do
     IFSTAT=($(grep $iface /proc/net/dev | tr ':' ' '))
-    # METRIC { name="<IF>`in_bytes", desc="Number of received bytes", unit="byte" }
+    # METRIC { name="if`<IF>`in_bytes", desc="Number of received bytes", unit="byte" }
     print_iface $iface in_bytes ${IFSTAT[1]}
-    # METRIC { name="<IF>`in_packets", desc="Number of packets received" }
+    # METRIC { name="if`<IF>`in_packets", desc="Number of packets received" }
     print_iface $iface in_packets ${IFSTAT[2]}
-    # METRIC { name="<IF>`in_errors", desc="Number of bad packets received" }
+    # METRIC { name="if`<IF>`in_errors", desc="Number of bad packets received" }
     print_iface $iface in_errors ${IFSTAT[3]}
-    # METRIC { name="<IF>`in_drop", desc="Number of dropped packets due to lack of space in kernel buffers" }
+    # METRIC { name="if`<IF>`in_drop", desc="Number of dropped packets due to lack of space in kernel buffers" }
     print_iface $iface in_drop ${IFSTAT[4]}
-    # METRIC { name="<IF>`in_fifo_overrun", desc="Number of fifo overrun errors" }
+    # METRIC { name="if`<IF>`in_fifo_overrun", desc="Number of fifo overrun errors" }
     print_iface $iface in_fifo_overrun ${IFSTAT[5]}
 
-    # METRIC { name="<IF>`out_bytes", desc="Number of tranmitted bytes", unit="byte" }
+    # METRIC { name="if`<IF>`out_bytes", desc="Number of tranmitted bytes", unit="byte" }
     print_iface $iface out_bytes ${IFSTAT[9]}
-    # METRIC { name="<IF>`out_packets", desc="Number of outgoing packets" }
+    # METRIC { name="if`<IF>`out_packets", desc="Number of outgoing packets" }
     print_iface $iface out_packets ${IFSTAT[10]}
-    # METRIC { name="<IF>`out_errors", desc="Number of errors that happend while transmitting packets" }
+    # METRIC { name="if`<IF>`out_errors", desc="Number of errors that happend while transmitting packets" }
     print_iface $iface out_errors ${IFSTAT[11]}
-    # METRIC { name="<IF>`out_drop", desc="Number of dropped packets due to lack of space in kernel buffers" }
+    # METRIC { name="if`<IF>`out_drop", desc="Number of dropped packets due to lack of space in kernel buffers" }
     print_iface $iface out_drop ${IFSTAT[12]}
-    # METRIC { name="<IF>`out_fifo_overrun", desc="Number of fifo overrun errors" }
+    # METRIC { name="if`<IF>`out_fifo_overrun", desc="Number of fifo overrun errors" }
     print_iface $iface out_fifo_overrun ${IFSTAT[13]}
 done
 
 # Read segment retransmitted from /proc/net/snmp
-# METRIC { name="tcp`segments_retransmitted", descr="Retransmitted tcp segments, systemwide" }
+# METRIC { name="if`tcp`segments_retransmitted", descr="Retransmitted tcp segments, systemwide" }
 let ROW=0
 while IFS=":" read HEAD TAIL
 do
@@ -57,7 +57,7 @@ FIELDS=( $TAIL )
 printf "%s\tL\t%s\n" tcp\'segments_retransmitted ${FIELDS[11]}
 
 # Connection Statistics from /proc/net/socstat{,6}
-# METRIC { name="tcp`connections", descr="Number of currently open TCP connections." }
+# METRIC { name="if`tcp`connections", descr="Number of currently open TCP connections." }
 # It would be much better if this was a counter: "number of connections since boot", so we could calculate #con/sec, etc.
 let CONNECTIONS=0
 while IFS=" " read HEAD inuse COUNT

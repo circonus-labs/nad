@@ -93,12 +93,12 @@ print_cssum syscall $SYSCALL
 # Process statistics
 while IFS=" " read NAME VAL
 do
-    # METRIC { name="processes", desc="number of processes created since boot, e.g. by fork()/clone() syscalls" }
+    # METRIC { name="cpu`processes", desc="number of processes created since boot, e.g. by fork()/clone() syscalls" }
     [[ $NAME = processes ]] && print_cssum $NAME $VAL
     # Rename: procs_running -> procs_runnable, since that is what's reported (http://lxr.linux.no/linux+v2.6.29/kernel/sched.c#L2699)
-    # METRIC { name="procs_runnable", desc="The number of processes currently in a runnable state." }
+    # METRIC { name="cpu`procs_runnable", desc="The number of processes currently in a runnable state." }
     [[ $NAME = procs_running ]] && print_cssum procs_runnable $VAL
-    # METRIC { name="procs_blocked", desc="The number of processes currently blocked, waiting for I/O to complete" }
+    # METRIC { name="cpu`procs_blocked", desc="The number of processes currently blocked, waiting for I/O to complete" }
     [[ $NAME = procs_blocked ]] && print_cssum $NAME $VAL
 done < /proc/stat
 
