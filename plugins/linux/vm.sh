@@ -92,6 +92,7 @@ do
     [[ "$NAME" = pgfault ]]    && PG_FAULTS="$VAL"
     [[ "$NAME" = pgmajfault ]] && PG_MAJFAULTS="$VAL"
     [[ "$NAME" = pswp* ]]      && print_vm vmstat $NAME $VAL
+    [[ "$NAME" = pgscan* ]]    && PG_SCAN=$(($PG_SCAN + $VAL))
 done < $PROCFILE
 
 let PG_MINFAULTS=$PG_FAULTS-$PG_MAJFAULTS
@@ -99,3 +100,4 @@ let PG_MINFAULTS=$PG_FAULTS-$PG_MAJFAULTS
 print_vm info page_fault $PG_FAULTS
 print_vm info page_fault\`minor $PG_MINFAULTS
 print_vm info page_fault\`major $PG_MAJFAULTS
+print_vm info page_scan $PG_SCAN
