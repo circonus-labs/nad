@@ -87,6 +87,9 @@ PROCFILE="/proc/vmstat"
     exit 1
 }
 
+let PG_SCAN=0
+let PG_FAULTS=0
+let PG_MAJFAULTS=0
 while IFS=" " read NAME VAL
 do
     [[ "$NAME" = pgfault ]]    && PG_FAULTS="$VAL"

@@ -101,3 +101,5 @@ do
     # METRIC { name="procs_blocked", desc="The number of processes currently blocked, waiting for I/O to complete" }
     [[ $NAME = procs_blocked ]] && print_cssum $NAME $VAL
 done < /proc/stat
+
+exit 0
