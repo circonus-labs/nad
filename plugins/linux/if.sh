@@ -22,10 +22,17 @@ DEVICES=(
 
 for iface in "${DEVICES[@]}" ; do
     IFSTAT=($(grep $iface /proc/net/dev | tr ':' ' '))
+    # METRIC { name="<IF>`in_bytes", desc="Number of received bytes", unit="byte" }
     print_iface $iface in_bytes ${IFSTAT[1]}
+    # METRIC { name="<IF>`in_packets", desc="Number of packets received" }
     print_iface $iface in_packets ${IFSTAT[2]}
+    # METRIC { name="<IF>`in_errors", desc="Number of bad packets received" }
     print_iface $iface in_errors ${IFSTAT[3]}
+
+    # METRIC { name="<IF>`out_bytes", desc="Number of tranmitted bytes", unit="byte" }
     print_iface $iface out_bytes ${IFSTAT[9]}
+    # METRIC { name="<IF>`out_packets", desc="Number of outgoing packets" }
     print_iface $iface out_packets ${IFSTAT[10]}
+    # METRIC { name="<IF>`out_errors", desc="Number of errors that happend while transmitting packets" }
     print_iface $iface out_errors ${IFSTAT[11]}
 done
