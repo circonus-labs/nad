@@ -55,3 +55,17 @@ do
 done < /proc/net/snmp
 FIELDS=( $TAIL )
 printf "%s\tL\t%s\n" tcp\'segments_retransmitted ${FIELDS[11]}
+
+# Connection Statistics from /proc/net/socstat{,6}
+# METRIC { name="tcp`connections", descr="Number of currently open TCP connections." }
+# It would be much better if this was a counter: "number of connections since boot", so we could calculate #con/sec, etc.
+let CONNECTIONS=0
+while IFS=" " read HEAD inuse COUNT
+do
+    [[ $HEAD == "TCP:" ]] && let CONNECTIONS+=$COUNT && break
+done </proc/net/sockstat
+while IFS=" " read HEAD inuse COUNT
+do
+    [[ $HEAD == "TCP6:" ]] && let CONNECTIONS+=$COUNT && break
+done </proc/net/sockstat6
+printf "%s\tL\t%s\n" tcp\`connections $CONNECTIONS
