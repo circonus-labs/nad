@@ -26,7 +26,7 @@ sudo docker run --name redis -d redis redis-server
 
 ## install
 
-1. Change to installation directory `cd /opt/circonus/etc/node-agent.d/docker`
+1. Change to installation directory `cd /opt/circonus/nad/etc/node-agent.d/docker`
 1. Make `make` or just do `npm install --production` if npm is in path
 1. Create a symlink (from `docker/stats.js` or `docker/events.js`) in `/opt/circonus/etc/node-agent.d`. The base name of the symlink will be used as the first part of the metric names. (e.g. if using only stats, `cd /opt/circonus/etc/node-agent.d && ln -s docker/stats.js dockerstats.js`, NAD would add the docker container stats all prefixed with **dockerstats**.)
 
