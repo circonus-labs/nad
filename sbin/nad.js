@@ -448,6 +448,21 @@ function drop_privileges() {
     });
 }
 
+/**
+ * initial_plugin_run
+ * @returns {Object} promise
+ */
+function initial_plugin_run() {
+    // This will start run longing processes that emit metrics continuously,
+    // also it will surface any plugin errors at startup time.
+    return new Promise((resolve, reject) => {
+        // This is a little hacky
+        let dummy_req = { headers : {} };
+        let dummy_res = { writeHead : () => {}, write: () => {}, end : () => {} };
+        plugins.run(dummy_req, dummy_res, null);
+    });
+}
+
 //
 // Start the NAD process
 //
@@ -460,6 +475,7 @@ load_push_receiver().
     then(start_reverse).
     then(start_statsd).
     then(drop_privileges).
+    then(initial_plugin_run).
     then(() => {
         log.info('NAD bootstrap complete');
     }).
