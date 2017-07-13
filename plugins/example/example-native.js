@@ -1,4 +1,9 @@
 'use strict';
+//
+// Example of a native plugin. It emits two metrics:
+// - `now` with the current time stamp, and
+// - `rand` with a random number.
+//
 
 /* eslint max-params: ["error", 5] */
 /* eslint no-param-reassign: ["error", { "props": false }]*/
