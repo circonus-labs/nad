@@ -4,12 +4,11 @@
 
 # This program was created as a modification to Brendan Gregg's
 # biolatency script.
+
 from __future__ import print_function
-import argparse
 import json
 import sys
 from time import sleep
-#, strftime
 
 from bcc import BPF # pylint: disable=E0401
 
@@ -78,32 +77,14 @@ int trace_req_completion(struct pt_regs *ctx, struct request *req) {
 """
 
 def main():
-    """main"""
-    # arguments
-    examples = """examples:
-        ./iolat-bcc            # summarize block I/O latency as a histogram
-        ./iolat-bcc -Q         # include OS queued time in I/O time
-    """
-    parser = argparse.ArgumentParser(
-        description="Summarize block device I/O latency as a histogram",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=examples)
-    parser.add_argument(
-        "-Q",
-        "--queued",
-        action="store_true",
-        help="include OS queued time in I/O time")
-    args = parser.parse_args()
+    # don't blog the nad process at startup
+    print("\n")
 
     # load BPF program
     bpf = BPF(text=BPF_TEXT)
 
-    if args.queued:
-        bpf.attach_kprobe(event="blk_account_io_start", fn_name="trace_req_start")
-    else:
-        bpf.attach_kprobe(event="blk_start_request", fn_name="trace_req_start")
-        bpf.attach_kprobe(event="blk_mq_start_request", fn_name="trace_req_start")
-
+    bpf.attach_kprobe(event="blk_start_request", fn_name="trace_req_start")
+    bpf.attach_kprobe(event="blk_mq_start_request", fn_name="trace_req_start")
     bpf.attach_kprobe(event="blk_account_io_completion", fn_name="trace_req_completion")
 
     # output
