@@ -1,5 +1,10 @@
 local circll = require("circll")
 
+-- Syscall table for Linux x86_64
+--
+-- taken from strace linux/x86_64/syscallent.h
+-- like in https://github.com/iovisor/bcc/blob/master/tools/syscount.py#L24
+--
 local SYSCALLS = {
   "sys_read",
   "sys_write",
@@ -61,7 +66,7 @@ local SYSCALLS = {
   "sys_fork",
   "sys_vfork",
   "sys_execve",
-  -- "sys__exit",
+  "sys__exit",
   "sys_wait4",
   "sys_kill",
   "sys_uname",
