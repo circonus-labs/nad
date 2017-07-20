@@ -1,7 +1,7 @@
 CC=gcc
 
-all: iolatency.elf
+all: bpf.elf iolatency.elf
 
-iolatency.elf: iolatency.c
-	$(CC) iolatency.c -o iolatency.elf
-	chmod +s iolatency.elf
+%.elf : %.c
+	$(CC) $< -o $@
+	chmod +s $@
