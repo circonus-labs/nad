@@ -77,7 +77,7 @@ int trace_req_completion(struct pt_regs *ctx, struct request *req) {
 """
 
 def main():
-    # don't blog the nad process at startup
+    # don't block the nad process at startup
     print("\n")
 
     # load BPF program
