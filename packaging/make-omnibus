@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # make-omnibus - create self-contained tarballs for distribution
 
@@ -40,59 +40,83 @@ if [[ "$PLATFORM" == "i686" ]]; then
     PLATFORM="i386"  # Normalize
 fi
 
-OS=""
-if [[ -f /etc/redhat-release ]]; then
-    INSTALL_TARGET="install-rhel"
-    relver=$(sed -e 's/.*release \(.\).*/\1/' /etc/redhat-release)
-    case "$relver" in
-        5)
-            echo "DEPRECATED -- CentOS 5 end-of-life 3/31/2017"
-            OS="rhel5"
-            WGET_OPTS+=" --no-check-certificate"
-            export GIT_SSL_NO_VERIFY=true
-            ;;
-        6)
-            OS="rhel6"
-            WGET_OPTS+=" --no-check-certificate"
-            ;;
-        7)
-            OS="rhel7"
-            ;;
-        *)
-            echo "Unsupported release: $relver"
+OS=`uname -s`
+MAKE="make"
+
+case $OS in
+    Linux)
+        if [[ -f /etc/redhat-release ]]; then
+            INSTALL_TARGET="install-rhel"
+            relver=$(sed -e 's/.*release \(.\).*/\1/' /etc/redhat-release)
+            case "$relver" in
+                5)
+                    echo "DEPRECATED -- CentOS 5 end-of-life 3/31/2017"
+                    OS="rhel5"
+                    WGET_OPTS+=" --no-check-certificate"
+                    export GIT_SSL_NO_VERIFY=true
+                    ;;
+                6)
+                    OS="rhel6"
+                    WGET_OPTS+=" --no-check-certificate"
+                    ;;
+                7)
+                    OS="rhel7"
+                    ;;
+                *)
+                    echo "Unsupported release: $relver"
+                    exit 1
+                    ;;
+            esac
+        elif [[ -f /etc/lsb-release ]]; then
+            INSTALL_TARGET="install-ubuntu"
+            . /etc/lsb-release
+            relver=$DISTRIB_RELEASE
+            [[ "$PLATFORM" == "x86_64" ]] && PLATFORM="amd64"
+            case "$relver" in
+                12.04)
+                    echo "DEPRECATED -- Ubuntu 12.04 (precise) end-of-life 4/2017"
+                    OS="ubuntu.12.04"
+                    fpm="/var/lib/gems/1.8/gems/fpm-0.4.29/bin/fpm"
+                    ;;
+                14.04)
+                    OS="ubuntu.14.04"
+                    fpm="/usr/local/bin/fpm"
+                    ;;
+                16.04)
+                    OS="ubuntu.16.04"
+                    fpm="/usr/local/bin/fpm"
+                    ;;
+                *)
+                    echo "Unsupported release: $relver"
+                    exit 1
+                    ;;
+            esac
+        fi
+        ;;
+    FreeBSD)
+        INSTALL_TARGET="install-freebsd"
+        relver=`freebsd-version -u | cut -d'-' -f1`
+
+        if [[ -z $relver ]]; then
+            echo "Unknown FreeBSD release. Omnibus packaging requires FreeBSD 10 or higher."
             exit 1
-            ;;
-    esac
-elif [[ -f /etc/lsb-release ]]; then
-    INSTALL_TARGET="install-ubuntu"
-    . /etc/lsb-release
-    relver=$DISTRIB_RELEASE
-    [[ "$PLATFORM" == "x86_64" ]] && PLATFORM="amd64"
-    case "$relver" in
-        12.04)
-            echo "DEPRECATED -- Ubuntu 12.04 (precise) end-of-life 4/2017"
-            OS="ubuntu.12.04"
-            fpm="/var/lib/gems/1.8/gems/fpm-0.4.29/bin/fpm"
-            ;;
-        14.04)
-            OS="ubuntu.14.04"
-            fpm="/usr/local/bin/fpm"
-            ;;
-        16.04)
-            OS="ubuntu.16.04"
-            fpm="/usr/local/bin/fpm"
-            ;;
-        *)
-            echo "Unsupported release: $relver"
-            exit 1
-            ;;
-    esac
-fi
+        fi
+
+        OS="freebsd.$relver"
+        MAKE="gmake"
+        ;;
+    *)
+        echo "Operating system '$OS' not supported for omnibus packaging."
+        exit 1
+        ;;
+esac
 
 if [[ -x /usr/bin/nproc ]]; then
     NPROC=$(nproc)
-else
+elif [[ -f /proc/cpuinfo ]]; then
     NPROC=$(grep -c ^processor /proc/cpuinfo)
+else
+    NPROC=`sysctl -n hw.ncpu`
 fi
 let MAKE_JOBS="$NPROC + ($NPROC / 2)" # 1.5x the number of CPUs
 
@@ -128,10 +152,10 @@ build_nodejs() {
 
     echo "Building node"
     pushd $BUILDDIR/node-$NODE_VERSION > /dev/null
-    make clean || make distclean
+    $MAKE clean || $MAKE distclean
     ./configure --prefix=$PREFIX
-    make -j $MAKE_JOBS
-    make DESTDIR=$INSTALLDIR install
+    $MAKE -j $MAKE_JOBS
+    $MAKE DESTDIR=$INSTALLDIR install
     popd > /dev/null
 }
 
@@ -224,19 +248,30 @@ build_nad() {
 
     echo "Building nad"
     pushd $BUILDDIR/nad > /dev/null
-    make DESTDIR=$INSTALLDIR PREFIX=$PREFIX $INSTALL_TARGET
+    $MAKE DESTDIR=$INSTALLDIR PREFIX=$PREFIX $INSTALL_TARGET
     popd > /dev/null
 
-    echo "Removing plugins not related to Linux $OS"
+    # Platform-specific plugins
+    declare -A platform_plugins
+    platform_plugins=([freebsd]=0 [illumos]=0 [linux]=0 [openbsd]=0 [pf]=0 [smartos]=0 [windows]=0)
+
+    if [[ $OS =~ ^rhel || $OS =~ ^ubuntu ]]; then
+        platform_plugins["linux"]=1
+    elif [[ $OS =~ ^freebsd ]]; then
+        platform_plugins["freebsd"]=1
+        platform_plugins["pf"]=1
+    fi
+
+    echo "Removing platform-specific plugins not related to $OS"
     pushd "${INSTALLDIR}/${APP_DIR}/etc/node-agent.d" > /dev/null
-    # list of plugins not applicable to Linux
-    plugin_list="illumos freebsd openbsd smartos windows pf"
-    for plugin in $plugin_list; do
-        [[ -d $plugin ]] && {
+
+    for plugin in ${!platform_plugins[@]}; do
+        if [[ -d $plugin && ${platform_plugins[$plugin]} -eq 0 ]]; then
             echo "Removing $plugin plugin(s)"
             rm -rf $plugin
-        }
+        fi
     done
+
     popd > /dev/null
 
     NAD_VER=$(${node_dest_dir}/bin/node -e "const pkg = require('${BUILDDIR}/nad/package.json'); console.log(pkg.version);")
