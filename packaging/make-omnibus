@@ -328,6 +328,12 @@ make_package() {
     else
         echo "Creating omnibus tarball"
         ARCHIVE="$BUILDDIR/nad-omnibus-${NAD_VER}-${OS}-${PLATFORM}.tar"
+        
+        if [[ -f ${ARCHIVE}.gz ]]; then
+            echo "Previously built at this version, removing file"
+            rm -f ${ARCHIVE}.gz
+        fi
+
         pushd $INSTALLDIR > /dev/null
         tar cf $ARCHIVE .
         gzip $ARCHIVE
