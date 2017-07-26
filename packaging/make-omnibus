@@ -156,6 +156,9 @@ build_nodejs() {
     ./configure --prefix=$PREFIX
     $MAKE -j $MAKE_JOBS
     $MAKE DESTDIR=$INSTALLDIR install
+    cp README.md $(INSTALLDIR)
+    cp LICENSE $(INSTALLDIR)
+    cp CHANGELOG.md $(INSTALLDIR)
     popd > /dev/null
 }
 
