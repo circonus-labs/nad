@@ -333,7 +333,7 @@ make_package() {
         gzip $ARCHIVE
         echo "--- created ${ARCHIVE}.gz"
         popd > /dev/null
-        cp ${ARCHIVE}.gz $PUBLISHDIR/
+        cp ${ARCHIVE}.gz $PUBLISHDIR/packages/
     fi
 }
 
