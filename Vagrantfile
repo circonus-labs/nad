@@ -189,6 +189,7 @@ Vagrant.configure('2') do |config|
     config.vm.define 'bsd11', autostart: false do |bsd11|
         bsd11.vm.guest = :freebsd
         bsd11.vm.box = 'freebsd/FreeBSD-11.0-RELEASE-p1'
+        # bsd11.vm.box = 'freebsd/FreeBSD-11.1-RELEASE'
         bsd11.vm.synced_folder '.', '/vagrant', id: 'vagrant-root', disabled: true
         bsd11.vm.synced_folder '.', '/vagrant', type: 'nfs'
         # mac not set in base box, just needs to be set to something to avoid vagrant errors
@@ -208,6 +209,10 @@ Vagrant.configure('2') do |config|
             echo "#{cosi_site_ip} cosi-site" >> /etc/hosts
             echo "Installing needed packages for 'make install' and 'make install-freebsd'"
             pkg install -y -q gcc node npm gmake bash logrotate curl
+            echo "Installing needed packages for 'packaging/make-omnibus'"
+            pkg install -y -q wget python git
+            mkdir -p /mnt/node-agent/packages
+            chown -R vagrant:vagrant /mnt/node-agent
             if [ $(grep -c fdescfs /etc/fstab) -eq 0 ]; then
                 mount -t fdescfs fdescfs /dev/fd
                 echo 'fdescfs	/dev/fd		fdescfs		rw,late	0	0' >> /etc/fstab
