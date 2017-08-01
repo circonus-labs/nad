@@ -110,7 +110,9 @@ The `packaging/make-omnibus` shell script is used to build the omnibus packages 
 
 # Plugins
 
-NAD uses a *plugin* system for gathering metrics. NAD supports two primary types of plugins - **executable** and **native**. Each type of plugin produces output that NAD consumes and makes available to Circonus. NAD/Circonus support the following *types* of metrics:
+NAD uses a *plugin* system for gathering metrics. NAD supports two primary types of plugins - **executable** and **native**. Each type of plugin produces output that NAD consumes and makes available to Circonus. Minimal examples of both, native and executable plugins can be found in the [`plugins/example`](https://github.com/circonus-labs/nad/tree/master/plugins/example) directory.
+
+NAD/Circonus support the following *types* of metrics:
 
 ## Metric types
 
@@ -137,6 +139,11 @@ An executable can be a shell script, perl/python/ruby/etc. script, a compiled bi
 ```json
 { "<metric_name>": { "_type": "<metric_type>", "_value": <value> } }
 ```
+
+The JSON form allows for histogram input in the following format:
+
+- List of values `[<val1>, <val2>, ... ]`
+- Pre-bucketed histograms `["H[12]=3", "H[3.1]=4"]`
 
 Example:
 
