@@ -110,7 +110,7 @@ The `packaging/make-omnibus` shell script is used to build the omnibus packages 
 
 # Plugins
 
-NAD uses a *plugin* system for gathering metrics. NAD supports two primary types of plugins - **executable** and **native**. Each type of plugin produces output that NAD consumes and makes available to Circonus. Minimal examples of both, native and executable plugins can be found in the [`plugins/example`](https://github.com/circonus-labs/nad/tree/master/plugins/example) directory.
+NAD uses a *plugin* system for gathering metrics. NAD supports two primary types of plugins - **executable** and **native**. Each type of plugin produces output that NAD consumes and makes available to Circonus. Minimal examples of both, native and executable plugins can be found in the [`plugins/example`](https://github.com/circonus-labs/nad/tree/master/examples/plugins) directory.
 
 NAD/Circonus support the following *types* of metrics:
 
@@ -126,7 +126,7 @@ NAD/Circonus support the following *types* of metrics:
 
 ## Executable plugins
 
-An executable can be a shell script, perl/python/ruby/etc. script, a compiled binary, etc. Anything that one can *run* from the command line. See the [plugins](plugins/) directory for examples of several types of executable plugins. Executables must produce metrics to standard output. They may produce JSON or tab-delimited output.  
+An executable can be a shell script, perl/python/ruby/etc. script, a compiled binary, etc. Anything that one can *run* from the command line. See the [examples/plugins](examples/plugins) and [plugins](plugins/) directory for examples of several types of executable plugins. Executables must produce metrics to standard output. They may produce JSON or tab-delimited output.  
 
 
 ### Tab-delimited output format
@@ -165,7 +165,7 @@ Continuous output is supported for long-running executables. After a set of metr
 
 ## Native plugins
 
- A native plugin is a NodeJS module which will be loaded into NAD. See [native example](examples/plugins/native), additionally, there are several native plugins in the [plugins](plugins/) directory.
+ A native plugin is a NodeJS module which will be loaded into NAD. See [native example](examples/plugins/), additionally, there are several native plugins in the [plugins](plugins/) directory.
 
  1. Written as a module
  1. Expose a `run()` method which will be passed five arguments.
