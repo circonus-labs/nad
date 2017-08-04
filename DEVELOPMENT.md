@@ -151,6 +151,15 @@ Example:
 { "my_metric": { "_type": "i", "_value": 10 }, "cherry`pi": { "_type": "n", "_value": 3.14 } }
 ```
 
+## Native plugins
+
+Place a file (with a `.js` extension) into plugin_dir. See [example](https://github.com/circonus-labs/nad/blob/master/examples/plugins/example-native.js).
+
+## Push receiver
+
+NAD also provides a push receiver to accept metrics from daemons and other external processes/jobs which do not fit into the plugin model. Metrics can be *pushed* to NAD via HTTP `PUT` or `POST` to `http://127.0.0.1:2609/write` with body as valid JSON (see above).
+
+
 ### Control Information
 
 An executable plugin may provide control information in a line starting with a `#` character followed by a JSON block. Currently, `timeout` is the only parameter accepted and the argument is interpreted as seconds. For example, to indicate that the script should be aborted if a set of output metrics cannot be completed in 1.12 seconds, the plugin would emit:
