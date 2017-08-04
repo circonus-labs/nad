@@ -20,11 +20,11 @@ const Plugins = require(path.join(nad.lib_dir, 'plugins'));
 // globals
 const log = settings.logger.child({ module: 'main' });
 
-let plugins = null;         // plugin manager
-let push_receiver = null;   // listener, metrics can be 'pushed' to nad
-let circwmi = null;         // dynamically load, if platform is windows
-let statsd = null;          // dynamically load, if enabled
-let reverse = null;         // dynamically load, if enabled
+let plugins = null; // plugin manager
+let push_receiver = null; // listener, metrics can be 'pushed' to nad
+let circwmi = null; // dynamically load, if platform is windows
+let statsd = null; // dynamically load, if enabled
+let reverse = null; // dynamically load, if enabled
 
 log.info({ name: settings.app_name, version: settings.app_version }, 'initializing');
 
@@ -164,9 +164,9 @@ function handler(req, res) {
         req.url_info = url.parse(req.url); // eslint-disable-line no-param-reassign
 
         log.debug({
-             base   : req.url,
-             method : req.method,
-             path   : req.url_info.pathname
+            base   : req.url,
+            method : req.method,
+            path   : req.url_info.pathname
         }, 'request');
 
         switch (req.method) {
@@ -455,11 +455,17 @@ function drop_privileges() {
 function initial_plugin_run() {
     // This will start run longing processes that emit metrics continuously,
     // also it will surface any plugin errors at startup time.
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         // This is a little hacky
-        let dummy_req = { headers : {} };
-        let dummy_res = { writeHead : () => {}, write: () => {}, end : () => {} };
+        const dummy_req = { headers: {} };
+        const dummy_res = {
+            end() {}, // eslint-disable-line no-empty-function
+            write() {}, // eslint-disable-line no-empty-function
+            writeHead() {} // eslint-disable-line no-empty-function
+        };
+
         plugins.run(dummy_req, dummy_res, null);
+        resolve();
     });
 }
 
