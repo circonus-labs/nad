@@ -31,8 +31,8 @@
     "remark-man": "5.0.1"
   },
   "scripts": {
-    "lint": "eslint --cache sbin/ lib/ plugins/",
-    "md2man": "remark man/nad.md --use man --output man/nad.8"
+    "lint": "node_modules/.bin/eslint --cache sbin/ lib/ plugins/",
+    "md2man": "node_modules./bin/remark man/nad.md --use man --output man/nad.8"
   },
   "repository": {
     "type": "git",
