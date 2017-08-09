@@ -1,6 +1,6 @@
 {
   "name": "nad",
-  "version": "2.3.3",
+  "version": "2.4.0",
   "private": true,
   "license": "SEE LICENSE IN LICENSE",
   "description": "Circonus Node Agent",
@@ -23,10 +23,10 @@
     "thirty-two": "1.0.2"
   },
   "devDependencies": {
-    "@maier/eslint-config-base": "0.1.0",
+    "@maier/eslint-config-base": "0.2.0",
     "@maier/eslint-config-node": "0.1.0",
     "@maier/eslint-config-node-cmd": "0.1.0",
-    "eslint": "4.3.0",
+    "eslint": "4.4.1",
     "remark-cli": "4.0.0",
     "remark-man": "5.0.1"
   },

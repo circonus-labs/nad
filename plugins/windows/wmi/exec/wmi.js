@@ -32,7 +32,7 @@ function help(err) {
     console.log(`${process.argv[1]}\n` +
               `\t-h\t\t\tthis help message\n` +
               `\t-c <config file>\tconfiguration file\n`
-             );
+    );
 
     if (err) {
         console.log(`\nError: ${err}\n`);
@@ -120,8 +120,8 @@ function process_output(output, args, tries) {
     let start_line = 0;
     let found = false;
 
-  // Header will always start with a begin quotation mark; skip
-  // lines until we get to the first that starts with one.
+    // Header will always start with a begin quotation mark; skip
+    // lines until we get to the first that starts with one.
     for (start_line = 0; start_line < lines.length; start_line++) {
         if (lines[start_line].substring(0, 1) === '"') {
             found = true;
@@ -129,7 +129,7 @@ function process_output(output, args, tries) {
         }
     }
 
-  // We didn't get any valid data from this command... just move on
+    // We didn't get any valid data from this command... just move on
     if (!found) {
         commands_finished++;
         if (commands_finished === total_commands) {
@@ -144,16 +144,16 @@ function process_output(output, args, tries) {
         const array_size = split_data.length - 1;
         let i = 0;
 
-    // The header doesn't always match the data for some reason... if it doesn't,
-    // run the command again until it does.
+        // The header doesn't always match the data for some reason... if it doesn't,
+        // run the command again until it does.
         if (header_array_size === array_size) {
-      // We have to strip the ending quotation mark off the final array entry
-      // I wanted to separate on tabs, but changing the output delimiter on
-      // typeperf ties you to a file and won't let you write to stdout. Sadness.
+            // We have to strip the ending quotation mark off the final array entry
+            // I wanted to separate on tabs, but changing the output delimiter on
+            // typeperf ties you to a file and won't let you write to stdout. Sadness.
             split_header[header_array_size] = split_header[header_array_size].substring(0, split_header[header_array_size].length - 1);
             split_data[array_size] = split_data[array_size].substring(0, split_data[array_size].length - 1);
 
-      // Skip timestamp, start at 1
+            // Skip timestamp, start at 1
             for (i = 1; i <= array_size; i++) {
                 data_points[split_header[i]] = split_data[i];
             }
@@ -162,13 +162,13 @@ function process_output(output, args, tries) {
                 finalize_nad_output();
             }
         } else {
-      // We failed for some reason... just try again
+            // We failed for some reason... just try again
             tries++;
             if (tries < 5) {
                 run_command(args, tries);
             } else {
-        // We failed 5 times and never got anything back...
-        // time to give up
+                // We failed 5 times and never got anything back...
+                // time to give up
                 commands_finished++;
                 if (commands_finished === total_commands) {
                     finalize_nad_output();

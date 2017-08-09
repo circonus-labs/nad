@@ -1,3 +1,6 @@
+/* eslint-disable */
+/* author needs to lint */
+
 const   path    = require('path'),
         spawn   = require('child_process').spawnSync;
 
