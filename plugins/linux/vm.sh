@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -eu
+
 AWK=$(type -P awk)
 [[ $? -eq 0 ]] || {
     echo "Unable to find 'awk'"
@@ -15,8 +17,6 @@ PROCFILE="/proc/meminfo"
     echo "Unable to find '${PROCFILE}'"
     exit 1
 }
-
-set -eu
 
 $AWK 'BEGIN {
     list[""] = 0;
@@ -87,9 +87,9 @@ PROCFILE="/proc/vmstat"
     exit 1
 }
 
-let PG_SCAN=0
-let PG_FAULTS=0
-let PG_MAJFAULTS=0
+PG_SCAN=0
+PG_FAULTS=0
+PG_MAJFAULTS=0
 while IFS=" " read NAME VAL
 do
     [[ "$NAME" = pgfault ]]    && PG_FAULTS="$VAL"

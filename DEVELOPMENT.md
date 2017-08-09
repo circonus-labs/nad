@@ -110,7 +110,7 @@ The `packaging/make-omnibus` shell script is used to build the omnibus packages 
 
 # Plugins
 
-NAD uses a *plugin* system for gathering metrics. NAD supports two primary types of plugins - **executable** and **native**. Each type of plugin produces output that NAD consumes and makes available to Circonus. Minimal examples of both, native and executable plugins can be found in the [`plugins/example`](https://github.com/circonus-labs/nad/tree/master/plugins/example) directory.
+NAD uses a *plugin* system for gathering metrics. NAD supports two primary types of plugins - **executable** and **native**. Each type of plugin produces output that NAD consumes and makes available to Circonus. Minimal examples of both, native and executable plugins can be found in the [`plugins/example`](https://github.com/circonus-labs/nad/tree/master/examples/plugins) directory.
 
 NAD/Circonus support the following *types* of metrics:
 
@@ -126,7 +126,7 @@ NAD/Circonus support the following *types* of metrics:
 
 ## Executable plugins
 
-An executable can be a shell script, perl/python/ruby/etc. script, a compiled binary, etc. Anything that one can *run* from the command line. See the [plugins](plugins/) directory for examples of several types of executable plugins. Executables must produce metrics to standard output. They may produce JSON or tab-delimited output.  
+An executable can be a shell script, perl/python/ruby/etc. script, a compiled binary, etc. Anything that one can *run* from the command line. See the [examples/plugins](examples/plugins) and [plugins](plugins/) directory for examples of several types of executable plugins. Executables must produce metrics to standard output. They may produce JSON or tab-delimited output.  
 
 
 ### Tab-delimited output format
@@ -151,6 +151,15 @@ Example:
 { "my_metric": { "_type": "i", "_value": 10 }, "cherry`pi": { "_type": "n", "_value": 3.14 } }
 ```
 
+## Native plugins
+
+Place a file (with a `.js` extension) into plugin_dir. See [example](https://github.com/circonus-labs/nad/blob/master/examples/plugins/example-native.js).
+
+## Push receiver
+
+NAD also provides a push receiver to accept metrics from daemons and other external processes/jobs which do not fit into the plugin model. Metrics can be *pushed* to NAD via HTTP `PUT` or `POST` to `http://127.0.0.1:2609/write` with body as valid JSON (see above).
+
+
 ### Control Information
 
 An executable plugin may provide control information in a line starting with a `#` character followed by a JSON block. Currently, `timeout` is the only parameter accepted and the argument is interpreted as seconds. For example, to indicate that the script should be aborted if a set of output metrics cannot be completed in 1.12 seconds, the plugin would emit:
@@ -165,7 +174,7 @@ Continuous output is supported for long-running executables. After a set of metr
 
 ## Native plugins
 
- A native plugin is a NodeJS module which will be loaded into NAD. See [native example](examples/plugins/native), additionally, there are several native plugins in the [plugins](plugins/) directory.
+ A native plugin is a NodeJS module which will be loaded into NAD. See [native example](examples/plugins/), additionally, there are several native plugins in the [plugins](plugins/) directory.
 
  1. Written as a module
  1. Expose a `run()` method which will be passed five arguments.
