@@ -8,7 +8,6 @@
 PARAMS="--all"
 [[ $1 == "active_only" ]] && PARAMS=
 systemctl --full --no-legend --no-pager $PARAMS | awk '
-    function push(A,B) { A[length(A)+1] = B }
     BEGIN {
         # Prepopulate some metrics, so they show even if there are no services
         # in the state.
