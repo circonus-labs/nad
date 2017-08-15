@@ -103,6 +103,7 @@ install-linux:	install
 	@# linux binaries and default plugins
 	cd $(DESTDIR)$(CONF)/linux ; $(MAKE)
 	cd $(DESTDIR)$(CONF) ; for f in cpu.sh disk.sh diskstats.sh fs.elf if.sh vm.sh ; do /bin/ln -sf linux/$$f ; done
+	cd $(DESTDIR)$(CONF) ; for f in loadavg.elf ; do /bin/ln -sf common/$$f ; done
 ifneq ($(wildcard /sbin/zpool),)
 	cd $(DESTDIR)$(CONF) ; /bin/ln -sf common/zpool.sh
 endif
@@ -165,6 +166,7 @@ endif
 	./install-sh -c -m 0755 freebsd-init/nad.out $(DESTDIR)/etc/rc.d/nad
 	cd $(DESTDIR)$(CONF)/freebsd ; $(MAKE)
 	cd $(DESTDIR)$(CONF) ; for f in cpu.sh disk.elf fs.elf if.sh vm.sh  ; do /bin/ln -sf freebsd/$$f ; done
+	cd $(DESTDIR)$(CONF) ; for f in loadavg.elf ; do /bin/ln -sf common/$$f ; done
 	A=$(shell /sbin/sysctl kstat.zfs > /dev/null 2>&1 ; echo $$?)
 ifeq ($(A),0)
 	cd $(DESTDIR)$(CONF) ; /bin/ln -sf zfsinfo.sh ; \
