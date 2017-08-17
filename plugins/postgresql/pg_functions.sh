@@ -3,7 +3,8 @@ print_uint() { printf "%s\tL\t%s\n" $1 $2; }
 print_dbl() { printf "%s\tn\t%s\n" $1 $2; }
 print_str() { printf "%s\ts\t%s\n" $1 $2; }
 
-pgconf="/opt/circonus/etc/pg-conf.sh"
+pgconf="/opt/circonus/nad/etc/pg-conf.sh"
+[[ ! -f $pgconf ]] && pgconf="/opt/circonus/etc/pg-conf.sh" # check old nad etc location
 [[ -f $pgconf ]] && source $pgconf
 
 PSQL=${PSQL_CMD:-}
