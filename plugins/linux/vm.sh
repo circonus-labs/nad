@@ -73,7 +73,7 @@ END {
     printf("memory`free_percent\tn\t%.02f\n", memFreePct)
     printf("swap`total\tL\t%.0f\n", swapTotal)
     printf("swap`used\tL\t%.0f\n", swapUsed)
-    printf("swap`free\tL\t%.0f\n", swapFreeTotal)
+    printf("swap`free\tL\t%.0f\n", swapFree)
     printf("swap`percent_used\tn\t%.02f\n", swapUsedPct / 100) # deprecated
     printf("swap`percent_free\tn\t%.02f\n", swapFreePct / 100) # deprecated
     printf("swap`used_percent\tn\t%.02f\n", swapUsedPct)
