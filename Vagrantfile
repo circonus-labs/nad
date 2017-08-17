@@ -7,7 +7,7 @@
 #
 
 # extract node version to use from common place
-node_ver = File.read('.node_version').strip
+node_ver = File.read(File.join(File.dirname(__FILE__), '.node_version')).strip
 
 #
 # this links up these VMs with a local cosi-site for testing
