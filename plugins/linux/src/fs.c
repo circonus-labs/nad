@@ -54,8 +54,8 @@ int main(int argc, char **argv) {
             df_pct = (used * 100) / adj + ((used * 100) % adj != 0);
            	pct = 100.0*(double)used/(double)adj;
         }
-        printf("%s`df_used_percent\tL\t%0.2f\n", mnt.mnt_dir, df_pct);
-        printf("%s`used_percent\tL\t%0.2f\n", mnt.mnt_dir, pct);
+        printf("%s`df_used_percent\tn\t%0.2f\n", mnt.mnt_dir, df_pct);
+        printf("%s`used_percent\tn\t%0.2f\n", mnt.mnt_dir, pct);
 
         pct = 0;
         df_pct = 0;
@@ -64,8 +64,8 @@ int main(int argc, char **argv) {
             df_pct = (used * 100) / buf.f_files + ((used * 100) % buf.f_files != 0);
             pct = 100.0*(double)(buf.f_files - buf.f_ffree)/(double)buf.f_files;
         }
-        printf("%s`df_used_inode_percent\tL\t%0.2f\n", mnt.mnt_dir, df_pct);
-        printf("%s`used_inode_percent\tL\t%0.2f\n", mnt.mnt_dir, pct);    }
+        printf("%s`df_used_inode_percent\tn\t%0.2f\n", mnt.mnt_dir, df_pct);
+        printf("%s`used_inode_percent\tn\t%0.2f\n", mnt.mnt_dir, pct);    }
   }
   exit(0);
 }
