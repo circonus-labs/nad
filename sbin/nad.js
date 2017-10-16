@@ -31,7 +31,7 @@ log.info({ name: settings.app_name, version: settings.app_version }, 'initializi
 if (settings.is_windows) {
     try {
         log.info('loading WMI module for Windows platform');
-        circwmi = require('circwmi');
+        circwmi = require(path.join(nad.lib_dir, 'circwmi'));
     } catch (err) {
         const msg = 'unable to load circwmi module';
 
@@ -394,6 +394,12 @@ function start_statsd() {
  * @returns {Object} promise
  */
 function drop_privileges() {
+    if (settings.is_windows) {
+        log.warn('running on windows (drop privileges not supported), skipping drop privileges');
+
+        return Promise.resolve();
+    }
+
     return new Promise((resolve, reject) => {
         // NOTE: primary benefits of performing this drop in situ:
         //       1. nad can only run as root intentionally (e.g. user
