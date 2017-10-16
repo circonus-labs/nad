@@ -4,6 +4,7 @@
 * [Installation](#installation)
     * [Automated](#automated-install) *recommended*
     * [Manual](#manual-install)
+       * [Windows](#windows-install)
     * [Source](#source-install)
     * [Updating](#updating)
 * [Running NAD](#running)
@@ -76,6 +77,17 @@ At the time of this writing, these are:
 * rpm packages - CentOS: EL6, EL7
 
 An up-to-date list of currently supported platforms is available from [COSI](https://onestep.circonus.com/) (list returned in JSON).
+
+### Windows Install
+
+1. Download from [NAD repository releases](https://github.com/circonus-labs/nad/releases/latest)
+1. Unpack NAD file downloaded from releases
+1. Ensure [node](https://nodejs.org/) v6+ installed
+1. Change to directory where NAD was unpacked
+1. Run npm install `npm install`
+1. Create `nad` directory in `node_modules` e.g. `mkdir node_modules\nad`
+1. Copy `lib/*` into `node_modules/nad` e.g. `xcopy lib\*.* node_modules\nad /s /e`
+1. Run NAD `node sbin\node.js`
 
 ## Updating
 
