@@ -88,7 +88,7 @@ An up-to-date list of currently supported platforms is available from [COSI](htt
 1. Run npm install `npm install`
 1. Create `nad` directory in `node_modules` e.g. `mkdir node_modules\nad`
 1. Copy `lib/*` into `node_modules/nad` e.g. `xcopy lib\*.* node_modules\nad /s /e`
-1. Run NAD `node sbin\node.js`
+1. Run NAD `node sbin\nad.js`
 
 ## Updating
 
