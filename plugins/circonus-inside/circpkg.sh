@@ -1,6 +1,6 @@
 #!/bin/bash
 
-OUTPUT_DIR=/opt/circonus/var/run/nad
+OUTPUT_DIR=/opt/circonus/nad/var/run
 OUTPUT_FILE=$OUTPUT_DIR/cpkg.list
 SUPPRESS_FILE=$OUTPUT_DIR/cpkg.wip
 CACHE_MINUTES=5

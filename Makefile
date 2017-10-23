@@ -11,6 +11,8 @@ MODULES=$(APP_DIR)/node_modules
 NAD_LIB=$(MODULES)/nad
 RUNSTATE_DIR=/var/run
 RUNSTATE_FILE=$(RUNSTATE_DIR)/nad.pid
+PLUGIN_RUNSTATE_DIR=$(PREFIX)/var/run
+PLUGIN_RUNSTATE_USER?=nobody
 MANIFEST_DIR=/var/svc/manifest/network/circonus
 METHOD_DIR=/var/svc/method
 MAKE?=make
@@ -43,6 +45,8 @@ install-dirs:
 	./mkinstalldirs $(DESTDIR)$(NAD_LIB)
 	./mkinstalldirs $(DESTDIR)$(MAN)
 	./mkinstalldirs $(DESTDIR)$(RUNSTATE_DIR)
+	./mkinstalldirs $(DESTDIR)$(PLUGIN_RUNSTATE_DIR)
+	chown $(PLUGIN_RUNSTATE_USER) $(DESTDIR)$(PLUGIN_RUNSTATE_DIR)
 
 install-nad:	install-dirs
 	@# main nad scripts
