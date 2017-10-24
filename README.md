@@ -158,6 +158,7 @@ In addition to the basic `install` target, there are OS-specific installation ta
 | `/opt/circonus/nad/log`                      | nad log directory (if applicable)                  |
 | `/opt/circonus/nad/man`                      | nad man page                                       |
 | `/opt/circonus/nad/sbin`                     | nad daemon                                         |
+| `/opt/circonus/nad/var/run`                  | [Plugin state directory](#plugin_runstate)         |
 | **Core Files** ||
 | `/opt/circonus/nad/etc/nad.conf`             | main nad configuration (see [Options](#config))    |
 | `/opt/circonus/nad/sbin/nad`                 | nad startup script                                 |
