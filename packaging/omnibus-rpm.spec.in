@@ -81,6 +81,7 @@ exit 0
 %{app_dir}/sbin/nad
 %{app_dir}/sbin/nad.js
 %{app_dir}/node_modules
+%dir %attr(0755, nobody, nobody) %{app_dir}/var/run
 %{_prefix}/bin/node
 %{_prefix}/lib
 %{_prefix}/nodejs

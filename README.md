@@ -24,6 +24,7 @@
     * [Enable](#plugin_enable)
     * [Disable](#plugin_disable)
     * [Verify](#plugin_verify)
+    * [Run State Directory](#plugin_runstate)
     * [Creating custom plugins](DEVELOPMENT.md#plugins)
 * [NAD Development](DEVELOPMENT.md)
 
@@ -157,6 +158,7 @@ In addition to the basic `install` target, there are OS-specific installation ta
 | `/opt/circonus/nad/log`                      | nad log directory (if applicable)                  |
 | `/opt/circonus/nad/man`                      | nad man page                                       |
 | `/opt/circonus/nad/sbin`                     | nad daemon                                         |
+| `/opt/circonus/nad/var/run`                  | [Plugin state directory](#plugin_runstate)         |
 | **Core Files** ||
 | `/opt/circonus/nad/etc/nad.conf`             | main nad configuration (see [Options](#config))    |
 | `/opt/circonus/nad/sbin/nad`                 | nad startup script                                 |
@@ -444,6 +446,15 @@ The currently loaded plugin inventory can be seen by making a request to the `in
 `curl http://localhost:2609/inventory`
 
 NAD will respond with a list of the currently loaded plugins. The `inventory` endpoint supports one argument, `?full`, which includes additional details on each plugin. The output of the inventory endpoint is JSON, enabling it to be used by orchestration and monitoring tooling.
+
+## <a name="plugin_runstate">Run State Directory</a>
+
+Installation will create a run-state directory in the application directory
+that should be writable by the non-privileged user that NAD runs as. Plugins
+can use this directory as scratch space to save local state, such as caching
+the output of an expensive command or query.
+
+The default location is `$PREFIX/nad/var/run`.
 
 ## Custom
 
