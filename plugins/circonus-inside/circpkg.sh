@@ -39,7 +39,7 @@ fi
 
 case `uname -s` in
 	Linux)
-		/bin/rpm -qa --queryformat '%{NAME}\ts\t%{VERSION}\n' circonus* | /usr/bin/tee $OUTPUT_FILE
+		/bin/rpm -qa --queryformat '%{NAME}\ts\t%{VERSION}-%{RELEASE}\n' circonus* | /usr/bin/tee $OUTPUT_FILE
 		suppressions
 	;;
 	SunOS)
