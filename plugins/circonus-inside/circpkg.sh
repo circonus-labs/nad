@@ -24,7 +24,7 @@ else
 		LMOD=`/bin/stat -c "%Y" $OUTPUT_FILE`
 		CTIME=`/bin/date +%s`
 		((AGE=$CTIME-$LMOD))
-		echo "cached\tl\t$AGE"
+		printf "cached\tl\t%d\n" $AGE
 		cat $OUTPUT_FILE
 		suppressions
 		exit
