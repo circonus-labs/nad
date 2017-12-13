@@ -38,7 +38,7 @@ It's also possible to run the entire nad process as root.
    sudo apt-get install bcc-tools libbcc-examples bcc-lua
    ```
 
-1. Set the setuid bit for the bpf.elf executable (**INSECURE** see below)
+1. Set the setuid bit for the bpf.elf executable (see below for an alternative to setuid)
    ```
    sudo chmod u+s /opt/circonus/nad/etc/node-agent.d/linux/bccbpf/bpf.elf
    ```
@@ -55,7 +55,7 @@ It's also possible to run the entire nad process as root.
    sudo systemctl restart nad
    ```
 
-> NOTE: using the setuid bit is **INSECURE**, a more secure method of implementing this would be to add an entry in `/etc/sudoers` allowing user `nobody` to run the specific `bpf.elf` command. Then, creating a stub `bpf.sh` which simply runs `sudo bpf.elf`.
+> NOTE: using the setuid bit _can be_ insecure, an alternative method of implementing this would be to add an entry in `/etc/sudoers` allowing user `nobody` to run the specific `bpf.elf` command. Then, creating a stub `bpf.sh` which simply runs `sudo bpf.elf`.
 
 1. Add entry to `sudoers`
 
