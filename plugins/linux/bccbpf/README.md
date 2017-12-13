@@ -38,12 +38,11 @@ It's also possible to run the entire nad process as root.
    sudo apt-get install bcc-tools libbcc-examples bcc-lua
    ```
 
-1. Set the setuid bit for the bpf.elf executable
+1. Set the setuid bit for the bpf.elf executable (**INSECURE** see below)
    ```
    sudo chmod u+s /opt/circonus/nad/etc/node-agent.d/linux/bccbpf/bpf.elf
    ```
    You might want to verify, that the file is owned by root.
-
 
 1. Link plugin into NAD plugin_dir
    ```
@@ -55,6 +54,35 @@ It's also possible to run the entire nad process as root.
    ```
    sudo systemctl restart nad
    ```
+
+> NOTE: using the setuid bit is **INSECURE**, a more secure method of implementing this would be to add an entry in `/etc/sudoers` allowing user `nobody` to run the specific `bpf.elf` command. Then, creating a stub `bpf.sh` which simply runs `sudo bpf.elf`.
+
+1. Add entry to `sudoers`
+
+    `echo "nobody $(hostname)=(root) NOPASSWD: /opt/circonus/nad/etc/node-agent.d/linux/bccbpf/bpf.elf" >> /etc/sudoers`
+
+2. Create stub
+
+    Create `/opt/circonus/nad/etc/node-agent.d/linux/bccbpf/bpf.sh` with the following contents:
+
+    ```sh
+    #!/usr/bin/env bash
+
+    cmd=$(readlink -f $0)
+    sudo ${cmd/.sh/.elf}
+    ```
+
+3. Make stub executable
+
+    Run `chmod 755 /opt/circonus/nad/etc/node-agent.d/linux/bccbpf/bpf.sh`
+
+4. Create a symlink for the plugin
+
+    ```sh
+    cd /opt/circonus/nad/etc/node-agent.d
+    ln -s linux/bccbpf/bpf.sh
+    ```
+
 
 Similar steps apply to `iolatency.py`.
 
