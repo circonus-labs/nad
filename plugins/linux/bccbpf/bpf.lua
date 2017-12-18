@@ -5,9 +5,9 @@ local json = require("dkjson")
 local bpf_preamble = require("circll").text
 
 local mods = {
-  bio = require("mod_biolatency"),
   runq = require("mod_runqlat"),
   syscall = require("mod_syscall"),
+  bio = require("mod_bio"),
 }
 local INTERVAL = tonumber(arg[1]) or 60
 
