@@ -35,11 +35,12 @@ do
     do
         a=(${line})
         [[ ${#a[*]} != 3 ]] && continue
+        type=
         case ${a[1]} in
-            ${KSTAT_DATA_UINT64})  TYPE=L ;;
+            ${KSTAT_DATA_UINT64})  type=L ;;
             *)  continue ;;
         esac
-        printf "%s\`%s\t%s\t%s\n" ${f} ${a[0]} $ ${a[2]}
+        [[ -n ${type} ]] && printf "%s\`%s\t%s\t%s\n" ${f} ${a[0]} ${type} ${a[2]}
     done < ${filename}
 done
 
@@ -53,18 +54,19 @@ for io_stats in ${PROC_DIR}/*/io
 do
     pool_dir=${io_stats%/*}
     pool_name=${pool_dir##*/}
+    [[ ${pool_name} == "*" ]] && continue
     line_count=0
     while read -r line
     do
-        line_count=$((line_count + 1))
+        ((line_count++))
         [[ ${line_count} == 2 ]] && header=(${line})
         [[ ${line_count} < 3 ]] && continue
-        v=(${line})
+        value=(${line})
         index=0
         for i in ${header[*]}
         do
-            printf "zpool_io\`%s\`%s\tL\t%s\n" ${pool_name} ${header[${index}]} ${v[${index}]}
-            index=$((index + 1))
+            printf "zpool_io\`%s\`%s\tL\t%s\n" ${pool_name} ${header[${index}]} ${value[${index}]}
+            ((index++))
         done
         break
     done < ${io_stats}
