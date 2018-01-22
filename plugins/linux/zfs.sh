@@ -4,6 +4,7 @@
 #
 
 PROC_DIR=${PROC_DIR:=/proc/spl/kstat/zfs}
+[[ ! -d ${PROC_DIR} ]] && exit
 
 # kstat-compatible files in /proc
 # depending on the ZFS version, these files may or may not exist, but that is ok
