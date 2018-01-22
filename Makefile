@@ -104,10 +104,11 @@ install-linux:	install
 	./install-sh -c -m 0755 bin/nad-log.out $(DESTDIR)$(BIN)/nad-log
 	@# linux binaries and default plugins
 	cd $(DESTDIR)$(CONF)/linux ; $(MAKE)
-	cd $(DESTDIR)$(CONF) ; for f in cpu.sh disk.sh diskstats.sh fs.elf if.sh vm.sh zfs.sh ; do /bin/ln -sf linux/$$f ; done
+	cd $(DESTDIR)$(CONF) ; for f in cpu.sh disk.sh diskstats.sh fs.elf if.sh vm.sh ; do /bin/ln -sf linux/$$f ; done
 	cd $(DESTDIR)$(CONF) ; for f in loadavg.elf ; do /bin/ln -sf common/$$f ; done
 ifneq ($(wildcard /sbin/zpool),)
 	cd $(DESTDIR)$(CONF) ; /bin/ln -sf common/zpool.sh
+	cd $(DESTDIR)$(CONF) ; /bin/ln -sf linux/zfs.sh
 endif
 ifneq ($(SYSTEMD_BIN),)
 	cd $(DESTDIR)$(CONF) ; /bin/ln -sf linux/systemd.sh
