@@ -46,7 +46,7 @@ It's also possible to run the entire nad process as root.
 
 1. Link plugin into NAD plugin_dir
    ```
-   cd /opt/circonus/etc/node-agent.d/
+   cd /opt/circonus/nad/etc/node-agent.d/
    ln -s linux/bccbpf/bpf.elf
    ```
 
