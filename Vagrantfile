@@ -25,7 +25,7 @@ Vagrant.configure('2') do |config|
     config.vm.define 'c7', autostart: false do |c7|
         c7.vm.box = 'maier/centos-7.3.1611-x86_64'
         c7.vm.provider 'virtualbox' do |vb|
-            vb.name = 'c7'
+            vb.name = 'c7_nad'
         end
         c7.vm.network 'private_network', ip: '192.168.100.202'
         c7.vm.provision 'shell', inline: <<-SHELL
@@ -53,7 +53,7 @@ Vagrant.configure('2') do |config|
     config.vm.define 'c6', autostart: false do |c6|
         c6.vm.box = 'maier/centos-6.8-x86_64'
         c6.vm.provider 'virtualbox' do |vb|
-            vb.name = 'c6'
+            vb.name = 'c6_nad'
         end
         c6.vm.network 'private_network', ip: '192.168.100.201'
         c6.vm.provision 'shell', inline: <<-SHELL
@@ -81,7 +81,7 @@ Vagrant.configure('2') do |config|
     config.vm.define 'c63', autostart: false do |c63|
         c63.vm.box = 'maier/centos-6.3-x86_64'
         c63.vm.provider 'virtualbox' do |vb|
-            vb.name = 'c63'
+            vb.name = 'c63_nad'
         end
         c63.vm.network 'private_network', ip: '192.168.100.200'
         c63.vm.provision 'shell', inline: <<-SHELL
@@ -111,7 +111,7 @@ Vagrant.configure('2') do |config|
         # prevent 'mesg: ttyname failed: Inappropriate ioctl for device' errors
         u16.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
         u16.vm.provider 'virtualbox' do |vb|
-            vb.name = 'u16'
+            vb.name = 'u16_nad'
         end
         u16.vm.network 'private_network', ip: '192.168.100.212'
         u16.vm.provision 'shell', inline: <<-SHELL
@@ -142,7 +142,7 @@ Vagrant.configure('2') do |config|
         # prevent 'mesg: ttyname failed: Inappropriate ioctl for device' errors
         u14.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
         u14.vm.provider 'virtualbox' do |vb|
-            vb.name = 'u14'
+            vb.name = 'u14_nad'
         end
         u14.vm.network 'private_network', ip: '192.168.100.211'
         u14.vm.provision 'shell', inline: <<-SHELL
@@ -171,7 +171,7 @@ Vagrant.configure('2') do |config|
     config.vm.define 'o14', autostart: false do |o14|
         o14.vm.box = 'maier/omnios-r151014-x86_64'
         o14.vm.provider 'virtualbox' do |vb|
-            vb.name = 'o14'
+            vb.name = 'o14_nad'
         end
         o14.vm.network 'private_network', ip: '192.168.100.221'
         o14.vm.provision 'shell', inline: <<-SHELL
@@ -196,7 +196,7 @@ Vagrant.configure('2') do |config|
         bsd11.vm.base_mac = ''
         bsd11.ssh.shell = 'sh'
         bsd11.vm.provider 'virtualbox' do |vb|
-            vb.name = 'bsd11'
+            vb.name = 'bsd11_nad'
             vb.customize ['modifyvm', :id, '--memory', '2048']
             vb.customize ['modifyvm', :id, '--cpus', '2']
             vb.customize ['modifyvm', :id, '--hwvirtex', 'on']
@@ -229,7 +229,7 @@ Vagrant.configure('2') do |config|
         bsd10.vm.base_mac = ''
         bsd10.ssh.shell = 'sh'
         bsd10.vm.provider 'virtualbox' do |vb|
-            vb.name = 'bsd10'
+            vb.name = 'bsd10_nad'
             vb.customize ['modifyvm', :id, '--memory', '2048']
             vb.customize ['modifyvm', :id, '--cpus', '2']
             vb.customize ['modifyvm', :id, '--hwvirtex', 'on']
