@@ -10,7 +10,7 @@ umask 0022
 # allow for local overrides which are not comitted in the repository
 [[ -f ./omnibus.conf ]] && source ./omnibus.conf
 
-: ${NAD_REPO:="https://github.com/circonus-labs/nad.git"}
+: ${NAD_REPO:="git://github.com/circonus-labs/nad.git"}
 : ${NAD_BRANCH:=""}
 : ${PREFIX:=/opt/circonus}
 : ${APP_DIR:=${PREFIX}/nad}
