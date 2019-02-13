@@ -1,4 +1,12 @@
-# NAD - Node Agent Daemon
+# DEPRECATED
+
+This project is no longer in active development.
+
+NAD is obsolete and has been replaced by the [circonus-agent](https://github.com/circonus-labs/circonus-agent).
+
+---
+
+## NAD - Node Agent Daemon
 
 * [Overview](#overview)
 * [Installation](#installation)
