@@ -69,10 +69,10 @@ install-plugins:	install-dirs
 	rsync -a plugins/ $(DESTDIR)$(CONF)/
 
 install-modules:
-	rsync -a lib/* $(DESTDIR)$(NAD_LIB)
 	cp package.json $(DESTDIR)$(APP_DIR) && \
 		cd $(DESTDIR)$(APP_DIR) && \
 		PATH="$(PATH):$(DESTDIR)$(PREFIX)/bin" PREFIX= npm install --only=production --no-progress
+	rsync -a lib/* $(DESTDIR)$(NAD_LIB)
 
 install-illumos:	install
 	@# service manifest
@@ -106,8 +106,9 @@ install-linux:	install
 	cd $(DESTDIR)$(CONF)/linux ; $(MAKE)
 	cd $(DESTDIR)$(CONF) ; for f in cpu.sh disk.sh diskstats.sh fs.elf if.sh vm.sh ; do /bin/ln -sf linux/$$f ; done
 	cd $(DESTDIR)$(CONF) ; for f in loadavg.elf ; do /bin/ln -sf common/$$f ; done
-ifneq ($(wildcard /sbin/zpool),)
+ifneq ($(wildcard /proc/spl),)
 	cd $(DESTDIR)$(CONF) ; /bin/ln -sf common/zpool.sh
+	cd $(DESTDIR)$(CONF) ; /bin/ln -sf linux/zfs.sh
 endif
 ifneq ($(SYSTEMD_BIN),)
 	cd $(DESTDIR)$(CONF) ; /bin/ln -sf linux/systemd.sh
